@@ -111,11 +111,13 @@ const Welcome = (props: Props) => {
                 text="Log in"
               />
             </Link>
-            <Button
-              variant="secondary"
-              onPress={openBottomSheet}
-              text="sign up"
-            />
+            <Link asChild href={'/(auth)/signUp'}>
+              <Button
+                variant="secondary"
+                onPress={openBottomSheet}
+                text="sign up"
+              />
+            </Link>
           </BottomSheetView>
         </BottomSheet>
       </View>
