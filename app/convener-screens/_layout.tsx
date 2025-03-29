@@ -56,7 +56,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="community" options={{ title: 'Community' }} />
       <Tabs.Screen name="index" options={{ title: 'Cohortz' }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      <Tabs.Screen name="(profile)" options={{ title: 'Profile' }} />
     </Tabs>
   );
 }

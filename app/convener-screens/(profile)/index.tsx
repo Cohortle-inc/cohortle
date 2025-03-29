@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import {
   Calender,
@@ -7,22 +7,88 @@ import {
   Instagram,
   Linkedin,
   Location,
+  Lock,
+  Notifications,
   Options,
+  Pencil,
   Share,
   X,
 } from '@/assets/icons';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
+import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
+import { Button } from '@/components/ui';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState<'Communities' | 'Social'>(
     'Communities',
   );
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  const Community = () => {
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: 16,
+          alignItems: 'center',
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: '#F2750D',
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+          }}
+        ></View>
+        <View>
+          <Text
+            style={{
+              fontFamily: 'DMSansMedium',
+              fontSize: 12,
+              color: '#1F1F1F',
+            }}
+          >
+            Branding & Brand Design
+          </Text>
+          <Text
+            style={{
+              color: '#8D9091',
+              fontSize: 10,
+            }}
+          >
+            15.8K Members
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  const openBottomSheet = () => {
+    bottomSheetRef.current?.expand();
+  };
+  const renderBackdrop = useCallback(
+    (
+      props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps,
+    ) => <BottomSheetBackdrop {...props} opacity={0.7} />,
+    [],
+  );
+
+  const handleSheetChanges = useCallback((index: number) => {
+    // Update state based on the index value
+    console.log(index);
+    // If index is greater than -1, sheet is active
+  }, []);
 
   return (
     <SafeAreaWrapper>
       {/* Header Section */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Sadiq's Cohort</Text>
-        <Pressable>
+        <Pressable onPress={openBottomSheet}>
           <Options />
         </Pressable>
       </View>
@@ -78,8 +144,10 @@ const Profile = () => {
       {/* Tab Content */}
       <View>
         {activeTab === 'Communities' ? (
-          <View>
-            <Text>Communities content goes here</Text>
+          <View style={{ gap: 16 }}>
+            <Community />
+            <Community />
+            <Community />
           </View>
         ) : (
           <View style={{ gap: 16 }}>
@@ -142,6 +210,94 @@ const Profile = () => {
           </View>
         )}
       </View>
+
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={0} // Start fully collapsed
+        snapPoints={[1, '30%', '30%']} // Adjust snap points
+        onChange={handleSheetChanges}
+        enablePanDownToClose // Allows swipe down to close
+        backdropComponent={renderBackdrop}
+      >
+        <BottomSheetView style={styles.contentContainer}>
+          <View
+            style={{
+              marginTop: 24,
+              flex: 1,
+              gap: 16,
+            }}
+          >
+            <Pressable
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 16,
+              }}
+            >
+              <Pencil />
+              <Text
+                style={{
+                  color: '#1F1F1F',
+                  fontFamily: 'DMSansRegular',
+                }}
+              >
+                Edit profile
+              </Text>
+            </Pressable>
+            <Pressable
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 16,
+              }}
+            >
+              <Notifications />
+              <Text
+                style={{
+                  color: '#1F1F1F',
+                  fontFamily: 'DMSansRegular',
+                }}
+              >
+                Cohort notifications
+              </Text>
+            </Pressable>
+            <Pressable
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 16,
+              }}
+            >
+              <Lock />
+              <Text
+                style={{
+                  color: '#1F1F1F',
+                  fontFamily: 'DMSansRegular',
+                }}
+              >
+                Account authentication
+              </Text>
+            </Pressable>
+            <Pressable
+              style={{
+                marginTop: 'auto',
+                paddingVertical: 16,
+                borderTopWidth: 1,
+                borderTopColor: '#EFEFEF',
+              }}
+            >
+              <Text
+                style={{
+                  color: '#1F1F1F',
+                  fontFamily: 'DMSansRegular',
+                }}
+              >
+                Sign out
+              </Text>
+            </Pressable>
+          </View>
+        </BottomSheetView>
+      </BottomSheet>
     </SafeAreaWrapper>
   );
 };
@@ -223,5 +379,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#391D65',
     marginTop: 4,
     borderRadius: 2,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
   },
 });

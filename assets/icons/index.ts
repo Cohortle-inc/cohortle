@@ -6,3 +6,7 @@ export { Share } from './Share';
 export { Calender } from './Calender';
 export { Location } from './Location';
 export { Instagram, Facebook, X, Linkedin } from './Socials';
+export { SignOut } from './SignOut';
+export { Pencil } from './Pencil';
+export { Notifications } from './Notifications';
+export { Lock } from './Lock';
