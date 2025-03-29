@@ -4,7 +4,7 @@ import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
 import { Plus } from '@/assets/icons';
 
-const Cohorts = () => {
+const Community = () => {
   return (
     <SafeAreaWrapper>
       <View style={{ flex: 1, backgroundColor: 'white', marginVertical: 16 }}>
@@ -19,6 +19,6 @@ const Cohorts = () => {
   );
 };
 
-export default Cohorts;
+export default Community;
 
 const styles = StyleSheet.create({});

@@ -43,7 +43,7 @@ const MoreInfo = () => {
         </View>
       </View>
 
-      <Link asChild href="/convener-screens/cohorts">
+      <Link asChild href="/convener-screens">
         <Pressable
           style={{
             borderWidth: 1,
