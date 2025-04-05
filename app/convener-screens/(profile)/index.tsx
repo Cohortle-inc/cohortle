@@ -20,6 +20,7 @@ import BottomSheet, {
 } from '@gorhom/bottom-sheet';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import { Button } from '@/components/ui';
+import { router } from 'expo-router';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState<'Communities' | 'Social'>(
@@ -114,7 +115,12 @@ const Profile = () => {
             <Text style={styles.infoText}>Joined August 2011</Text>
           </View>
 
-          <Pressable style={styles.editButton}>
+          <Pressable
+            onPress={() =>
+              router.push('/convener-screens/(profile)/edit-profile')
+            }
+            style={styles.editButton}
+          >
             <Text style={styles.editButtonText}>Edit profile</Text>
           </Pressable>
         </View>

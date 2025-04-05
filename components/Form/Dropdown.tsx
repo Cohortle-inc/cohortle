@@ -3,12 +3,12 @@ import { View, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Text } from '@/theme/theme';
 
-const DropdownInput = () => {
+const DropdownInput = ({ label }: { label: string }) => {
   const [selectedValue, setSelectedValue] = useState('');
 
   return (
     <View>
-      <Text style={styles.label}>Select Age Group</Text>
+      <Text style={styles.label}>{label}</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedValue}
@@ -16,7 +16,11 @@ const DropdownInput = () => {
           style={styles.picker}
           enabled={true} // Enable/disable dropdown
         >
-          <Picker.Item label="Select an option" value="" />
+          <Picker.Item
+            style={{ fontSize: 14 }}
+            label="Select an option"
+            value=""
+          />
           <Picker.Item label="5-7 years" value="5-7" />
           <Picker.Item label="8-10 years" value="8-10" />
           <Picker.Item label="11-15 years" value="11-15" />
@@ -33,14 +37,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   pickerContainer: {
+    height: 48,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     overflow: 'hidden', // Ensure rounded corners
   },
   picker: {
-    height: 50,
     backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

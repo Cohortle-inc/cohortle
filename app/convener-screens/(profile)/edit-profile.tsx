@@ -1,16 +1,145 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
+import { SafeAreaWrapper } from '@/HOC';
+import { Back, Camera } from '@/assets/icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { DropdownInput, Input, TextArea } from '@/components/Form';
 
 type Props = {};
 
 const EditProfile = (props: Props) => {
   return (
-    <View>
-      <Text>EditProfile</Text>
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 16,
+            paddingVertical: 16,
+            borderBottomWidth: 1,
+            borderColor: '#ECDCFF',
+            paddingHorizontal: 16,
+          }}
+        >
+          <Pressable onPress={() => router.back()}>
+            <Back />
+          </Pressable>
+          <Text>Edit Profile</Text>
+        </View>
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 26,
+          }}
+        >
+          {/* Container for the image and camera badge */}
+          <View style={{ position: 'relative' }}>
+            {/* Profile image */}
+            <View style={styles.profileImage} />
+
+            {/* Camera badge */}
+            <View
+              style={{
+                position: 'absolute',
+                bottom: -4,
+                right: -4,
+                height: 32,
+                width: 32,
+                backgroundColor: '#ECDCFF',
+                borderRadius: 999,
+                justifyContent: 'center',
+                alignItems: 'center',
+                elevation: 2, // for subtle shadow on Android
+                shadowColor: '#000', // iOS shadow
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.2,
+                shadowRadius: 2,
+              }}
+            >
+              <Camera />
+            </View>
+          </View>
+        </View>
+        <View style={{ gap: 8, paddingHorizontal: 16, marginTop: 24 }}>
+          <Input label="Full Name" placeholder="Full name" />
+          <Input label="Headline" placeholder="Text" />
+          <DropdownInput label="Timezone" />
+          <DropdownInput label="Language" />
+          <Input label="Location" placeholder="Location" />
+          <TextArea label="Bio" />
+          <Input label="Website" placeholder="Website" />
+
+          <Input label="X URL" placeholder="X URL" />
+
+          <Input label="Facebook URL" placeholder="Facebook URL" />
+
+          <Input label="Instagram URL" placeholder="Instagram URL" />
+
+          <Input label="LinkedIn URL" placeholder="LinkedIn URL" />
+        </View>
+        <View
+          style={{
+            paddingHorizontal: 16,
+            marginTop: 24,
+            flexDirection: 'row',
+            gap: 16,
+          }}
+        >
+          <Pressable
+            style={{
+              backgroundColor: 'white',
+              padding: 6,
+              borderRadius: 500,
+              flex: 1,
+              borderWidth: 1,
+              borderColor: '#F8F1FF',
+            }}
+          >
+            <Text
+              style={{
+                color: '#391D65',
+                textAlign: 'center',
+              }}
+            >
+              Cancel
+            </Text>
+          </Pressable>
+          <Pressable
+            style={{
+              backgroundColor: '#391D65',
+              padding: 6,
+              borderRadius: 500,
+              flex: 1,
+            }}
+          >
+            <Text
+              style={{
+                color: 'white',
+                textAlign: 'center',
+              }}
+            >
+              Save changes
+            </Text>
+          </Pressable>
+        </View>
+        <Text style={{ marginTop: 24, textAlign: 'center', color: '#1F1F1F' }}>
+          You have unsaved changes.
+        </Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 export default EditProfile;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  profileImage: {
+    height: 152,
+    width: 152,
+    backgroundColor: '#F2750D',
+    borderRadius: 8,
+  },
+});

@@ -10,3 +10,5 @@ export { SignOut } from './SignOut';
 export { Pencil } from './Pencil';
 export { Notifications } from './Notifications';
 export { Lock } from './Lock';
+export { Back } from './Back';
+export { Camera } from './Camera';
