@@ -1,14 +1,44 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
-import { SafeAreaWrapper } from '@/HOC';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+} from 'react-native';
+import React, { useState } from 'react';
 import { Back, Camera } from '@/assets/icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { DropdownInput, Input, TextArea } from '@/components/Form';
+import * as ImagePicker from 'expo-image-picker';
 
 type Props = {};
 
 const EditProfile = (props: Props) => {
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    // Request permissions
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    // Launch image picker
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -36,30 +66,49 @@ const EditProfile = (props: Props) => {
           }}
         >
           {/* Container for the image and camera badge */}
-          <View style={{ position: 'relative' }}>
-            {/* Profile image */}
-            <View style={styles.profileImage} />
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 26,
+            }}
+          >
+            <View style={{ position: 'relative' }}>
+              {/* Profile image - now shows either the selected image or the placeholder */}
+              {profileImage ? (
+                <Image
+                  source={{ uri: profileImage }}
+                  style={[
+                    styles.profileImage,
+                    { backgroundColor: 'transparent' },
+                  ]}
+                />
+              ) : (
+                <View style={styles.profileImage} />
+              )}
 
-            {/* Camera badge */}
-            <View
-              style={{
-                position: 'absolute',
-                bottom: -4,
-                right: -4,
-                height: 32,
-                width: 32,
-                backgroundColor: '#ECDCFF',
-                borderRadius: 999,
-                justifyContent: 'center',
-                alignItems: 'center',
-                elevation: 2, // for subtle shadow on Android
-                shadowColor: '#000', // iOS shadow
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.2,
-                shadowRadius: 2,
-              }}
-            >
-              <Camera />
+              {/* Camera badge */}
+              <Pressable
+                onPress={pickImage}
+                style={{
+                  position: 'absolute',
+                  bottom: -4,
+                  right: -4,
+                  height: 32,
+                  width: 32,
+                  backgroundColor: '#ECDCFF',
+                  borderRadius: 999,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  elevation: 2,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 2,
+                }}
+              >
+                <Camera />
+              </Pressable>
             </View>
           </View>
         </View>
@@ -141,5 +190,8 @@ const styles = StyleSheet.create({
     width: 152,
     backgroundColor: '#F2750D',
     borderRadius: 8,
+  },
+  contentContainer: {
+    padding: 16,
   },
 });
