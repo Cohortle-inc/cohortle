@@ -19,7 +19,6 @@ import BottomSheet, {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
-import { Button } from '@/components/ui';
 import { router } from 'expo-router';
 
 const Profile = () => {
