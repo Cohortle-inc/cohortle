@@ -32,7 +32,7 @@ export default function TabLayout() {
                   <Community fill={focused ? '#391D65' : 'gray'} />
                 </View>
               );
-            case 'index':
+            case '(cohorts)':
               return (
                 <View style={iconContainerStyle}>
                   <Cohortz fill={focused ? '#391D65' : 'gray'} />
@@ -55,7 +55,7 @@ export default function TabLayout() {
       })}
     >
       <Tabs.Screen name="community" options={{ title: 'Community' }} />
-      <Tabs.Screen name="index" options={{ title: 'Cohortz' }} />
+      <Tabs.Screen name="(cohorts)" options={{ title: 'Cohortz' }} />
       <Tabs.Screen name="(profile)" options={{ title: 'Profile' }} />
     </Tabs>
   );

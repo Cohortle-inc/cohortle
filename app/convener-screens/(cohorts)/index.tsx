@@ -10,8 +10,10 @@ import BottomSheet, {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
+import { useRouter } from 'expo-router';
 
 const Cohorts = () => {
+  const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
   const [createdCohorts, setCreatedCohorts] = useState([1]);
 
@@ -153,7 +155,9 @@ const Cohorts = () => {
               gap: 16,
             }}
           >
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/convener-screens/edit-cohort')}
+            >
               <Text>See learners</Text>
             </TouchableOpacity>
             <TouchableOpacity>
