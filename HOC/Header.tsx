@@ -1,8 +1,10 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { Back } from '@/assets/icons';
+import { useRouter } from 'expo-router';
 
 const Header = ({ title }: { title: string }) => {
+  const router = useRouter();
   return (
     <View
       style={{
@@ -11,7 +13,7 @@ const Header = ({ title }: { title: string }) => {
         paddingVertical: 16,
       }}
     >
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => router.back()}>
         <Back />
       </TouchableOpacity>
       <Text style={{ paddingLeft: 16, fontFamily: 'DMSans', fontSize: 16 }}>

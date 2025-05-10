@@ -142,7 +142,7 @@ const Cohorts = () => {
       <BottomSheet
         ref={bottomSheetRef}
         index={0} // Start fully collapsed
-        snapPoints={[1, '30%', '30%']} // Adjust snap points
+        snapPoints={[1, '22%', '22%']} // Adjust snap points
         onChange={handleSheetChanges}
         enablePanDownToClose // Allows swipe down to close
         backdropComponent={renderBackdrop}
@@ -163,11 +163,10 @@ const Cohorts = () => {
             <TouchableOpacity>
               <Text>Add learners (copy link)</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/convener-screens/edit-cohort')}
+            >
               <Text>Edit community</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text>Paywall</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>

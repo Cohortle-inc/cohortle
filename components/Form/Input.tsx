@@ -7,7 +7,7 @@ const NormalInput = ({ label, placeholder }: any) => {
 
   return (
     <View>
-      <Text style={styles.label}>{label}</Text>
+      {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
         style={styles.input}
         placeholder={placeholder}
