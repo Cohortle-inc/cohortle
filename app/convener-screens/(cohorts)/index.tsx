@@ -10,7 +10,7 @@ import BottomSheet, {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
-import { useRouter } from 'expo-router';
+import { RelativePathString, useRouter } from 'expo-router';
 
 const Cohorts = () => {
   const router = useRouter();
@@ -44,7 +44,7 @@ const Cohorts = () => {
       <View style={{ backgroundColor: 'white', marginVertical: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <Text style={{ color: '#B085EF', fontFamily: 'DMSansSemiBold' }}>
-            Cohortz
+            Cohortly
           </Text>
           <Pressable>
             <Plus />
@@ -87,7 +87,7 @@ const Cohorts = () => {
       )}
       {createdCohorts.length !== 0 && (
         <View style={{}}>
-          <Cohort onOpenBottomSheet={openBottomSheet} />
+          <Cohort route="./lesson" onOpenBottomSheet={openBottomSheet} />
         </View>
       )}
       <Modal isVisible={isModalVisible}>
@@ -177,9 +177,19 @@ const Cohorts = () => {
 
 export default Cohorts;
 
-const Cohort = ({ onOpenBottomSheet }: { onOpenBottomSheet: () => void }) => {
+const Cohort = ({
+  onOpenBottomSheet,
+  route,
+}: {
+  onOpenBottomSheet: () => void;
+  route: RelativePathString;
+}) => {
+  const router = useRouter();
   return (
-    <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+    <TouchableOpacity
+      onPress={() => router.push(route)}
+      style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}
+    >
       <View style={styles.profileImage} />
       <View>
         <Text
@@ -206,7 +216,7 @@ const Cohort = ({ onOpenBottomSheet }: { onOpenBottomSheet: () => void }) => {
           <PlusSmall />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

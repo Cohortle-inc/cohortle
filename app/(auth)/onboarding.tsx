@@ -75,7 +75,7 @@ const OnBoarding = () => {
                   loop
                 />
                 <Text style={styles.subHeading} variant="subheading">
-                  Invited to Cohortz?{' '}
+                  Invited to Cohortly{' '}
                   <Text style={{ textDecorationLine: 'underline' }}>
                     Accept Invitation
                   </Text>

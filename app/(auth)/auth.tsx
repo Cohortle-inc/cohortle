@@ -64,7 +64,7 @@ const Welcome = (props: Props) => {
         <PaddedView>
           <View style={styles.welcomeView}>
             <Text variant={'headerOne'} style={styles.header}>
-              Welcome to Cohortz!
+              Welcome to Cohortly
             </Text>
             <Text style={styles.subHeader}>
               Let's embark on your learning adventure together.
@@ -84,7 +84,7 @@ const Welcome = (props: Props) => {
               style={{ textAlign: 'center', marginTop: 16 }}
               variant="subheading"
             >
-              Invited to Cohortz?{' '}
+              Invited to Cohortly?{' '}
               <Text
                 style={{
                   textDecorationLine: 'underline',
