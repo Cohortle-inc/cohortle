@@ -2,26 +2,32 @@ import { StyleSheet, View } from 'react-native';
 import React from 'react';
 import { Text } from '@/theme/theme';
 
-const Header = ({ number }: any) => {
-  const Block = ({ bg }: any) => {
-    return (
-      <View
-        style={{
-          height: 4,
-          flex: 1,
-          backgroundColor: bg ? '#B085EF' : '#EFEFEF',
-          borderRadius: 8,
-        }}
-      />
-    );
-  };
+interface HeaderProps {
+  number: number; // current active step (starts at 1)
+  total?: number; // total number of steps, default 3
+}
+
+const Header = ({ number, total = 3 }: HeaderProps) => {
+  // Make an array for the total steps, fill with index [0,1,2,...]
+  const blocks = Array.from({ length: total });
+
+  const Block = ({ active }: { active: boolean }) => (
+    <View
+      style={{
+        height: 4,
+        flex: 1,
+        backgroundColor: active ? '#B085EF' : '#EFEFEF',
+        borderRadius: 8,
+      }}
+    />
+  );
 
   return (
     <View>
       <View style={{ flexDirection: 'row', gap: 10 }}>
-        <Block bg={true} />
-        <Block bg={number > 1} />
-        <Block bg={number > 2} />
+        {blocks.map((_, i) => (
+          <Block key={i} active={number > i} />
+        ))}
       </View>
       <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
         <Text
@@ -33,7 +39,7 @@ const Header = ({ number }: any) => {
           }}
         >
           {number}
-          <Text style={{ color: '#CCCCCC' }}>/3</Text>
+          <Text style={{ color: '#CCCCCC' }}>/ {total}</Text>
         </Text>
       </View>
     </View>

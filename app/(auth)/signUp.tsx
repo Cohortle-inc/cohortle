@@ -119,7 +119,13 @@ const SignUp = () => {
           <Button
             disabled={isNextButtonDisabled}
             text="Next"
-            onPress={() => router.navigate('/(convener)/about')}
+            onPress={() => {
+              if (selectedRole === 'convener') {
+                router.navigate('/(convener)/about');
+              } else if (selectedRole === 'student') {
+                router.navigate('/(student)/about');
+              }
+            }}
           />
         </View>
       </View>

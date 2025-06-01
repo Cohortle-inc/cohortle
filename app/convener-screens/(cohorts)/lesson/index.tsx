@@ -178,7 +178,7 @@ const Index = (props: Props) => {
       <BottomSheet
         ref={bottomSheetRef}
         index={0} // Start fully collapsed
-        snapPoints={[1, '22%', '22%']} // Adjust snap points
+        snapPoints={[1, '27%', '27%']} // Adjust snap points
         onChange={handleSheetChanges}
         enablePanDownToClose // Allows swipe down to close
         backdropComponent={renderBackdrop}
@@ -197,7 +197,12 @@ const Index = (props: Props) => {
               <Text>Edit lesson</Text>
             </TouchableOpacity>
             <TouchableOpacity>
-              <Text>View as student</Text>
+              <Text>View as a student</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/convener-screens/edit-cohort')}
+            >
+              <Text>Unpublish lesson</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/convener-screens/edit-cohort')}
@@ -214,9 +219,10 @@ const Index = (props: Props) => {
 export default Index;
 
 const Lesson = ({ onOpenBottomSheet }: { onOpenBottomSheet: () => void }) => {
+  const router = useRouter();
   return (
     <TouchableOpacity
-      // onPress={() => router.push(route)}
+      onPress={() => router.push('/convener-screens/lesson/create-module')}
       style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}
     >
       <View style={styles.profileImage} />
@@ -226,9 +232,21 @@ const Lesson = ({ onOpenBottomSheet }: { onOpenBottomSheet: () => void }) => {
         >
           Branding & Brand Design
         </Text>
-        <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
-          1:30 min
-        </Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+          <Text
+            style={{
+              color: '#8D9091',
+              marginTop: 4,
+              fontSize: 10,
+              fontStyle: 'italic',
+            }}
+          >
+            Draft
+          </Text>
+          <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
+            1:30 min
+          </Text>
+        </View>
       </View>
       <View
         style={{
