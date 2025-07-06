@@ -44,7 +44,7 @@ const Cohorts = () => {
       <View style={{ backgroundColor: 'white', marginVertical: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <Text style={{ color: '#B085EF', fontFamily: 'DMSansSemiBold' }}>
-            Cohortly
+            Cohortle
           </Text>
           <Pressable>
             <Plus />

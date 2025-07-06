@@ -5,7 +5,7 @@ import { Text, View, StyleSheet } from 'react-native';
 export default function TabLayout() {
   const segment = useSegments() as string[];
 
-  const segmentsToHideTabBar: string[] = ['course'];
+  const segmentsToHideTabBar: string[] = ['course', 'module'];
 
   const hideTabBar: boolean = segmentsToHideTabBar.some((seg) =>
     segment.includes(seg),

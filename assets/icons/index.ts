@@ -14,3 +14,5 @@ export { Back } from './Back';
 export { Camera } from './Camera';
 export { Gallery } from './Gallery';
 export { RedTrash } from './Trash';
+export { Check } from './Check';
+export { RedDoor } from './RedDoor';

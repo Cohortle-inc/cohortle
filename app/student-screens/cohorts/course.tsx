@@ -7,12 +7,14 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
-import { Back, Options } from '@/assets/icons';
-import { router } from 'expo-router';
+import { Back, Check, Close, Options, RedDoor } from '@/assets/icons';
+import { router, useRouter } from 'expo-router';
+import { BottomSheet } from '@/components/ui';
 
 const Course = () => {
   const [activeTab, setActiveTab] = useState('Home');
   const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
+  const [isSheetVisible, setSheetVisible] = useState(false);
   return (
     <SafeAreaWrapper>
       <View
@@ -30,7 +32,7 @@ const Course = () => {
         <Text style={{ fontSize: 10, fontWeight: 'semibold' }}>
           Create High-Fidelity Designs and Prototypes in Figma
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setSheetVisible(true)}>
           <Options />
         </TouchableOpacity>
       </View>
@@ -98,9 +100,11 @@ const Course = () => {
                     <TouchableOpacity
                       key={num}
                       style={{
+                        flexDirection: 'row',
+                        gap: 4,
                         borderWidth: 1,
                         borderColor: '#ECDCFF',
-                        paddingHorizontal: 18,
+                        paddingHorizontal: 8,
                         paddingVertical: 4,
                         borderRadius: 12,
                         marginRight: 8,
@@ -111,6 +115,7 @@ const Course = () => {
                       }}
                     >
                       <Text style={{ fontSize: 10 }}>{num}</Text>
+                      <Check />
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -135,13 +140,54 @@ const Course = () => {
           )}
         </View>
       </View>
+      <BottomSheet
+        isVisible={isSheetVisible}
+        onClose={() => setSheetVisible(false)}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingBottom: 24,
+          }}
+        >
+          <Text style={{ fontWeight: 'bold' }}>Options</Text>
+          <TouchableOpacity onPress={() => setSheetVisible(false)}>
+            <Close />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}
+          >
+            <RedDoor />
+            <Text style={{ color: '#EE3D3E' }}>Unenroll from cohort</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={{
+            marginTop: 24,
+            borderWidth: 1,
+            borderColor: '#ECDCFF',
+            padding: 12,
+            borderRadius: 8,
+            alignItems: 'center',
+          }}
+          onPress={() => setSheetVisible(false)}
+        >
+          <Text style={{ fontWeight: 'bold', color: '#211E8A' }}>Close</Text>
+        </TouchableOpacity>
+      </BottomSheet>
     </SafeAreaWrapper>
   );
 };
 
 const Module = () => {
+  const router = useRouter();
   return (
-    <View
+    <TouchableOpacity
+      onPress={() => router.push('/student-screens/cohorts/module')}
       style={{
         marginBottom: 16,
         padding: 16,
@@ -182,7 +228,7 @@ const Module = () => {
           2 min
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 export default Course;
