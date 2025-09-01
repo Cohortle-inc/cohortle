@@ -26,12 +26,11 @@ const About = () => {
           </Text>
         </View>
         <View style={{ gap: 24 }}>
-          <Input label="Full Name" placeholder="Full name" />
-          <Input label="Password" placeholder="Password" />
-          <Input label="Re-type Password" placeholder="Password" />
+          <Input label="First Name" placeholder="First name" />
+          <Input label="Last Name" placeholder="Last name" />
         </View>
       </View>
-
+{/* 
       <View
         style={{
           flexDirection: 'row',
@@ -55,7 +54,7 @@ const About = () => {
           </Text>{' '}
           the privacy policy.
         </Text>
-      </View>
+      </View> */}
       <Link asChild href="/personal-info">
         <Pressable
           style={{

@@ -131,7 +131,7 @@ const SignUp = () => {
       </View>
     </SafeAreaWrapper>
   );
-};
+}; 
 
 export default SignUp;
 

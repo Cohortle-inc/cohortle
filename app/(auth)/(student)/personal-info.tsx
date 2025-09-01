@@ -6,28 +6,30 @@ import { Header } from '@/ui';
 import { Text } from '@/theme/theme';
 import { BackArrowIcon } from '@/assets/icons';
 import { Link } from 'expo-router';
-
+ 
 const CommunityInfo = () => {
   return (
-    <SafeAreaWrapper>
-      <View style={{ marginTop: 24 }}>
+    <SafeAreaWrapper style={{ display: "flex", flexDirection: "column", gap: 20}}>
+      <View style={{ marginTop: 24, }}>
         <Header number={2} total={2} />
         <View>
           <Text
-            style={{
-              textAlign: 'center',
-              fontSize: 18,
-              fontFamily: 'DMSansMedium',
-              marginBottom: 18,
-              marginTop: 16,
-              color: '#B085EF',
-            }}
+            style={styles.header}
           >
             What username do you want to use?
           </Text>
         </View>
         <View style={{ gap: 24 }}>
           <Input label="Username" placeholder="Username" />
+        </View>
+      </View>
+
+      <View>
+        <Text style={styles.header}>Set Password</Text>
+        
+        <View style={{ gap: 24 }}>
+          <Input label="Password" placeholder="create a password" />
+          <Input label="Re-type Password" placeholder="re-type your password" />
         </View>
       </View>
 
@@ -39,7 +41,6 @@ const CommunityInfo = () => {
             paddingVertical: 14,
             alignItems: 'center',
             borderRadius: 32,
-            marginTop: 48,
             backgroundColor: '#391D65',
           }}
         >
@@ -65,4 +66,12 @@ const CommunityInfo = () => {
 
 export default CommunityInfo;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  header: {
+    fontSize: 18,
+    fontFamily: 'DMSansMedium',
+    marginBottom: 18,
+    marginTop: 16,
+    color: '#B085EF',
+  }
+});

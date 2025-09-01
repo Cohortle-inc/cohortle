@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import React from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
@@ -11,8 +11,11 @@ const EmailConfirmation = (props: Props) => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Text variant={'l'}>Your email address</Text>
+        <Text variant={'l'} style={styles.header}>Your email address</Text>
         <Text>We'll send you a quick email to confirm your address.</Text>
+        <TextInput 
+          style={styles.input}
+        />
         <View style={{ marginTop: 36 }}>
           <Button
             text="Next"
@@ -31,5 +34,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  header: {},
+  input: {
+    borderRadius: 5,
+    paddingHorizontal: 4,
+    borderColor: "black",
+    borderWidth: 1
+  },
+  header: {
+    fontWeight: "bold"
+  },
 });
