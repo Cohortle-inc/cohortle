@@ -29,24 +29,27 @@ const Course = () => {
         <TouchableOpacity onPress={() => router.back()}>
           <Back />
         </TouchableOpacity>
-        <Text style={{ fontSize: 10, fontWeight: 'semibold' }}>
+        {/* <Text style={{ fontSize: 10, fontWeight: 'semibold' }}>
           Create High-Fidelity Designs and Prototypes in Figma
-        </Text>
+        </Text> */}
         <TouchableOpacity onPress={() => setSheetVisible(true)}>
           <Options />
         </TouchableOpacity>
       </View>
-      <View>
+      <View style={{flexDirection: "column", gap: 5 }}>
         <Text
           style={{
-            fontSize: 32,
+            fontSize: 20,
             fontWeight: '600',
             marginBottom: 4,
           }}
         >
           Name of Cohort
         </Text>
-        <Text>Name of Convener</Text>
+        <View>
+          <Text style={{fontWeight: 300}}>Offered By</Text>
+          <Text style={{fontSize: 16}}>Abdulhamid Usman</Text>
+        </View>
       </View>
       <View style={{ flex: 1 }}>
         {/* Tab Bar */}
@@ -94,8 +97,11 @@ const Course = () => {
           {activeTab === 'Home' ? (
             <View>
               <View>
-                <Text>Modules</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <Text style={{fontWeight: 600, fontSize: 16}}>About this course</Text>
+                <Text style={{marginVertical: 10}}>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi delectus sequi alias eligendi veritatis quis. Voluptates voluptate nobis maxime odit alias? Ipsam maiores voluptatum nesciunt voluptas facilis dolore temporibus cupiditate.
+                </Text>
+                {/* <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {numbers.map((num) => (
                     <TouchableOpacity
                       key={num}
@@ -118,20 +124,20 @@ const Course = () => {
                       <Check />
                     </TouchableOpacity>
                   ))}
-                </ScrollView>
-                <View style={{ marginTop: 16 }}>
-                  <Module />
-                  <Module />
-                  <Module />
-                  <Module />
+                </ScrollView> */}
+                <View style={{marginVertical: 10}}>
+                  <Text style={{fontWeight: 600}}>Syllabus: What you'll learn from the course</Text>
+                  <View style={{ marginTop: 16 }}>
+                    <Module />
+                    <Module />
+                    <Module />
+                    <Module />
+                  </View>
                 </View>
               </View>
             </View>
           ) : (
             <View>
-              <View>
-                
-              </View>
               <Text style={{ fontWeight: 'bold' }}>Course Description</Text>
               <Text style={{ marginTop: 8, fontSize: 12, letterSpacing: 1 }}>
                 This course will teach you how to create high-fidelity designs
@@ -192,45 +198,36 @@ const Module = () => {
     <TouchableOpacity
       onPress={() => router.push('/student-screens/cohorts/module')}
       style={{
-        marginBottom: 16,
         padding: 16,
-        borderWidth: 1,
-        borderColor: '#ECDCFF',
+        borderTopWidth: 1,
+        borderColor: 'black',
+        borderStyle: "dashed",
         borderRadius: 8,
+        flexDirection: "row",
+        alignItems: "center"
       }}
     >
-      <Text style={{ fontWeight: 'semibold' }}>Module enteries</Text>
-      <View
+      <Text style={{fontWeight: 300}}>Module id</Text>
+      <Text
         style={{
-          flexDirection: 'row',
-          gap: 8,
-          alignItems: 'center',
-          marginTop: 8,
+          marginLeft: 10,
+          padding: 4,
+          borderRadius: 4,
+          fontSize: 14,
+          fontWeight: "semibold"
         }}
       >
-        <Text
-          style={{
-            borderWidth: 1,
-            borderColor: '#ECDCFF',
-            padding: 4,
-            borderRadius: 4,
-            fontSize: 10,
-          }}
-        >
-          Video
-        </Text>
-        <Text
-          style={{
-            borderWidth: 1,
-            borderColor: '#ECDCFF',
-            padding: 4,
-            borderRadius: 4,
-            fontSize: 10,
-          }}
-        >
-          2 min
-        </Text>
-      </View>
+        Module Title
+      </Text>
+      {/* <Text
+        style={{
+          marginLeft: "auto",
+          borderRadius: 4,
+          fontSize: 10,
+        }}
+      >
+        2 min
+      </Text> */}
     </TouchableOpacity>
   );
 };

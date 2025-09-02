@@ -111,7 +111,7 @@ const Welcome = (props: Props) => {
                 text="Log in"
               />
             </Link>
-            <Link asChild href={'/(auth)/signUp'}>
+            <Link asChild href={'/(auth)/email-confirmation'}>
               <Button
                 variant="secondary"
                 onPress={openBottomSheet}

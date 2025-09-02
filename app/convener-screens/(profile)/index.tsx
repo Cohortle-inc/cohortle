@@ -101,7 +101,7 @@ const Profile = () => {
 
           <View style={styles.infoRow}>
             <Location />
-            <Text style={styles.infoText}>Abuja, Nigeria</Text>
+            <Text style={styles.infoText}>Abuj, Nigeria</Text>
           </View>
 
           <View style={styles.infoRow}>

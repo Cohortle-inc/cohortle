@@ -44,11 +44,6 @@ const Community = () => {
           <>
             <Message />
             <Message />
-            <Message />
-            <Message />
-            <Message />
-            <Message />
-            <Message />
           </>
         ) : (
           <>
@@ -93,6 +88,7 @@ const Message = ({ withImg }: any) => {
         borderColor: '#ECDCFF',
         borderRadius: 8,
       }}
+      onPress={() => router.push('/')}
     >
       <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
         <View
