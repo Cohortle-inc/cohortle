@@ -35,7 +35,7 @@ const CheckEmail = (props: Props) => {
         console.log("verified!")
         router.navigate({
           pathname: '/(auth)/signUp',
-          params: response.data.token
+          params: {token: response.data.token}
         });
         console.log("verified!")
       }

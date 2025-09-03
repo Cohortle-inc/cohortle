@@ -12,6 +12,8 @@ import { Text, Theme } from '@/theme/theme';
 import { Button } from '@/components/ui';
 import { router } from 'expo-router';
 import { useTheme } from '@shopify/restyle';
+import axios from 'axios';
+import { useLocalSearchParams, useSearchParams } from 'expo-router/build/hooks';
 
 const { width } = Dimensions.get('window');
 
@@ -35,13 +37,18 @@ const creatorDefinition = [
 
 const SignUp = () => {
   const theme = useTheme<Theme>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const [selectedRole, setSelectedRole] = useState<
-    'convener' | 'student' | null
+    'convener' | 'learner' | null
   >(null);
   const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
   const [showDefinition, setShowDefinition] = useState(false);
+  const apiURL = process.env.EXPO_PUBLIC_API_URL;
+  const token = useLocalSearchParams<{token: string}>();
 
-  const handleRoleSelection = (role: 'convener' | 'student') => {
+  const handleRoleSelection = (role: 'convener' | 'learner') => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
     if (selectedRole !== role) {
@@ -61,6 +68,39 @@ const SignUp = () => {
     </View>
   );
 
+  const handleRole = async () => {
+    setLoading(true);
+    setError("")
+    console.log(token)
+    try {
+      const response = await axios.patch(`${apiURL}/v1/api/profile/set-role`, 
+        {role: selectedRole}
+        , {
+      
+        headers: {
+          Authorization: `Bearer ${token.token}`
+        }}
+      )
+      console.log(response.data)
+      if (!response.data.error) {
+        setError("role set!")
+        setLoading(false)
+        if (selectedRole === 'convener') {
+          router.navigate('/(convener)/about');
+        } else if (selectedRole === 'learner') {
+          router.navigate('/(student)/about');
+        }
+            
+
+      }
+    } catch (err) {
+      setError("error setting role: " + err)
+    }
+    finally {
+      setLoading(false)
+    }
+    
+  }
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
@@ -103,14 +143,14 @@ const SignUp = () => {
           <Button
             textStyle={styles.buttonText}
             variant={
-              selectedRole === 'student' && showDefinition
+              selectedRole === 'learner' && showDefinition
                 ? 'primary'
                 : 'outline'
             }
             text="Student"
-            onPress={() => handleRoleSelection('student')}
+            onPress={() => handleRoleSelection('learner')}
           />
-          {selectedRole === 'student' &&
+          {selectedRole === 'learner' &&
             showDefinition &&
             renderDefinition(creatorDefinition)}
         </View>
@@ -119,13 +159,7 @@ const SignUp = () => {
           <Button
             disabled={isNextButtonDisabled}
             text="Next"
-            onPress={() => {
-              if (selectedRole === 'convener') {
-                router.navigate('/(convener)/about');
-              } else if (selectedRole === 'student') {
-                router.navigate('/(student)/about');
-              }
-            }}
+            onPress={handleRole}
           />
         </View>
       </View>
