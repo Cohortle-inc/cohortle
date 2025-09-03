@@ -1,16 +1,59 @@
 import { Dimensions, StyleSheet, View } from 'react-native';
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
 import { Button } from '@/components/ui';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import Lottie from 'lottie-react-native';
+import axios from 'axios';
 
 type Props = {};
 const { width } = Dimensions.get('window');
 
 const CheckEmail = (props: Props) => {
-  const { email } = useLocalSearchParams<{ email?: string }>();
+  const params = useLocalSearchParams();
+  const initial_token = params.token as string;
+  const email = params.email as string;
+  const apiURL = process.env.EXPO_PUBLIC_API_URL;
+  const router = useRouter();
+  // const [token, setToken] = useState(initial_token);
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  const verify_token = async () => {
+    setLoading(true);
+    setError("")
+    if(!initial_token) {
+      setError("No token recieved. Contact the developers");
+    }
+
+    try {
+      const response = await axios.post(`${apiURL}/v1/api/auth/verify-email`, {
+        verify_token: initial_token
+      })
+      if (!response.data.error) {
+        console.log("verified!")
+        router.navigate({
+          pathname: '/(auth)/signUp',
+          params: response.data.token
+        });
+        console.log("verified!")
+      }
+      else (
+        setError("Couldn't verify token. Contact the developers")
+      )
+    } catch (err) {
+      setError("An unexpected error occurred. Contact the developers")
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    verify_token();
+  }, [])
+
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
@@ -26,18 +69,19 @@ const CheckEmail = (props: Props) => {
           variant={'headerTwo'}
           style={{ textAlign: 'center', paddingBottom: 8 }}
         >
-          Check your email!
+        Verifying your email!
         </Text>
         <Text style={{ textAlign: 'center' }}>
-          To confirm your email address, tap the button on the email we sent to
+          This should only take a moment
           {/* Turn the text bellow bold */}
-          <Text> {email}</Text>
+          <Text>
+            ...</Text>
         </Text>
 
         <View style={{ marginTop: 36 }}>
           <Button
             text="Next"
-            onPress={() => router.navigate('/(auth)/get-started')}
+            onPress={() => {}}
           />
         </View>
       </View>

@@ -38,13 +38,13 @@ const EmailConfirmation = (props: Props) => {
     setError("");
 
     try {
-      const response = await axios.post(`http://172.20.10.3:3048/v1/api/auth/register-email`, 
+      const response = await axios.post(`${apiURL}/v1/api/auth/register-email`, 
         { email }
       );
       if (!response.data.error) {
         router.navigate({
           pathname: '/(auth)/check-email',
-          params: { email }
+          params: { token: response.data.link, email }
         });
         console.log("sent!")
       } else {
