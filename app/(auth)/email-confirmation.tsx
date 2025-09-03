@@ -44,7 +44,7 @@ const EmailConfirmation = (props: Props) => {
       if (!response.data.error) {
         router.navigate({
           pathname: '/(auth)/check-email',
-          params: { token: response.data.link, email }
+          params: { token: response.data.link}
         });
         console.log("sent!")
       } else {

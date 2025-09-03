@@ -104,7 +104,7 @@ const Welcome = (props: Props) => {
           backdropComponent={renderBackdrop}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <Link href="/(auth)/email-confirmation" asChild>
+            <Link href="/(auth)/login" asChild>
               <Button
                 style={{ marginTop: 16, marginBottom: 16 }}
                 onPress={openBottomSheet}

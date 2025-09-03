@@ -86,10 +86,17 @@ const SignUp = () => {
         setError("role set!")
         setLoading(false)
         if (selectedRole === 'convener') {
-          router.navigate('/(convener)/about');
+          router.navigate({
+            pathname: '/(convener)/about',
+            params: {token: response.data.token}
+          });
         } else if (selectedRole === 'learner') {
-          router.navigate('/(student)/about');
+          router.navigate({
+            pathname: '/(student)/about',
+            params: {token: response.data.token}
+          });
         }
+        console.log(response.data.token)
             
 
       }

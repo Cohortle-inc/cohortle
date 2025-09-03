@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@shopify/restyle';
 import Onboarding from 'react-native-onboarding-swiper';
@@ -10,6 +10,7 @@ import { Theme, Text } from '@/theme/theme';
 const { width } = Dimensions.get('window');
 
 const OnBoarding = () => {
+  const [role, setRole] = useState("")
   const router = useRouter();
   const theme = useTheme<Theme>();
 
