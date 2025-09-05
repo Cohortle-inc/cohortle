@@ -22,7 +22,7 @@ const LoginScreen = (props: Props) => {
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
-  };
+  }; 
 
   const handleSubmit = async () => {
     if (!email) {
@@ -57,10 +57,11 @@ const LoginScreen = (props: Props) => {
         // Store token securely
         await AsyncStorage.setItem('authToken', result.token);
         await AsyncStorage.setItem('userData', JSON.stringify(result.user));
+        console.log(result.token)
         
         // Navigate to onboarding with token
         router.replace({
-          pathname: "/(auth)/onboarding",
+          pathname: "/student-screens/community",
           params: { token: result.token },
         });
       } else {

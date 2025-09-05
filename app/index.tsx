@@ -3,6 +3,9 @@ import { useRouter } from 'expo-router';
 import { supabase } from '@/utils/lib/supabase';
 import { getItem } from '../utils/asyncStorage';
 import { View, ActivityIndicator } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 export default function InitialScreen() {
   const router = useRouter();
@@ -29,8 +32,10 @@ export default function InitialScreen() {
 
   // Show a loading indicator while deciding where to route the user
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" />
-    </View>
+    <QueryClientProvider client={queryClient}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    </QueryClientProvider>
   );
 }
