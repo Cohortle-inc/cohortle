@@ -11,6 +11,8 @@ import { SafeAreaWrapper } from '@/HOC';
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Message from "@/components/Post/post";
+import { Comment } from "@/components/Post/comments";
+import { CommentInput } from "@/components/Post/input";
 
 // Update the interface to match potential backend response
 export interface Post {
@@ -118,6 +120,8 @@ export default function PostScreen() {
         ) : (
           <Text>Post not found</Text>
         )}
+        <Comment />
+        <CommentInput />
       </ScrollView>
     </SafeAreaWrapper>
   );
