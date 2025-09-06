@@ -14,16 +14,10 @@ import { Link, useRouter } from 'expo-router';
 import { Placeholder } from '@/assets/images';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Posts } from '@/types/postTypes';
+import Message from '@/components/Post/post';
 
-interface Posts {
-  id: number;
-  posted_by: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  } | null; // allow null in case user lookup fails
-  text: string;
-}
+
 const Community = () => {
   const [activeTab, setActiveTab] = useState<'convener' | 'foryou'>('convener');
   const [posts, setPosts] = useState<Posts[]>([])
@@ -42,6 +36,7 @@ const Community = () => {
           console.warn("Unexpected posts response:", response.data);
           setPosts([]); // fallback
         }
+      console.log(response.data.posts)
       return response.data.posts
       
   };
@@ -77,8 +72,7 @@ const Community = () => {
           
     <>
       {posts.map((post) => (
-        <Message 
-          key={post.id}
+        <Message
           postMessage={{
             id: post.id,
             posted_by: post.posted_by,
@@ -117,68 +111,7 @@ const TabButton = ({
   </TouchableOpacity>
 );
 
-interface PostMessageProps {
-  withImg?: boolean;
-  postMessage: Posts;
-}
-const Message: React.FC<PostMessageProps> = ({withImg, postMessage}) => {
-  
-  const router = useRouter();
-  return (
-    <TouchableOpacity
-      style={{
-        marginBottom: 16,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: '#ECDCFF',
-        borderRadius: 8,
-      }}
-      key={postMessage.id}
-      onPress={() => router.push('/')}
-    >
-      <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: '#40135B',
-          }}
-        ></View>
-        <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
-          <Text>{postMessage.posted_by?.first_name} {postMessage.posted_by?.last_name}</Text>
-          <Text
-            style={{
-              color: '#fff',
-              backgroundColor: '#391D65',
-              borderRadius: 999,
-              padding: 2,
-              fontSize: 6,
-              height: 12,
-            }}
-          >
-            Convener
-          </Text>
-        </View>
-      </View>
-      <View style={{ marginTop: 8 }}>
-        <Text style={{ fontSize: 14, marginTop: 16 }}>
-          {postMessage.text}</Text>
-        <View
-          style={{
-            marginTop: 16,
-            alignItems: 'center',
-          }}
-        >
-          <Image source={Placeholder} />
-        </View>
-        <Text style={{ fontSize: 10, marginTop: 16 }}>
-          4:38 PM • Sep 18, 2024
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-};
+
 
 const styles = StyleSheet.create({
   tabRow: {
