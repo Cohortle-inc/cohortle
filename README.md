@@ -11,7 +11,7 @@ Cohortz is a dynamic platform for managing communities and online classes, combi
 
 ## Technologies
 
-- **Frontend**: Built with React Native and Outblic for a seamless and responsive user experience.
+- **Frontend**: Built with React Native.
 - **Backend**: Utilizes modern backend technologies to handle data management, user authentication, and resource sharing.
 
 ## Installation
@@ -50,20 +50,6 @@ Cohortz is a dynamic platform for managing communities and online classes, combi
 - **Creating a Cohortz**: Navigate to the "Create Cohortz" section, fill in the details, and customize your community.
 - **Uploading Resources**: Go to your cohortz page, and use the upload feature to add resources for members.
 - **Following Cohortz**: Explore and search for cohortz to follow and receive updates.
-
-## Contributing
-
-Contributions are welcome! If you'd like to contribute to the development of Cohortz, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Make your changes and commit them (`git commit -am 'Add new feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
