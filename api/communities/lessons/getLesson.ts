@@ -26,5 +26,7 @@ export const useGetLesson = (lessonId: string, moduleId: string) => {
   return useQuery({
     queryKey: ['lesson', lessonId, moduleId],
     queryFn: () => getLesson(lessonId, moduleId),
+    refetchOnReconnect: true,
+    refetchInterval: 5000
   });
 };
