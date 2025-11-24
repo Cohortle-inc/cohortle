@@ -50,8 +50,10 @@ const Community = () => {
         >
           Cohortle
         </Link>
-        <Link
-          href={'/convener-screens/(cohorts)/upload'}
+        <View
+        
+          // href={'/convener-screens/(cohorts)/upload'}
+          // href={'/convener-screens/(cohorts)/upload'}
           style={{
             position: 'absolute',
             right: 0,
@@ -62,7 +64,7 @@ const Community = () => {
           }}
         >
           <Text style={{ fontWeight: 700 }}>Create Post</Text>
-        </Link>
+        </View>
       </View>
 
       {/* Tab Switcher */}
@@ -81,7 +83,11 @@ const Community = () => {
 
       {/* Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
-        {activeTab === 'convener' ? (
+       
+          <View style={{width: '100%', height: 400, justifyContent: 'center', alignItems: 'center'}}>
+            <Text>Comming Soon...</Text>
+          </View>
+        {/* {activeTab === 'convener' ? (
           <>
             {posts.map((post) => (
               <Message
@@ -95,7 +101,7 @@ const Community = () => {
           </>
         ) : (
           <></>
-        )}
+        )} */}
       </ScrollView>
     </SafeAreaWrapper>
   );

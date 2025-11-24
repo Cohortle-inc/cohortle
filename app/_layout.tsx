@@ -6,7 +6,7 @@ import { ThemeProvider } from '@shopify/restyle';
 import theme from '@/theme/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import FlashMessage from "react-native-flash-message";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -19,6 +19,7 @@ export default function RootLayout() {
     DMSansLight: require('../assets/fonts/DMSans-Light.ttf'),
     DMSansSemiBold: require('../assets/fonts/DMSans-SemiBold.ttf'),
   });
+  
 
   useEffect(() => {
     if (loaded) {
@@ -45,8 +46,13 @@ export default function RootLayout() {
       <ThemeProvider theme={theme}>
         <GestureHandlerRootView>
           <Stack screenOptions={{ headerShown: false }}>
+            
             <Stack.Screen name="(tabs)" />
           </Stack>
+          <FlashMessage position="top"
+            floating={true}
+            duration={3000}
+            style={{ marginTop: 50 }} />
         </GestureHandlerRootView>
       </ThemeProvider>
     </QueryClientProvider>

@@ -29,6 +29,7 @@ const useGetCommunities = (cohortId: number) => {
     queryFn: () => getCommunities(cohortId),
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
+    refetchInterval: 10000,
     staleTime: 0,
     enabled: !!cohortId,
   });

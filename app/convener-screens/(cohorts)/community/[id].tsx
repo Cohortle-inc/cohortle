@@ -1,3 +1,4 @@
+// import ModuleIcon from '../../../../assets/images/'
 import { Back, Close, Options, Plus, PlusSmall } from '@/assets/icons';
 import { Input } from '@/components/Form';
 import { SafeAreaWrapper } from '@/HOC';
@@ -11,6 +12,7 @@ import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typesc
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Switch,
@@ -24,6 +26,8 @@ import { combine } from 'zustand/middleware';
 import { usePostCommunity } from '@/api/communities/postCommunity';
 import { CommunityType } from '@/api/communities/postCommunity';
 import useGetCommunities from '@/api/communities/getCommunities';
+import useGetModules from '@/api/communities/modules/getModules';
+import { colors } from '@/utils/color';
 
 interface CreateCommunityHandlerOptions {
   onSuccess?: (data: any) => void;
@@ -51,17 +55,7 @@ const courseOptions = [
     key: 'self_paced',
     title: 'Self-paced',
     description: 'Learners can start immediately and learn at their own pace',
-  },
-  {
-    key: 'structured',
-    title: 'Structured',
-    description: 'Learning follows a structured, guided path with milestones',
-  },
-  {
-    key: 'scheduled',
-    title: 'Scheduled',
-    description: 'Courses run on a set schedule with live sessions',
-  },
+  }
 ];
 const getButtonStyle = (isActive: any) => ({
   width: 270, // fallback for string percentage, but better to use number below
@@ -86,19 +80,21 @@ const Index = (props: Props) => {
   const [lessons, setLessons] = useState([]);
   const [step, setStep] = useState(1);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [cohortGroup, setCohortGroup] = useState('Branding & Branding Design');
   const [communityAccess, setCommunityAccess] = useState(false);
   const { id } = useLocalSearchParams<{ id: string }>(); // cohort id
+  const { cohortName } = useLocalSearchParams<{ cohortName: string }>(); // cohort name
   const numericId = Number(id);
 
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
 
   console.log(apiURL);
   const { mutate: createCommunity } = usePostCommunity(numericId);
-  const { data: communities = [] } = useGetCommunities(numericId);
+  const { data: communities = [], isLoading } = useGetCommunities(numericId);
   const handleStep = () => {
     setStep(step + 1);
   };
+  
+  console.log(communities)
 
   console.log('Sol', communities);
 
@@ -178,76 +174,111 @@ const Index = (props: Props) => {
               marginLeft: 16,
             }}
           >
-            Branding & Branding Design
+            {cohortName}
           </Text>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={toggleModal}
             style={{ marginLeft: 'auto' }}
           >
             <Plus />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
-      </View>
-      {communities.length > 0 ? (
-        <ScrollView
-          contentContainerStyle={{ paddingVertical: 16, gap: 16 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {communities.map((community: CommunityType) => (
-            <Community {...community} onOpenBottomSheet={openBottomSheet} />
-          ))}
-          <TouchableOpacity
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 8,
-              marginTop: 16,
-            }}
-            onPress={toggleModal}
-          >
-            <PlusSmall />
-            <Text style={{ color: '#391D65', fontFamily: 'DMSansSemiBold' }}>
-              Create Community
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      ) : (
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Text
-            style={{
-              color: '#1F1F1F',
-              fontSize: 20,
-              fontFamily: 'DMSansSemiBold',
-              marginBottom: 8,
-            }}
-          >
-            No communities yet
-          </Text>
-          <Text style={{ color: '#1F1F1F', textAlign: 'center', fontSize: 14 }}>
-            Create communities and let the discussion begin. Create communities
-            for different topics to help members connect and engage.
-          </Text>
-          <TouchableOpacity
-            style={{
-              borderWidth: 1,
-              borderColor: '#F8F1FF',
-              paddingVertical: 14,
-              alignItems: 'center',
-              borderRadius: 24,
-              marginTop: 24,
-              backgroundColor: '#391D65',
-              width: 200,
-            }}
-            onPress={toggleModal}
-          >
-            <Text style={{ color: '#fff', fontFamily: 'DMSansSemiBold' }}>
-              Create community
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      </View>{isLoading ? (
+  // Loading State
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
+    <ActivityIndicator size="large" color="#391D65" />
+    <Text style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}>
+      Loading communities...
+    </Text>
+  </View>
+) : communities.length > 0 ? (
+  // Has Communities
+  <ScrollView
+    contentContainerStyle={{ paddingVertical: 16, gap: 16 }}
+    showsVerticalScrollIndicator={false}
+  >
+    {communities.map((community: CommunityType) => (
+      <Community
+        key={community.id}
+        {...community}
+        onOpenBottomSheet={openBottomSheet}
+      />
+    ))}
+
+    {/* Show "Create Community" button only if less than 2 communities */}
+    {communities.length < 2 && (
+      <TouchableOpacity
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          marginTop: 24,
+          paddingVertical: 16,
+          backgroundColor: '#F8F1FF',
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: '#E8DDFD',
+        }}
+        onPress={toggleModal}
+      >
+        <PlusSmall />
+        <Text style={{ color: '#391D65', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
+          Create Community
+        </Text>
+      </TouchableOpacity>
+    )}
+  </ScrollView>
+) : (
+  // Empty State
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+    <Text
+      style={{
+        color: '#1F1F1F',
+        fontSize: 22,
+        fontFamily: 'DMSansSemiBold',
+        textAlign: 'center',
+        marginBottom: 12,
+      }}
+    >
+      No communities yet
+    </Text>
+    <Text
+      style={{
+        color: '#666',
+        textAlign: 'center',
+        fontSize: 15,
+        lineHeight: 22,
+        marginBottom: 32,
+      }}
+    >
+      Create communities and let the discussion begin. Group members by topics,
+      courses, or interests.
+    </Text>
+
+    <TouchableOpacity
+      style={{
+        backgroundColor: '#391D65',
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        borderRadius: 32,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+      }}
+      onPress={toggleModal}
+    >
+      <PlusSmall color="#fff" />
+      <Text style={{ color: '#fff', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
+        Create Community
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
 
       <Modal isVisible={isModalVisible}>
         <View
@@ -257,12 +288,11 @@ const Index = (props: Props) => {
             paddingBottom: 40,
             padding: 16,
             borderRadius: 8,
-            alignItems: 'center',
           }}
         >
           <TouchableOpacity
             onPress={toggleModal}
-            style={{ alignItems: 'flex-end' }}
+            style={{ alignItems: 'flex-end', position: 'relative', paddingVertical: 5}}
           >
             <Close />
           </TouchableOpacity>
@@ -361,7 +391,7 @@ const Index = (props: Props) => {
                 </View> */}
 
               {/* Community Access */}
-              <View style={styles.switchRow}>
+              {/* <View style={styles.switchRow}>
                 <Text style={styles.label}>Community access</Text>
                 <Switch
                   value={communityAccess}
@@ -374,11 +404,11 @@ const Index = (props: Props) => {
               <Text style={styles.hint}>Add members from this cohort</Text>
 
               {/* Info text */}
-              <Text style={styles.info}>
+              {/* <Text style={styles.info}>
                 The Community will be created in draft mode and will not be
                 visible to your learners. You can update access settings after
                 you create the community.
-              </Text>
+              </Text> */}
             </ScrollView>
           )}
           <View style={{ alignItems: 'center' }}>
@@ -391,7 +421,8 @@ const Index = (props: Props) => {
                 borderRadius: 32,
                 marginTop: 32,
                 backgroundColor: '#391D65',
-                width: '70%',
+                width: 155
+                
               }}
               onPress={step < 2 ? handleStep : createCommunityHandler}
             >
@@ -485,20 +516,20 @@ const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
       onPress={() =>
         router.navigate({
           pathname: '/convener-screens/community/(course)/[id]',
-          params: { id, cohort_id },
+          params: { name, id, cohort_id },
         })
       }
       style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}
     >
-      <View style={styles.profileImage} />
+      <Ionicons name='grid' size={20} color={colors.primary} style={{padding: 5, backgroundColor: colors.purpleShade, borderRadius: 8}} />
       <View>
         <Text
           style={{ fontFamily: 'DMSansMedium', fontSize: 12, color: '#1F1F1F' }}
         >
           {name}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-          <Text
+        {/* <View style={{ flexDirection: 'row', gap: 8 }}> */}
+          {/* <Text
             style={{
               color: '#8D9091',
               marginTop: 4,
@@ -507,11 +538,11 @@ const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
             }}
           >
             3 Modules
-          </Text>
-          <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
+          </Text> */}
+          {/* <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
             200 memebers
-          </Text>
-        </View>
+          </Text> */}
+        {/* </View> */}
       </View>
       <View
         style={{
@@ -521,9 +552,9 @@ const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
           alignItems: 'center',
         }}
       >
-        <TouchableOpacity onPress={onOpenBottomSheet}>
+        {/* <TouchableOpacity onPress={onOpenBottomSheet}>
           <Options />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </TouchableOpacity>
   );

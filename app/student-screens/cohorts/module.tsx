@@ -1,39 +1,64 @@
 import { StyleSheet, Text, TouchableOpacity, View, Dimensions, ActivityIndicator } from 'react-native';
-import { useVideoPlayer, VideoView } from 'expo-video';
-import React, { useEffect, useState, } from 'react';
+// import { useVideoPlayer, VideoView } from 'expo-video';
+import React, { useEffect, useState, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Video, ResizeMode } from 'expo-av';
 
 const Module = () => {
   const [title, setTitle] = useState<string | null>(null);
   const [media, setMedia] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<any>({});
+  const video = useRef<Video>(null);
 
-  const videoSource = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-  const player = useVideoPlayer(videoSource, (player) => {
-    // 2. Configure the player
-    player.loop = true; // Set to loop
-    player.play();      // Start playing immediately
-  });
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        const [mediaUrl, titleText] = await Promise.all([
-          AsyncStorage.getItem("media"),
-          AsyncStorage.getItem("name")
-        ]);
-        setMedia(mediaUrl);
-        setTitle(titleText);
-      } catch (error) {
-        console.error('Error loading data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadLessonData = async () => {
+    try {
+      const [savedMedia, savedTitle] = await Promise.all([
+        AsyncStorage.getItem("media"),
+        AsyncStorage.getItem("name"),
+      ]);
+
+      setMedia(savedMedia || "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4");
+      setTitle(savedTitle || "Untitled Lesson");
+    } catch (error) {
+      console.error("Failed to load lesson data:", error);
+      // Fallback to demo video
+      setMedia("https://d23dyxeqlo5psv.cloudfront.net/big_buck_b://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4");
+      setTitle("Demo Lesson");
+    } finally {
+      setIsLoading(false); // Don't forget to hide loader!
+    }
+  };
+
+  loadLessonData();
+}, []); // ← Empty array = run only once on mount
+  // const videoSource = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+  // const player = useVideoPlayer(videoSource, (player) => {
+  //   // 2. Configure the player
+  //   player.loop = true; // Set to loop
+  //   player.play();      // Start playing immediately
+  // });
+  // useEffect(() => {
+  //   const loadData = async () => {
+  //     try {
+  //       setIsLoading(true);
+  //       const [mediaUrl, titleText] = await Promise.all([
+  //         AsyncStorage.getItem("media"),
+  //         AsyncStorage.getItem("name")
+  //       ]);
+  //       setMedia(mediaUrl);
+  //       setTitle(titleText);
+  //     } catch (error) {
+  //       console.error('Error loading data:', error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
     
-    loadData();
-  }, []);
+  //   loadData();
+  // }, []);
 
   if (isLoading) {
     return (
@@ -44,18 +69,27 @@ const Module = () => {
         </View>
       </SafeAreaView>
     );
-  }
+  } 
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
+      <View>
       {/* 3. Attach the player to the VideoView component */}
-      <VideoView
-        style={styles.vwVideo}
-        player={player}
-        allowsFullscreen // Enable native fullscreen control
-        allowsPictureInPicture // Enable Picture-in-Picture
+      <Video
+        ref={video}
+        style={styles.video}
+        source={{
+          uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        }}
+        // Or local file:
+        // source={require('./assets/videos/sample.mp4')}
+
+        useNativeControls // This adds the default play/pause, fullscreen, etc.
+        resizeMode={ResizeMode.CONTAIN}
+        isLooping
+        onPlaybackStatusUpdate={setStatus}
       />
+      
     </View>
 
       <View style={styles.contentSection}>

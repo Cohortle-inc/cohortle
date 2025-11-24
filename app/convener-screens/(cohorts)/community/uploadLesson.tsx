@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  TextInput,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';           // <-- EXPO IMAGE PICKER
 import * as DocumentPicker from 'expo-document-picker';
@@ -18,11 +19,13 @@ import { NavHead } from '@/components/HeadRoute';
 import { useLocalSearchParams } from 'expo-router';
 import { useGetLesson } from '@/api/communities/lessons/getLesson';
 import { uploadLessonMedia } from '@/api/communities/lessons/uploadMedia';
+import { Ionicons } from '@expo/vector-icons';
+import { TextArea } from '@/components/Form';
 
 // Unified type for any file/media selected
 interface MediaFile {
   uri: string;
-  type: 'image' | 'video' | 'audio' | 'document';
+  type: 'video'
   name: string;
   size?: number;
 }
@@ -30,12 +33,20 @@ interface MediaFile {
 const CreateLesson = () => {
   const [title, setTitle] = useState<string>('Introduction');
   const [media, setMedia] = useState<MediaFile | null>(null);
+  const [description, setDescription] = useState('')
   const [text, setText] = useState<string>('');
   const lessonID = useLocalSearchParams().lessonId as string;
   const moduleID = useLocalSearchParams().moduleId as string;
   const moduleTitle = useLocalSearchParams().moduleTitle;
   const { data: lessonData, isLoading } = useGetLesson(lessonID, moduleID);
   const [loading, setLoading] = useState(false);
+  console.log(lessonData)
+
+  useEffect(() => {
+    if (lessonData?.description) {
+      setDescription(lessonData.description);
+    }
+  }, [lessonData]);
 
   // Normalizes both ImagePicker and DocumentPicker results
 const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPickerAsset) => {
@@ -53,10 +64,10 @@ const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPicke
   const getMediaType = (): MediaFile['type'] => {
     const mime = (asset as any).mimeType?.toLowerCase() || '';
 
-    if (mime.startsWith('image/')) return 'image';
+    // if (mime.startsWith('image/')) return 'image';
     if (mime.startsWith('video/')) return 'video';
-    if (mime.startsWith('audio/')) return 'audio';
-    return 'document';
+    // if (mime.startsWith('audio/')) return 'audio';
+    
   };
 
   const unified: MediaFile = {
@@ -129,42 +140,24 @@ const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPicke
     }
   };
 
-  const renderMediaPreview = () => {
-    if (!media) return null;
+  // Just replace your renderPreview() and related code with this:
 
-    switch (media.type) {
-      case 'image':
-        return <Image source={{ uri: media.uri }} style={styles.mediaPreview} />;
-      case 'video':
-        return (
-          <View style={styles.videoContainer}>
-            {/* <Video
-              source={{ uri: media.uri }}
-              style={styles.videoPreview}
-              paused
-              resizeMode="cover"
-            /> */}
-            <Text style={styles.videoIcon}>Play</Text>
-          </View>
-        );
-      case 'audio':
-        return (
-          <View style={styles.audioContainer}>
-            <Text style={styles.audioIcon}>Music</Text>
-            <Text style={styles.audioText}>{media.name}</Text>
-          </View>
-        );
-      default:
-        return (
-          <View style={styles.documentContainer}>
-            <Text style={styles.documentIcon}>Document</Text>
-            <Text style={styles.documentName} numberOfLines={2}>
-              {media.name}
-            </Text>
-          </View>
-        );
-    }
-  };
+const renderPreview = () => {
+  // Use selected media OR the current lesson media from backend
+  const currentVideoUrl = media?.uri || lessonData?.media || lessonData?.url;
+
+  if (!currentVideoUrl) return null;
+
+  return (
+    <View style={styles.previewBox}>
+      {/* Simple black box with big Play icon + video filename */}
+      
+      <Text style={styles.videoName} numberOfLines={2}>
+        {media?.name || currentVideoUrl.split('/').pop()?.split('?')[0] || 'Video'}
+      </Text>
+    </View>
+  );
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -175,42 +168,56 @@ const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPicke
           <Text style={{ fontSize: 20, fontWeight: '700' }}>
             {isLoading ? '...' : lessonData?.name}
           </Text>
-          <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>
+          {/* <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>
             Course type:{' '}
             <Text style={{ textDecorationLine: 'underline', color: '#000' }}>
               Self-paced
             </Text>
-          </Text>
+          </Text> */}
         </View>
 
         {/* Upload Section */}
         <TouchableOpacity style={styles.uploadSection} onPress={handleUploadPress}>
+          <Ionicons name="videocam" color={colors.primary} size={25} />
           <View style={styles.uploadContent}>
-            {media ? (
+            {renderPreview() ? (
               <>
-                {renderMediaPreview()}
-                <Text style={styles.mediaName} numberOfLines={1}>
-                  {media.name}
+                {renderPreview()}
+                <Text style={styles.changeText}>
+                  {media ? 'Tap to change video' : 'Tap to replace video'}
                 </Text>
-                <Text style={styles.changeMediaText}>Tap to change media</Text>
               </>
             ) : (
-              <View style={{ gap: 8, alignItems: 'center' }}>
-                <Text style={styles.uploadIcon}>Folder</Text>
-                <Text style={styles.uploadSubtext}>
-                  Videos, audio, images, documents
-                </Text>
+              <View style={{ alignItems: 'center', gap: 5 }}>
+                <Text style={{ fontSize: 48 }}>Upload Video</Text>
+                <Text style={styles.uploadSubtext}>Tap to add a video lesson</Text>
               </View>
             )}
-            <Text style={styles.uploadText}>Upload media</Text>
+
+            <Text style={styles.uploadButton}>
+              {media || lessonData?.media ? 'Change Video' : 'Upload Video'}
+            </Text>
           </View>
         </TouchableOpacity>
+        
+        {/* <View>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Write a detailed description for this lesson..."
+            placeholderTextColor="#999"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={10}
+            textAlignVertical="top"
+          />
+        </View> */}
 
         <TouchableOpacity
           onPress={handleUpdateForm}
           disabled={loading}
           style={{
-            marginTop: 25,
+            marginTop: 50,
             width: '100%',
             height: 45,
             backgroundColor: colors.primary,
@@ -229,19 +236,57 @@ const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPicke
 };
 
 const styles = StyleSheet.create({
-  // ... (your styles stay exactly the same)
+  previewBox: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  videoPlaceholder: {
+    width: 180,
+    height: 180,
+    backgroundColor: '#000',
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  playIcon: {
+    fontSize: 48,
+    color: '#fff',
+  },
+  videoName: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '600',
+    textAlign: 'center',
+    maxWidth: 200,
+  },
+  changeText: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
+  },
+  uploadButton: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#8B5CF6',
+    fontWeight: '600',
+    paddingHorizontal: 24,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: '#B085EF',
+    borderRadius: 50,
+  },
   container: { paddingTop: 25, flex: 1, backgroundColor: '#f8f9fa' },
-  scrollContent: { padding: 20 },
+  scrollContent: { padding: 20, gap: 10 },
   header: { marginBottom: 30 },
   uploadSection: {
     borderWidth: 2,
     borderColor: colors.purpleShade,
     borderStyle: 'dashed',
     borderRadius: 10,
-    padding: 25,
+    padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
   },
   uploadContent: { alignItems: 'center', width: '100%' },
   uploadIcon: { fontSize: 40 },
@@ -291,6 +336,27 @@ const styles = StyleSheet.create({
   documentName: { fontSize: 12, color: '#333', textAlign: 'center' },
   mediaName: { fontSize: 14, color: '#333', fontWeight: '500', marginBottom: 5 },
   changeMediaText: { fontSize: 12, color: '#666', fontStyle: 'italic' },
-});
+  label: {
+    fontSize: 14,
+    color: '#391D65',
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: '#391D65',
+    backgroundColor: '#fff',
+  },
+  textArea: {
+    height: 150, // You can adjust based on lines
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+},
+
+);
 
 export default CreateLesson;

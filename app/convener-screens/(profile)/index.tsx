@@ -22,6 +22,8 @@ import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typesc
 import { router } from 'expo-router';
 import { Image, ActivityIndicator } from 'react-native';
 import { useProfile } from '@/hooks/api/useProfileHook';
+import { useGetCohort } from '@/api/cohorts/getCohort';
+import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = React.useState<'Communities' | 'Social'>(
@@ -31,9 +33,10 @@ const Profile = () => {
   // Use React Query instead of useState + useEffect
   const { data: profile, isLoading, error } = useProfile();
 
+  const {data: cohorts = []} = useConvenersCohorts()
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const Community = () => {
+  const Community = (name: any) => {
     return (
       <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
         <View
@@ -52,7 +55,7 @@ const Profile = () => {
               color: '#1F1F1F',
             }}
           >
-            Branding & Brand Design
+            {name}
           </Text>
           <Text style={{ color: '#8D9091', fontSize: 10 }}>15.8K Members</Text>
         </View>
@@ -146,7 +149,7 @@ const Profile = () => {
           </View>
 
           <Pressable
-            onPress={() => router.push('/student-screens/profile/edit-profile')}
+            onPress={() => router.push('/convener-screens/(profile)/edit-profile')}
             style={styles.editButton}
           >
             <Text style={styles.editButtonText}>Edit profile</Text>
@@ -179,9 +182,9 @@ const Profile = () => {
       <View>
         {activeTab === 'Communities' ? (
           <View style={{ gap: 16 }}>
-            <Community />
-            <Community />
-            <Community />
+            {cohorts.map((data: any) => {
+              <Community key={data.id} name={data.name} />
+            })}
           </View>
         ) : (
           <View style={{ gap: 16 }}>

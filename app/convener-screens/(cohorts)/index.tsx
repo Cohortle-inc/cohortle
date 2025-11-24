@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Clipboard, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import React, { useCallback, useRef, useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
@@ -14,6 +14,7 @@ import { RelativePathString, useRouter } from 'expo-router';
 import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 import { useCreateCohort } from '@/api/cohorts/postCohort';
 import { CohortType } from '@/types/cohortType';
+import { showMessage } from 'react-native-flash-message';
 
 const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
@@ -72,10 +73,10 @@ const Cohorts = () => {
     setModalVisible(!isModalVisible);
   };
 
-  const handleCohortPress = (id: number) => {
+  const handleCohortPress = (id: number, cohortName: string) => {
     router.navigate({
       pathname: `/convener-screens/(cohorts)/community/[id]`,
-      params: { id },
+      params: { id, cohortName },
     });
   };
   const renderBackdrop = useCallback(
@@ -92,59 +93,69 @@ const Cohorts = () => {
           <Text style={{ color: '#B085EF', fontFamily: 'DMSansSemiBold' }}>
             Cohortle
           </Text>
-          <Pressable onPress={toggleModal}>
+          {/* <Pressable onPress={toggleModal}>
             <Plus />
-          </Pressable>
+          </Pressable> */}
         </View>
       </View>
-      {cohorts.length === 0 && (
-        <View style={{ marginVertical: 'auto' }}>
-          <Text
-            style={{
-              color: '#000000',
-              fontFamily: 'DMSansSemiBold',
-              fontSize: 24,
-              textAlign: 'center',
-            }}
-          >
-            Welcome to your cohort
-          </Text>
-          <Text style={{ textAlign: 'center', marginTop: 8 }}>
-            This is where you’ll (create, edit and delete) your communities and
-            learners.
-          </Text>
-          <Pressable
-            onPress={toggleModal}
-            style={{
-              borderWidth: 1,
-              borderColor: '#F8F1FF',
-              paddingVertical: 14,
-              alignItems: 'center',
-              borderRadius: 32,
-              marginTop: 48,
-              backgroundColor: '#391D65',
-            }}
-          >
-            <Text style={{ color: '#fff', fontFamily: 'DMSansSemiBold' }}>
-              Create first cohort
-            </Text>
-          </Pressable>
-        </View>
-      )}
-      {cohorts.length !== 0 && (
-        <View style={{ gap: 15 }}>
-          {cohorts.map((cohort: any) => (
-            <Cohort
-              key={cohort.id}
-              name={cohort.name}
-              onPress={() => {
-                handleCohortPress(cohort.id);
-              }}
-              onOpenBottomSheet={() => openBottomSheet(cohort.id)}
-            />
-          ))}
-        </View>
-      )}
+      {isLoading ? (
+  // Loading State
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
+    <ActivityIndicator size="large" color="#391D65" />
+    <Text style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}>
+      Loading your cohorts...
+    </Text>
+  </View>
+) : cohorts.length === 0 ? (
+  // Empty State
+  <View style={{ marginVertical: 'auto', paddingHorizontal: 32 }}>
+    <Text
+      style={{
+        color: '#000000',
+        fontFamily: 'DMSansSemiBold',
+        fontSize: 24,
+        textAlign: 'center',
+      }}
+    >
+      Welcome to your cohort
+    </Text>
+    <Text style={{ textAlign: 'center', marginTop: 12, color: '#666', lineHeight: 22 }}>
+      This is where you’ll create, edit, and manage your communities and learners.
+    </Text>
+    <Pressable
+      onPress={toggleModal}
+      style={{
+        backgroundColor: '#391D65',
+        paddingVertical: 16,
+        alignItems: 'center',
+        borderRadius: 32,
+        marginTop: 48,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+      }}
+    >
+      <Text style={{ color: '#fff', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
+        Create first cohort
+      </Text>
+    </Pressable>
+  </View>
+) : (
+  // Cohorts List
+  <View style={{ gap: 15, paddingBottom: 20 }}>
+    {cohorts.map((cohort: any) => (
+      <Cohort
+        key={cohort.id}
+        name={cohort.name}
+        onPress={() => {
+          handleCohortPress(cohort.id, cohort.name);
+        }}
+        onOpenBottomSheet={() => openBottomSheet(cohort.id)}
+      />
+    ))}
+  </View>
+)}
       <Modal isVisible={isModalVisible}>
         <View
           style={{
@@ -221,18 +232,47 @@ const Cohorts = () => {
               gap: 16,
             }}
           >
-            <TouchableOpacity
+            {/* <TouchableOpacity
             // onPress={() => router.push('/convener-screens/edit-cohort')}
             >
               <Text>See learners</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text>Add learners (copy link)</Text>
+            </TouchableOpacity> */}
+            <TouchableOpacity
+              onPress={() => {
+                if (!selectedCohort?.url) {
+                  showMessage({
+                    message: "Error",
+                    description: "Invite link not available",
+                    type: "danger",
+                    icon: "danger",
+                    backgroundColor: "#EE3D3E",
+                  });
+                  return;
+                }
+
+                // This is React Native's native Clipboard – no expo-clipboard needed
+                Clipboard.setString(selectedCohort.url);
+
+                showMessage({
+                  message: "Copied!",
+                  description: "Invite code copied to clipboard",
+                  type: "success",
+                  backgroundColor: "#391D65",
+                  color: "#fff",
+                  icon: "success",
+                  duration: 2500,
+                  titleStyle: { fontFamily: "DMSansSemiBold", fontSize: 16 },
+                });
+
+                bottomSheetRef.current?.close();
+              }}
+            >
+  <Text>Add learners (copy join code)</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>
                 router.navigate({
-                  pathname: `/convener-screens/(cohorts)/edit-profile/[id]`,
+                  pathname: `/convener-screens/(cohorts)/edit-community/[id]`,
                   params: { id: selectedCohort?.id },
                 })
               }
@@ -278,9 +318,9 @@ const Cohort = ({ name, onOpenBottomSheet, onPress }: CohortProps) => {
           >
             {name}
           </Text>
-          <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
+          {/* <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
             15.8K Members
-          </Text>
+          </Text> */}
         </View>
       </View>
       <View

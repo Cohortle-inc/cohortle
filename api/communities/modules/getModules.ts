@@ -25,6 +25,7 @@ const useGetModules = (id: number | null) => {
   return useQuery({
     queryKey: ['modules', id],
     queryFn: () => getModules(id!),
+    refetchInterval: 3000,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
     staleTime: 0,

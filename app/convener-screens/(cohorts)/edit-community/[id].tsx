@@ -11,6 +11,7 @@ import { Header, SafeAreaWrapper } from '@/HOC';
 import { Back, Close, Options } from '@/assets/icons';
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetBackdropProps,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -21,6 +22,8 @@ import { useGetCohort } from '@/api/cohorts/getCohort';
 import { useUpdateCohort } from '@/api/updateCohorts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDeleteCohort } from '@/api/cohorts/deleteCohort';
+import { useGetCohortLearners } from '@/api/cohorts/getCohortLearners';
+import { useRemoveCohortLearner } from '@/api/cohorts/removeLearner';
 
 const EditCohort = () => {
   const router = useRouter();
@@ -31,19 +34,60 @@ const EditCohort = () => {
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isDeleteCohortVisible, setDeleteCohortVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-
+const [selectedLearner, setSelectedLearner] = useState<any>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: cohort } = useGetCohort(id as any);
+  const { data: cohortLearners } = useGetCohortLearners(id)
   const updateCohort = useUpdateCohort();
   const deleteCohort = useDeleteCohort();
+  const removeLearnerMutation = useRemoveCohortLearner();
+  // console.log(cohortLearners)
 
+  const handleRemoveLearner = async (memberId: string | number) => {
+    if (!id) return;
+
+    Alert.alert(
+      'Remove Learner',
+      'Are you sure you want to remove this learner?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            removeLearnerMutation.mutate(
+              { cohortId: id, learnerId: memberId },
+              {
+                onSuccess: () => {
+                  bottomSheetRef.current?.close();
+                },
+              }
+            );
+          },
+        },
+      ]
+    );}
   const handleSheetChanges = useCallback((index: number) => {
     // Update state based on the index value
     console.log(index);
     // If index is greater than -1, sheet is active
   }, []);
 
-  const openBottomSheet = () => {
+  const CustomBackdrop = (props: BottomSheetBackdropProps) => (
+  <BottomSheetBackdrop
+    {...props}
+    disappearsOnIndex={-1}        // Fully fade out when closed
+    appearsOnIndex={0}            // Start appearing from the first snap point
+    opacity={0.75}                // Darker for better focus
+    pressBehavior="close"         // Tap anywhere outside = close sheet
+    style={{
+      backgroundColor: 'rgba(0, 0, 0, 0.75)', // Deep black with strong overlay
+    }}
+  />
+);
+
+  const openBottomSheetWithLearner = (learner: any) => {
+    setSelectedLearner(learner);
     bottomSheetRef.current?.expand();
   };
 
@@ -114,7 +158,7 @@ const EditCohort = () => {
               activeTab === 'details' ? styles.activeTabText : styles.tabText
             }
           >
-            Detailsssss for {cohort?.name}
+            Details for {cohort?.name}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -157,18 +201,19 @@ const EditCohort = () => {
               onPress={() => setDeleteCohortVisible(true)}
               style={{
                 borderWidth: 1,
-                borderColor: '#EE3D3E',
+                borderColor: 'grey',
                 flex: 1,
                 width: '100%',
                 borderRadius: 16,
               }}
+              disabled
             >
               <Text
                 style={{
                   textAlign: 'center',
                   paddingVertical: 6,
                   paddingHorizontal: 16,
-                  color: '#EE3D3E',
+                  color: 'grey',
                 }}
               >
                 Delete Cohort
@@ -197,78 +242,72 @@ const EditCohort = () => {
           </View>
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={[
-            styles.content,
-            { gap: 16, paddingBottom: 16 },
-          ]}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderBottomColor: '#D9D9D9',
-              borderBottomWidth: 1,
-              paddingBottom: 8,
-              paddingHorizontal: 16,
-            }}
-          >
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 9999,
-                backgroundColor: '#FFC100',
-              }}
-            ></View>
-            <View style={{ marginLeft: 16 }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
-                Muhammad Umar
-              </Text>
-              <Text style={{ fontSize: 12 }}>iamumar01@gmail.com</Text>
-            </View>
-            <TouchableOpacity
-              onPress={openBottomSheet}
-              style={{ marginLeft: 'auto' }}
-            >
-              <Options />
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        <ScrollView contentContainerStyle={[styles.content, { gap: 16, paddingBottom: 16 }]}>
+    {cohortLearners && cohortLearners.length > 0 ? (
+      cohortLearners.map((learner: any) => (
+        <LearnerItem key={learner.member_id || learner.id} learner={learner} onPressOptions={openBottomSheetWithLearner} />
+      ))
+    ) : (
+      <Text style={{ textAlign: 'center', marginTop: 20, color: '#666' }}>
+        No learners in this cohort yet.
+      </Text>
+    )}
+  </ScrollView>
       )}
+      {/* Bottom Sheet */}
       <BottomSheet
         ref={bottomSheetRef}
         index={0} // Start fully collapsed
-        snapPoints={[1, '30%', '30%']} // Adjust snap points
-        onChange={handleSheetChanges}
+        snapPoints={[1, '30%', '30%']}
         enablePanDownToClose // Allows swipe down to close
         backdropComponent={renderBackdrop}
+        onChange={(index) => index === -1 && setSelectedLearner(null)}
       >
         <BottomSheetView style={styles.contentContainer}>
-          <View
-            style={{
-              marginTop: 24,
-              flex: 1,
-              gap: 16,
-            }}
-          >
-            <TouchableOpacity onPress={() => setDeleteModalVisible(true)}>
-              <Text>Restrict learner</Text>
-              <Text style={{ color: '#8D9091' }}>
-                Restrict learner Learner is restricted from commenting on posts,
-                and creating posts.
+          {selectedLearner ? (
+            <View style={{ padding: 16, gap: 24 }}>
+              <Text style={{ fontSize: 16, fontWeight: '600', textAlign: 'center' }}>
+                {selectedLearner.first_name} {selectedLearner.last_name}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-            // onPress={() => router.push('/convener-screens/edit-cohort')}
-            >
-              <Text>Remove learner</Text>
-              <Text style={{ color: '#8D9091' }}>
-                Learner will no longer hae access to your cohort and
-                communities.
-              </Text>
-            </TouchableOpacity>
-          </View>
+              
+              <TouchableOpacity
+                style={{ gap: 4 }}
+                onPress={() => {
+                  Alert.alert(
+                    'Remove Learner',
+                    `Remove ${selectedLearner.first_name} from this cohort?`,
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      { text: 'Remove', style: 'destructive', onPress: () => handleRemoveLearner(selectedLearner.member_id) },
+                    ]
+                  );
+                  bottomSheetRef.current?.close();
+                }}
+              >
+                <Text style={{ color: '#EE3D3E', fontWeight: '500' }}>Remove learner</Text>
+                <Text style={{ color: '#8D9091', fontSize: 12 }}>
+                  Learner will lose access to this cohort and its communities.
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setDeleteModalVisible(true);
+                  bottomSheetRef.current?.close();
+                }}
+                
+                style={{ gap: 4 }}
+              >
+                <Text style={{ color: '#8D9091', fontWeight: '500' }}>Restrict learner</Text>
+                <Text style={{ color: '#8D9091', fontSize: 12 }}>
+                  Learner will be restricted from commenting and creating posts.
+                </Text>
+              </TouchableOpacity>
+
+            </View>
+          ) : (
+            <Text style={{ textAlign: 'center', color: '#666' }}>Select a learner</Text>
+          )}
         </BottomSheetView>
       </BottomSheet>
 
@@ -513,9 +552,53 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   contentContainer: {
+    zIndex: 90,
     flex: 1,
     padding: 16,
   },
 });
 
 export default EditCohort;
+
+
+const LearnerItem = ({ learner, onPressOptions }: { learner: any; onPressOptions: (learner: any) => void }) => (
+  <View
+    style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderBottomColor: '#D9D9D9',
+      borderBottomWidth: 1,
+      paddingBottom: 12,
+      paddingHorizontal: 16,
+    }}
+  >
+    {/* Avatar */}
+    <View
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#FFC100',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>
+        {learner.first_name[0]}{learner.last_name[0]}
+      </Text>
+    </View>
+
+    {/* Name & Email */}
+    <View style={{ marginLeft: 12, flex: 1 }}>
+      <Text style={{ fontWeight: '600', fontSize: 15 }}>
+        {learner.first_name} {learner.last_name}
+      </Text>
+      <Text style={{ fontSize: 13, color: '#666' }}>{learner.email}</Text>
+    </View>
+
+    {/* Options */}
+    <TouchableOpacity onPress={() => onPressOptions(learner)}>
+      <Options width={24} height={24} />
+    </TouchableOpacity>
+  </View>
+);
