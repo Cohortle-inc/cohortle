@@ -5,16 +5,63 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Back, Check, Close, Options, RedDoor } from '@/assets/icons';
 import { router, useRouter } from 'expo-router';
 import { BottomSheet } from '@/components/ui';
+// import { CheckBox } from '@rneui/themed';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import useGetModules from '@/api/communities/modules/getModules';
+import { useGetLessons } from '@/api/communities/lessons/getLessons';
+
+type ModuleType = {
+  id: number;
+  title: string;
+  status: string;
+  order_number: number;
+  community_id: number;
+  created_at: string;
+  updated_at: string;
+};
 
 const Course = () => {
   const [activeTab, setActiveTab] = useState('Home');
   const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
   const [isSheetVisible, setSheetVisible] = useState(false);
+  const [communityId, setCommunityId] = useState<string | null>(null);
+  const [title, setTitle] = useState<string | null>(null)
+  const {data: moduleData} = useGetModules(Number(communityId))
+  const [module, setModule] = useState<number | null>(null);
+  const {data: lessonData} = useGetLessons(module)
+
+
+  console.log(lessonData)
+  console.log(title)
+  useEffect(() => {
+    const loadId = async () => {
+      const id = await AsyncStorage.getItem("communityID");
+      setCommunityId(id);
+    };
+
+    loadId();
+  }, []);
+
+  useEffect(() => {
+    const name = async () => {
+      const title = await AsyncStorage.getItem("communityName");
+      setTitle(title);
+    };
+
+    name();
+  }, []);
+
+  useEffect(() => {
+    if (moduleData && moduleData.length > 0) {
+      setModule(moduleData[1]?.id || moduleData[0].id);
+    }
+  }, [moduleData]);
+
   return (
     <SafeAreaWrapper>
       <View
@@ -30,7 +77,7 @@ const Course = () => {
           <Back />
         </TouchableOpacity>
         <Text style={{ fontSize: 10, fontWeight: 'semibold' }}>
-          Create High-Fidelity Designs and Prototypes in Figma
+          {title}
         </Text>
         <TouchableOpacity onPress={() => setSheetVisible(true)}>
           <Options />
@@ -46,7 +93,7 @@ const Course = () => {
         >
           Name of Cohort
         </Text>
-        <Text>Name of Convener</Text>
+        <Text onPress={() => {}}>Name of Convener</Text>
       </View>
       <View style={{ flex: 1 }}>
         {/* Tab Bar */}
@@ -96,42 +143,54 @@ const Course = () => {
               <View>
                 <Text>Modules</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {numbers.map((num) => (
+                  {moduleData?.map((mod: ModuleType) => (
                     <TouchableOpacity
-                      key={num}
-                      style={{
-                        flexDirection: 'row',
-                        gap: 4,
-                        borderWidth: 1,
-                        borderColor: '#ECDCFF',
-                        paddingHorizontal: 8,
-                        paddingVertical: 4,
-                        borderRadius: 12,
-                        marginRight: 8,
-                        marginTop: 8,
-                        minWidth: 32,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
+                      onPress={() => setModule(mod.id)}
+                      key={mod.id}
+                      style={[
+                        mod.id === module && { backgroundColor: 'purple' },
+                        {
+                          flexDirection: 'row',
+                          gap: 4,
+                          borderWidth: 1,
+                          borderColor: '#DABCFF',
+                          paddingHorizontal: 8,
+                          paddingVertical: 4,
+                          borderRadius: 12,
+                          marginRight: 8,
+                          marginTop: 8,
+                          minWidth: 32,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        },
+                      ]}
                     >
-                      <Text style={{ fontSize: 10 }}>{num}</Text>
-                      <Check />
+                      <Text
+                        style={[
+                          mod.id === module && { color: '#DABCFF' },
+                          { fontSize: 10 },
+                        ]}
+                      >
+                        {mod.title}
+                      </Text>
+                      <Check color="#DABCFF" />
                     </TouchableOpacity>
                   ))}
+
                 </ScrollView>
                 <View style={{ marginTop: 16 }}>
+                  {/* <Module />
                   <Module />
-                  <Module />
-                  <Module />
-                  <Module />
+                  <Module /> */}
+                  {lessonData?.map((lesson: LessonProp) => (
+                    <Lesson key={lesson.id} {...lesson} />
+                  ))}
                 </View>
               </View>
             </View>
           ) : (
             <View>
-              <View>
-                
-              </View>
+              <View></View>
               <Text style={{ fontWeight: 'bold' }}>Course Description</Text>
               <Text style={{ marginTop: 8, fontSize: 12, letterSpacing: 1 }}>
                 This course will teach you how to create high-fidelity designs
@@ -186,54 +245,85 @@ const Course = () => {
   );
 };
 
-const Module = () => {
+interface LessonProp {
+  id: number;
+  description: string;
+  module_id: string;
+  name: string;
+  media: string;
+  order_number: string;
+  status: string;
+  
+}
+const Lesson = (lesson: LessonProp) => {
   const router = useRouter();
+  const [checkedModule, setCheckedModule] = useState(false);
+
+  const handlePress = async () => {
+    await AsyncStorage.setItem("media", lesson.media)
+    await AsyncStorage.setItem("name", lesson.name)
+    router.navigate('/student-screens/cohorts/module')
+  }
+
   return (
     <TouchableOpacity
-      onPress={() => router.push('/student-screens/cohorts/module')}
+      onPress={handlePress}
       style={{
+        width: '100%',
         marginBottom: 16,
         padding: 16,
         borderWidth: 1,
         borderColor: '#ECDCFF',
         borderRadius: 8,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
       }}
     >
-      <Text style={{ fontWeight: 'semibold' }}>Module enteries</Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 8,
-          alignItems: 'center',
-          marginTop: 8,
-        }}
-      >
-        <Text
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontWeight: '600' }}>{lesson.name}</Text>
+
+        <View
           style={{
-            borderWidth: 1,
-            borderColor: '#ECDCFF',
-            padding: 4,
-            borderRadius: 4,
-            fontSize: 10,
+            flexDirection: 'row',
+            gap: 8,
+            alignItems: 'center',
+            marginTop: 8,
           }}
         >
-          Video
-        </Text>
-        <Text
-          style={{
-            borderWidth: 1,
-            borderColor: '#ECDCFF',
-            padding: 4,
-            borderRadius: 4,
-            fontSize: 10,
-          }}
-        >
-          2 min
-        </Text>
+          <Text
+            style={{
+              borderWidth: 1,
+              borderColor: '#ECDCFF',
+              padding: 4,
+              borderRadius: 4,
+              fontSize: 10,
+            }}
+          >
+            Video
+          </Text>
+          <Text
+            style={{
+              borderWidth: 1,
+              borderColor: '#ECDCFF',
+              padding: 4,
+              borderRadius: 4,
+              fontSize: 10,
+            }}
+          >
+            2 min
+          </Text>
+        </View>
       </View>
+
+      {/* <CheckBox
+        checked={checkedModule}
+        onPress={() => setCheckedModule(!checkedModule)}
+      /> */}
     </TouchableOpacity>
   );
 };
+
 export default Course;
 
 const styles = StyleSheet.create({});

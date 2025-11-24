@@ -1,22 +1,27 @@
-import { Link, useLocalSearchParams } from "expo-router";
-import { 
+import { Link, useLocalSearchParams } from 'expo-router';
+import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   Text,
-  View, 
-  ActivityIndicator
-} from "react-native";
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaWrapper } from '@/HOC';
-import axios from "axios";
-import { useEffect, useState } from "react";
-import Message from "@/components/Post/post";
-import { Comment } from "@/components/Post/comments";
-import { CommentInput } from "@/components/Post/input";
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import Message from '@/components/Post/post';
+import { Comment } from '@/components/Post/comments';
+import { CommentInput } from '@/components/Post/input';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CommentProp } from '@/types/commentType';
+import { Ionicons } from '@expo/vector-icons';
+import { Scale } from 'lucide-react-native';
+import { colors } from '@/utils/color';
 
 // Update the interface to match potential backend response
 export interface Post {
-  id: string;
+  id: number;
   posted_by?: {
     first_name?: string;
     last_name?: string;
@@ -30,29 +35,33 @@ export interface Post {
 
 export default function PostScreen() {
   const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<CommentProp[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { id } = useLocalSearchParams<{ id: string }>();
-  
+  const apiURL = process.env.EXPO_PUBLIC_API_URL;
+
   const getPost = async () => {
     if (!id) {
-      setError("Post ID is required");
+      setError('Post ID is required');
       setLoading(false);
       return;
     }
 
     const apiURL = process.env.EXPO_PUBLIC_API_URL;
+    const token = await AsyncStorage.getItem('authToken');
     try {
       const response = await axios.get(`${apiURL}/v1/posts/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache"
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+          Authorization: `Bearer ${token}`,
         },
       });
-      
+
       console.log('Full response:', response.data);
-      
+
       // Handle different response structures
       if (response.data.error === false && response.data.post) {
         const postData = Array.isArray(response.data.post)
@@ -63,18 +72,43 @@ export default function PostScreen() {
         // Some APIs might not have an error field
         setPost(response.data.post);
       } else {
-        setError(response.data.message || "Failed to fetch post");
+        setError(response.data.message || 'Failed to fetch post');
       }
     } catch (err: any) {
-      console.log("Error fetching post:", err);
-      setError(err.response?.data?.message || "An error occurred");
+      console.log('Error fetching post:', err);
+      setError(err.response?.data?.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     getPost();
+  }, [id]);
+
+  const fetchComment = async () => {
+    const token = await AsyncStorage.getItem('authToken');
+    try {
+      const response = await axios.get(`${apiURL}/v1/post/${id}/comments`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (Array.isArray(response.data.comments)) {
+        setComments(response.data.comments);
+      } else {
+        console.warn('Unexpected result', response.data);
+        setComments([]);
+      }
+      console.log(response.data.comments);
+    } catch (error) {
+      console.error(error);
+      console.log('fail');
+    }
+  };
+
+  useEffect(() => {
+    fetchComment();
   }, [id]);
 
   if (loading) {
@@ -103,7 +137,10 @@ export default function PostScreen() {
   return (
     <SafeAreaWrapper>
       <View style={{ marginVertical: 16 }}>
-        <Link href="/(auth)/login" style={{ color: '#B085EF', fontSize: 18, fontWeight: '600' }}>
+        <Link
+          href="/(auth)/login"
+          style={{ color: '#B085EF', fontSize: 18, fontWeight: '600' }}
+        >
           Cohortle
         </Link>
       </View>
@@ -111,17 +148,42 @@ export default function PostScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {post ? (
           <Message
-          postMessage={{
-            id: post.id?.toString() || id || '',
-            posted_by: post.posted_by,
-            text: post.text || 'No content available',
-          }}
+            postMessage={{
+              id: post.id?.toString() || id || '',
+              posted_by: post.posted_by as any,
+              text: post.text || 'No content available',
+            }}
           />
         ) : (
           <Text>Post not found</Text>
         )}
-        <Comment />
-        <CommentInput />
+        <>
+          {comments.length !== 0 ? (
+            comments.map((comment) => (
+              <Comment
+                key={comment.id} // Don't forget the key prop!
+                prop={{
+                  id: comment.id,
+                  text: comment.text,
+                  post_id: comment.post_id,
+                  user: comment.user,
+                }}
+              />
+            ))
+          ) : (
+            <View style={{ alignItems: 'center' }}>
+              <Ionicons
+                name="chatbubble-ellipses"
+                size={30}
+                color={colors.purpleShade}
+              />
+              <Text style={{ fontWeight: 600, fontSize: 16 }}>
+                Be the first to comment
+              </Text>
+            </View>
+          )}
+        </>
+        <CommentInput postId={id} />
       </ScrollView>
     </SafeAreaWrapper>
   );

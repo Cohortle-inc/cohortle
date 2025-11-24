@@ -36,7 +36,7 @@ const Course = () => {
           <Options />
         </TouchableOpacity>
       </View>
-      <View style={{flexDirection: "column", gap: 5 }}>
+      <View style={{ flexDirection: 'column', gap: 5 }}>
         <Text
           style={{
             fontSize: 20,
@@ -47,8 +47,8 @@ const Course = () => {
           Name of Cohort
         </Text>
         <View>
-          <Text style={{fontWeight: 300}}>Offered By</Text>
-          <Text style={{fontSize: 16}}>Abdulhamid Usman</Text>
+          <Text style={{ fontWeight: 300 }}>Offered By</Text>
+          <Text style={{ fontSize: 16 }}>Abdulhamid Usman</Text>
         </View>
       </View>
       <View style={{ flex: 1 }}>
@@ -97,9 +97,14 @@ const Course = () => {
           {activeTab === 'Home' ? (
             <View>
               <View>
-                <Text style={{fontWeight: 600, fontSize: 16}}>About this course</Text>
-                <Text style={{marginVertical: 10}}>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi delectus sequi alias eligendi veritatis quis. Voluptates voluptate nobis maxime odit alias? Ipsam maiores voluptatum nesciunt voluptas facilis dolore temporibus cupiditate.
+                <Text style={{ fontWeight: 600, fontSize: 16 }}>
+                  About this course
+                </Text>
+                <Text style={{ marginVertical: 10 }}>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi
+                  delectus sequi alias eligendi veritatis quis. Voluptates
+                  voluptate nobis maxime odit alias? Ipsam maiores voluptatum
+                  nesciunt voluptas facilis dolore temporibus cupiditate.
                 </Text>
                 {/* <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {numbers.map((num) => (
@@ -125,8 +130,10 @@ const Course = () => {
                     </TouchableOpacity>
                   ))}
                 </ScrollView> */}
-                <View style={{marginVertical: 10}}>
-                  <Text style={{fontWeight: 600}}>Syllabus: What you'll learn from the course</Text>
+                <View style={{ marginVertical: 10 }}>
+                  <Text style={{ fontWeight: 600 }}>
+                    Syllabus: What you'll learn from the course
+                  </Text>
                   <View style={{ marginTop: 16 }}>
                     <Module />
                     <Module />
@@ -201,20 +208,20 @@ const Module = () => {
         padding: 16,
         borderTopWidth: 1,
         borderColor: 'black',
-        borderStyle: "dashed",
+        borderStyle: 'dashed',
         borderRadius: 8,
-        flexDirection: "row",
-        alignItems: "center"
+        flexDirection: 'row',
+        alignItems: 'center',
       }}
     >
-      <Text style={{fontWeight: 300}}>Module id</Text>
+      <Text style={{ fontWeight: 300 }}>Module id</Text>
       <Text
         style={{
           marginLeft: 10,
           padding: 4,
           borderRadius: 4,
           fontSize: 14,
-          fontWeight: "semibold"
+          fontWeight: 'semibold',
         }}
       >
         Module Title

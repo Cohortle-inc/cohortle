@@ -7,7 +7,7 @@ interface HeaderProps {
   total?: number; // total number of steps, default 3
 }
 
-const Header = ({ number, total = 3 }: HeaderProps) => {
+const Header = ({ number, total = 4 }: HeaderProps) => {
   // Make an array for the total steps, fill with index [0,1,2,...]
   const blocks = Array.from({ length: total });
 

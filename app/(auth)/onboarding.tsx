@@ -10,7 +10,7 @@ import { Theme, Text } from '@/theme/theme';
 const { width } = Dimensions.get('window');
 
 const OnBoarding = () => {
-  const [role, setRole] = useState("")
+  const [role, setRole] = useState('');
   const router = useRouter();
   const theme = useTheme<Theme>();
 

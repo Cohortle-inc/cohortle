@@ -7,4 +7,3 @@ export interface Posts {
   } | null; // allow null in case user lookup fails
   text: string;
 }
-

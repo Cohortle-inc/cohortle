@@ -1,60 +1,117 @@
-import { Pressable, StyleSheet, View, Alert } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaWrapper } from '@/HOC';
-import { CustomCheckbox, DropdownInput, Input } from '@/components/Form';
+import { CustomCheckbox, Input } from '@/components/Form';
 import { Header } from '@/ui';
 import { Text } from '@/theme/theme';
 import { BackArrowIcon } from '@/assets/icons';
-import { Link, router, useLocalSearchParams } from 'expo-router'; // Assuming you have an auth context
-import axios from 'axios';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
+import axios, { AxiosResponse } from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// ✅ Define types for form state
+interface FormData {
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  location: string;
+  socials: string;
+  bio: string;
+  profileImage?: { uri: string; type: string; name: string } | null;
+}
+
+// ✅ Define backend response type
+interface UpdateProfileResponse {
+  error: boolean;
+  message: {
+    FIRSTNAME?: string;
+    LASTNAME?: string;
+    USERNAME?: string;
+  };
+}
 
 const About = () => {
-  const [data, setData] = useState({
+  const [data, setData] = useState<FormData>({
     firstName: '',
-    lastName: '',
-    username: '',
-    password: '',
+    lastName: 'oipj',
+    username: 'hamid',
+    password: 'password',
+    location: '',
+    socials: '',
+    bio: '',
   });
-  const [isChecked, setIsChecked] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const token = useLocalSearchParams<{token: string}>(); // Get token from auth context
-  const apiURl = process.env.EXPO_PUBLIC_API_URL;
-  const handleUpdate = (field: string, value: string) => {
-    setData(prev => ({ ...prev, [field]: value }));
+  const [isChecked, setIsChecked] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const token = useLocalSearchParams().token as string;
+  const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
+  const router = useRouter();
+
+  useEffect(() => {
+    const changes = data.firstName !== '' || data.lastName !== '';
+
+    setHasChanges(changes);
+  }, [data.firstName, data.lastName]);
+
+  const handleUpdate = (field: keyof FormData, value: string) => {
+    setData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSave = async () => {
+    console.log(token);
     if (!isChecked) {
-      Alert.alert('Please accept terms and conditions');
+      Alert.alert(
+        'Terms Required',
+        'Please agree to the terms before continuing.',
+      );
       return;
     }
-
     setLoading(true);
-    console.log(token.token)
     try {
-      const response = await axios.put(`${apiURl}/v1/api/profile`,
-        {
-          first_name: data.firstName,
-          last_name: data.lastName,
-          username: data.username, // should come from user data
-          password: data.password, // should come from secure input
-        },
+      const formData = new FormData();
+
+      formData.append('first_name', data.firstName);
+      formData.append('last_name', data.lastName);
+
+      const response: AxiosResponse<UpdateProfileResponse> = await axios.put(
+        `${apiURL}/v1/api/profile`,
+        formData,
         {
           headers: {
-            Authorization: `Bearer ${token.token}`, // use token.token
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      const result = await response.data;
-
-      if (!response.data.error) {
-        router.push('/personal-info');
+      if (response.data.error) {
+        Alert.alert(
+          'Update Failed',
+          JSON.stringify(response.data.message, null, 2),
+        );
+      } else {
+        Alert.alert('Success', 'Profile updated successfully!');
+        router.navigate({
+          pathname: '/(student)/personal-info',
+          params: { token: token },
+        });
       }
-      console.log(result);
-    } catch (error) {
-      console.log('Error', 'Something went wrong');
+    } catch (error: any) {
+      console.error('Update Error:', error.response || error);
+      Alert.alert(
+        'Error',
+        error?.response?.data?.message ||
+          'Something went wrong while updating your profile.',
+      );
     } finally {
       setLoading(false);
     }
@@ -62,21 +119,11 @@ const About = () => {
 
   return (
     <SafeAreaWrapper>
-      <View style={{ marginTop: 24, paddingHorizontal: 20 }}>
+      <View style={styles.container}>
         <Header number={1} total={2} />
-        <View>
-          <Text
-            style={{
-              textAlign: 'center',
-              fontSize: 18,
-              fontFamily: 'DMSansMedium',
-              marginBottom: 80,
-            }}
-          >
-            Tell us about yourself 😄
-          </Text>
-        </View>
-        
+
+        <Text style={styles.title}>Tell us about yourself 😄</Text>
+
         <View style={{ gap: 24 }}>
           <Input
             label="First Name"
@@ -92,60 +139,32 @@ const About = () => {
           />
         </View>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: 8,
-            alignContent: 'center',
-            marginTop: 80,
-          }}
-        >
+        <View style={styles.checkboxContainer}>
           <CustomCheckbox
             checked={isChecked}
-            onToggle={() => setIsChecked(!isChecked)}
+            onToggle={() => setIsChecked((prev) => !prev)}
           />
           <Text>
-            I agree to the{' '}
-            <Text style={{ textDecorationLine: 'underline', color: '#391D65' }}>
-              terms{' '}
-            </Text>
-            and{' '}
-            <Text style={{ textDecorationLine: 'underline', color: '#391D65' }}>
-              read
-            </Text>{' '}
-            the privacy policy.
+            I agree to the <Text style={styles.linkText}>terms</Text> and{' '}
+            <Text style={styles.linkText}>privacy policy</Text>.
           </Text>
         </View>
 
         <Pressable
-          onPress={handleSubmit}
+          onPress={handleSave}
           disabled={loading}
-          style={{
-            borderWidth: 1,
-            borderColor: '#F8F1FF',
-            paddingVertical: 14,
-            alignItems: 'center',
-            borderRadius: 32,
-            marginTop: 48,
-            backgroundColor: loading ? '#cccccc' : '#391D65',
-          }}
+          style={[styles.submitBtn, loading && styles.disabledBtn]}
         >
-          <Text style={{ color: '#fff' }}>{loading ? 'Processing...' : 'Next'}</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitText}>Next</Text>
+          )}
         </Pressable>
 
-        <Pressable
-          onPress={() => router.back()}
-          style={{
-            paddingVertical: 14,
-            alignItems: 'center',
-            marginTop: 32,
-            flexDirection: 'row',
-            gap: 8,
-            justifyContent: 'center',
-          }}
-        >
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <BackArrowIcon />
-          <Text style={{ color: '#391D65' }}>Back</Text>
+          <Text style={styles.backText}>Back</Text>
         </Pressable>
       </View>
     </SafeAreaWrapper>
@@ -154,4 +173,51 @@ const About = () => {
 
 export default About;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 24,
+    paddingHorizontal: 20,
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 18,
+    fontFamily: 'DMSansMedium',
+    marginBottom: 80,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    alignContent: 'center',
+    marginTop: 80,
+  },
+  linkText: {
+    textDecorationLine: 'underline',
+    color: '#391D65',
+  },
+  submitBtn: {
+    borderWidth: 1,
+    borderColor: '#F8F1FF',
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderRadius: 32,
+    marginTop: 48,
+    backgroundColor: '#391D65',
+  },
+  disabledBtn: {
+    backgroundColor: '#ccc',
+  },
+  submitText: {
+    color: '#fff',
+  },
+  backBtn: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 32,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+  },
+  backText: {
+    color: '#391D65',
+  },
+});

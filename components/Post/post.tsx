@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Text,
   View,
-}
-from 'react-native';import { Placeholder } from '@/assets/images';
+} from 'react-native';
+import { Placeholder } from '@/assets/images';
 import { useRouter } from 'expo-router';
 import { Posts } from '@/types/postTypes';
 
@@ -16,8 +16,7 @@ interface PostMessageProps {
   postMessage: Posts;
 }
 
-const Message: React.FC<PostMessageProps> = ({withImg, postMessage}) => {
-  
+const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
   const router = useRouter();
   return (
     <TouchableOpacity
@@ -29,10 +28,12 @@ const Message: React.FC<PostMessageProps> = ({withImg, postMessage}) => {
         borderRadius: 8,
       }}
       key={postMessage.id}
-      onPress={() => router.push({
-        pathname: `/student-screens/community/post/[id]` as any,
-        params: {id: postMessage.id.toString()}
-      })}
+      onPress={() =>
+        router.push({
+          pathname: `/student-screens/community/post/[id]` as any,
+          params: { id: postMessage.id.toString() },
+        })
+      }
     >
       <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
         <View
@@ -44,7 +45,10 @@ const Message: React.FC<PostMessageProps> = ({withImg, postMessage}) => {
           }}
         ></View>
         <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
-          <Text>{postMessage.posted_by?.first_name} {postMessage.posted_by?.last_name}</Text>
+          <Text>
+            {postMessage.posted_by?.first_name}{' '}
+            {postMessage.posted_by?.last_name}
+          </Text>
           <Text
             style={{
               color: '#fff',
@@ -60,8 +64,7 @@ const Message: React.FC<PostMessageProps> = ({withImg, postMessage}) => {
         </View>
       </View>
       <View style={{ marginTop: 8 }}>
-        <Text style={{ fontSize: 14, marginTop: 16 }}>
-          {postMessage.text}</Text>
+        <Text style={{ fontSize: 14, marginTop: 16 }}>{postMessage.text}</Text>
         <View
           style={{
             marginTop: 16,
@@ -78,4 +81,4 @@ const Message: React.FC<PostMessageProps> = ({withImg, postMessage}) => {
   );
 };
 
-export default Message
+export default Message;
