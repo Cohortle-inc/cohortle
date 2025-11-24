@@ -1,4 +1,10 @@
-import { StyleSheet, TextInput, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import React from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
@@ -13,37 +19,37 @@ type Props = {};
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
 
 const LoginScreen = (props: Props) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
-  }; 
+  };
 
   const handleSubmit = async () => {
     if (!email) {
-      setError("Email is required.");
+      setError('Email is required.');
       return;
     }
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
+      setError('Please enter a valid email address.');
       return;
     }
     if (!password) {
-      setError("Password is required.");
+      setError('Password is required.');
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError('Password must be at least 6 characters.');
       return;
     }
 
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const response = await axios.post(`${apiURL}/v1/api/auth/login`, {
@@ -57,24 +63,25 @@ const LoginScreen = (props: Props) => {
         // Store token securely
         await AsyncStorage.setItem('authToken', result.token);
         await AsyncStorage.setItem('userData', JSON.stringify(result.user));
-        console.log(result.token)
-        
+        console.log(result.token);
+
         // Navigate to onboarding with token
         router.replace({
-          pathname: "/student-screens/community",
+          pathname: '/student-screens/cohorts',
           params: { token: result.token },
         });
       } else {
-        setError(result.message || "Login failed. Please try again.");
+        setError(result.message || 'Login failed. Please try again.');
       }
     } catch (err: any) {
       if (axios.isAxiosError(err)) {
-        const errorMessage = err.response?.data?.message || "Login failed. Please try again.";
+        const errorMessage =
+          err.response?.data?.message || 'Login failed. Please try again.';
         setError(errorMessage);
-        console.log("Login error:", err.response?.data);
+        console.log('Login error:', err.response?.data);
       } else {
-        console.error("Unexpected error:", err);
-        setError("Something went wrong. Please try again.");
+        console.error('Unexpected error:', err);
+        setError('Something went wrong. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -84,12 +91,16 @@ const LoginScreen = (props: Props) => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Text variant={'l'} style={styles.header}>Login</Text>
-        <Text style={styles.subtitle}>Enter your email and password to continue</Text>
-        
+        <Text variant={'l'} style={styles.header}>
+          Login
+        </Text>
+        <Text style={styles.subtitle}>
+          Enter your email and password to continue
+        </Text>
+
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email</Text>
-          <TextInput 
+          <TextInput
             style={styles.input}
             value={email}
             placeholder="Enter your email"
@@ -104,7 +115,7 @@ const LoginScreen = (props: Props) => {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Password</Text>
           <View style={styles.passwordContainer}>
-            <TextInput 
+            <TextInput
               style={styles.passwordInput}
               value={password}
               placeholder="Enter your password"
@@ -114,11 +125,15 @@ const LoginScreen = (props: Props) => {
               secureTextEntry={!showPassword}
               autoCapitalize="none"
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.eyeIcon}
               onPress={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <EyeOff size={20} color="#666" /> : <Eye size={20} color="#666" />}
+              {showPassword ? (
+                <EyeOff size={20} color="#666" />
+              ) : (
+                <Eye size={20} color="#666" />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -127,19 +142,22 @@ const LoginScreen = (props: Props) => {
 
         <View style={styles.buttonContainer}>
           <Button
-            text={loading ? "Logging in..." : "Login"}
+            text={loading ? 'Logging in...' : 'Login'}
             onPress={handleSubmit}
             disabled={loading}
           />
-          {loading && <ActivityIndicator style={styles.loader} color="#0000ff" />}
+          {loading && (
+            <ActivityIndicator style={styles.loader} color="#0000ff" />
+          )}
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push('/(auth)/signup')}
+          onPress={() => router.push('/(auth)/signUp')}
         >
           <Text style={styles.signupText}>
-            Don't have an account? <Text style={styles.signupHighlight}>Sign up</Text>
+            Don't have an account?{' '}
+            <Text style={styles.signupHighlight}>Sign up</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -156,7 +174,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 28,
     marginBottom: 8,
     textAlign: 'center',
@@ -176,14 +194,14 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: 8,
     padding: 15,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderWidth: 1,
     fontSize: 16,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
   },
@@ -205,7 +223,7 @@ const styles = StyleSheet.create({
     top: 15,
   },
   errorText: {
-    color: "red",
+    color: 'red',
     marginBottom: 15,
     textAlign: 'center',
   },

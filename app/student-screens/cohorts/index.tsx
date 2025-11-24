@@ -10,8 +10,31 @@ import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
 import { Plus } from '@/assets/icons';
 import { useRouter } from 'expo-router';
+import { useGetLearnerCohorts } from '@/api/learners/cohortsJoined';
+import { CommunityType } from '@/api/communities/postCommunity';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface CommunityData {
+  id: string;
+  cohort_id: number;
+  community_owner: number;
+  created_at: string;
+  description: string;
+  first_name: string;
+  last_name: string;
+  module_count: number;
+  name: string;
+  status: string;
+  sub_type: string;
+  thumbnail: string | null;
+  type: string;
+  updated_at: string;
+}
 
 const Community = () => {
+  const {data: communityData, isLoading: communityLoading} = useGetLearnerCohorts()
+  // const {data}
+  console.log("KKK: ", communityData)
   return (
     <SafeAreaWrapper>
       <View style={{ flex: 1, backgroundColor: 'white', marginVertical: 16 }}>
@@ -28,9 +51,15 @@ const Community = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <Course />
-          <Course />
-          <Course />
+          {!communityLoading && communityData && (
+            <View>
+              {communityData.map((data: any, index: number) => (
+                <View key={data.id || index} style={{}}>
+                  <Course {...data} />
+                </View>
+              ))}
+            </View>
+          )}
         </ScrollView>
       </View>
     </SafeAreaWrapper>
@@ -39,11 +68,18 @@ const Community = () => {
 
 export default Community;
 
-const Course = () => {
+const Course = (community: CommunityData) => {
   const router = useRouter();
+  const handlePress = async () => {
+    await AsyncStorage.setItem("communityID", String(community.id))
+    await AsyncStorage.setItem("communityaName", String(community.name))
+    // await AsyncStorage.setItem("communityID", String(community.id))
+    router.navigate('/student-screens/cohorts/course')
+    // await AsyncStorage.setItem()
+  }
   return (
     <TouchableOpacity
-      onPress={() => router.push('/student-screens/cohorts/course')}
+      onPress={() => {handlePress()}}
       style={{
         marginBottom: 16,
         borderWidth: 1,
@@ -74,7 +110,7 @@ const Course = () => {
             color: '#1F1F1F',
           }}
         >
-          Sadiq Bilyamin
+          {community.first_name} {community.last_name}
         </Text>
       </View>
       <View>
@@ -86,11 +122,11 @@ const Course = () => {
             marginTop: 8,
           }}
         >
-          Name of course
+          {community.name}
         </Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <Text style={{ color: '#1F1F1F', fontSize: 10, marginTop: 4 }}>
-            Module 2/5
+            Modules: {community.module_count}
           </Text>
           <Text
             style={{
@@ -101,9 +137,9 @@ const Course = () => {
             ~
           </Text>
 
-          <Text style={{ color: '#1F1F1F', fontSize: 10, marginTop: 4 }}>
-            32%
-          </Text>
+          {/* <Text style={{ color: '#1F1F1F', fontSize: 10, marginTop: 4 }}>
+            0%
+          </Text> */}
         </View>
       </View>
     </TouchableOpacity>

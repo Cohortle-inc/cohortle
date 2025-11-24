@@ -17,28 +17,25 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Posts } from '@/types/postTypes';
 import Message from '@/components/Post/post';
 
-
 const Community = () => {
   const [activeTab, setActiveTab] = useState<'convener' | 'foryou'>('convener');
-  const [posts, setPosts] = useState<Posts[]>([])
+  const [posts, setPosts] = useState<Posts[]>([]);
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
-  
+
   const fetchPosts = async () => {
     const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`${apiURL}/v1/api/posts`,
-        { headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-        if (Array.isArray(response.data.posts)) {
-          setPosts(response.data.posts); // ✅ correct
-        } else {
-          console.warn("Unexpected posts response:", response.data);
-          setPosts([]); // fallback
-        }
-      console.log(response.data.posts)
-      return response.data.posts
-      
+    const response = await axios.get(`${apiURL}/v1/api/posts`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (Array.isArray(response.data.posts)) {
+      setPosts(response.data.posts); // ✅ correct
+    } else {
+      console.warn('Unexpected posts response:', response.data);
+      setPosts([]); // fallback
+    }
+    return response.data.posts;
   };
   useEffect(() => {
     fetchPosts();
@@ -47,8 +44,24 @@ const Community = () => {
   return (
     <SafeAreaWrapper>
       <View style={{ marginVertical: 16 }}>
-        <Link href="/(auth)/login" style={{ color: '#B085EF', fontSize: 18, fontWeight: '600' }}>
+        <Link
+          href="/(auth)/login"
+          style={{ color: '#B085EF', fontSize: 18, fontWeight: '600' }}
+        >
           Cohortle
+        </Link>
+        <Link
+          href={'/convener-screens/(cohorts)/upload'}
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            padding: 8,
+            borderRadius: 8,
+            backgroundColor: '#E9D7FE',
+          }}
+        >
+          <Text style={{ fontWeight: 700 }}>Create Post</Text>
         </Link>
       </View>
 
@@ -69,21 +82,19 @@ const Community = () => {
       {/* Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
         {activeTab === 'convener' ? (
-          
-    <>
-      {posts.map((post) => (
-        <Message
-          postMessage={{
-            id: post.id,
-            posted_by: post.posted_by,
-            text: post.text,
-          }} 
-        />
-      ))}
-    </>
-        ) : (
           <>
+            {posts.map((post) => (
+              <Message
+                postMessage={{
+                  id: post.id,
+                  posted_by: post.posted_by,
+                  text: post.text,
+                }}
+              />
+            ))}
           </>
+        ) : (
+          <></>
         )}
       </ScrollView>
     </SafeAreaWrapper>
@@ -110,8 +121,6 @@ const TabButton = ({
     </Text>
   </TouchableOpacity>
 );
-
-
 
 const styles = StyleSheet.create({
   tabRow: {

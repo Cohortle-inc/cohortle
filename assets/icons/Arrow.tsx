@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { ForwardedRef } from 'react';
+import { View, ViewProps, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { View, StyleSheet } from 'react-native';
 
-const BackArrowIcon = () => {
+const Arrow = React.forwardRef((props: ViewProps, ref: ForwardedRef<View>) => {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} ref={ref} {...props}>
       <Svg width="23" height="22" viewBox="0 0 23 22" fill="none">
         <Path
           fillRule="evenodd"
@@ -15,7 +15,7 @@ const BackArrowIcon = () => {
       </Svg>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -24,4 +24,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BackArrowIcon;
+export default Arrow;

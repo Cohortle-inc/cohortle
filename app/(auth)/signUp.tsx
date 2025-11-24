@@ -38,7 +38,7 @@ const creatorDefinition = [
 const SignUp = () => {
   const theme = useTheme<Theme>();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const [selectedRole, setSelectedRole] = useState<
     'convener' | 'learner' | null
@@ -46,7 +46,7 @@ const SignUp = () => {
   const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
   const [showDefinition, setShowDefinition] = useState(false);
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
-  const token = useLocalSearchParams<{token: string}>();
+  const token = useLocalSearchParams<{ token: string }>();
 
   const handleRoleSelection = (role: 'convener' | 'learner') => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -70,44 +70,41 @@ const SignUp = () => {
 
   const handleRole = async () => {
     setLoading(true);
-    setError("")
-    console.log(token)
+    setError('');
+    console.log(token);
     try {
-      const response = await axios.patch(`${apiURL}/v1/api/profile/set-role`, 
-        {role: selectedRole}
-        , {
-      
-        headers: {
-          Authorization: `Bearer ${token.token}`
-        }}
-      )
-      console.log(response.data)
+      const response = await axios.patch(
+        `${apiURL}/v1/api/profile/set-role`,
+        { role: selectedRole },
+        {
+          headers: {
+            Authorization: `Bearer ${token.token}`,
+          },
+        },
+      );
+      console.log(response.data);
       if (!response.data.error) {
-        setError("role set!")
-        setLoading(false)
+        setError('role set!');
+        setLoading(false);
         if (selectedRole === 'convener') {
           router.navigate({
             pathname: '/(convener)/about',
-            params: {token: response.data.token}
+            params: { token: response.data.token },
           });
         } else if (selectedRole === 'learner') {
           router.navigate({
             pathname: '/(student)/about',
-            params: {token: response.data.token}
+            params: { token: response.data.token },
           });
         }
-        console.log(response.data.token)
-            
-
+        console.log(response.data.token);
       }
     } catch (err) {
-      setError("error setting role: " + err)
+      setError('error setting role: ' + err);
+    } finally {
+      setLoading(false);
     }
-    finally {
-      setLoading(false)
-    }
-    
-  }
+  };
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
@@ -172,7 +169,7 @@ const SignUp = () => {
       </View>
     </SafeAreaWrapper>
   );
-}; 
+};
 
 export default SignUp;
 
