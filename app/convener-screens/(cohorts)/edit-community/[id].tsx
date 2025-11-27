@@ -34,10 +34,10 @@ const EditCohort = () => {
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isDeleteCohortVisible, setDeleteCohortVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-const [selectedLearner, setSelectedLearner] = useState<any>(null);
+  const [selectedLearner, setSelectedLearner] = useState<any>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: cohort } = useGetCohort(id as any);
-  const { data: cohortLearners } = useGetCohortLearners(id)
+  const { data: cohortLearners } = useGetCohortLearners(id);
   const updateCohort = useUpdateCohort();
   const deleteCohort = useDeleteCohort();
   const removeLearnerMutation = useRemoveCohortLearner();
@@ -61,12 +61,13 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
                 onSuccess: () => {
                   bottomSheetRef.current?.close();
                 },
-              }
+              },
             );
           },
         },
-      ]
-    );}
+      ],
+    );
+  };
   const handleSheetChanges = useCallback((index: number) => {
     // Update state based on the index value
     console.log(index);
@@ -74,17 +75,17 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
   }, []);
 
   const CustomBackdrop = (props: BottomSheetBackdropProps) => (
-  <BottomSheetBackdrop
-    {...props}
-    disappearsOnIndex={-1}        // Fully fade out when closed
-    appearsOnIndex={0}            // Start appearing from the first snap point
-    opacity={0.75}                // Darker for better focus
-    pressBehavior="close"         // Tap anywhere outside = close sheet
-    style={{
-      backgroundColor: 'rgba(0, 0, 0, 0.75)', // Deep black with strong overlay
-    }}
-  />
-);
+    <BottomSheetBackdrop
+      {...props}
+      disappearsOnIndex={-1} // Fully fade out when closed
+      appearsOnIndex={0} // Start appearing from the first snap point
+      opacity={0.75} // Darker for better focus
+      pressBehavior="close" // Tap anywhere outside = close sheet
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.75)', // Deep black with strong overlay
+      }}
+    />
+  );
 
   const openBottomSheetWithLearner = (learner: any) => {
     setSelectedLearner(learner);
@@ -201,19 +202,18 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
               onPress={() => setDeleteCohortVisible(true)}
               style={{
                 borderWidth: 1,
-                borderColor: 'grey',
+                borderColor: 'red',
                 flex: 1,
                 width: '100%',
                 borderRadius: 16,
               }}
-              disabled
             >
               <Text
                 style={{
                   textAlign: 'center',
                   paddingVertical: 6,
                   paddingHorizontal: 16,
-                  color: 'grey',
+                  color: 'red',
                 }}
               >
                 Delete Cohort
@@ -242,17 +242,26 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
           </View>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={[styles.content, { gap: 16, paddingBottom: 16 }]}>
-    {cohortLearners && cohortLearners.length > 0 ? (
-      cohortLearners.map((learner: any) => (
-        <LearnerItem key={learner.member_id || learner.id} learner={learner} onPressOptions={openBottomSheetWithLearner} />
-      ))
-    ) : (
-      <Text style={{ textAlign: 'center', marginTop: 20, color: '#666' }}>
-        No learners in this cohort yet.
-      </Text>
-    )}
-  </ScrollView>
+        <ScrollView
+          contentContainerStyle={[
+            styles.content,
+            { gap: 16, paddingBottom: 16 },
+          ]}
+        >
+          {cohortLearners && cohortLearners.length > 0 ? (
+            cohortLearners.map((learner: any) => (
+              <LearnerItem
+                key={learner.member_id || learner.id}
+                learner={learner}
+                onPressOptions={openBottomSheetWithLearner}
+              />
+            ))
+          ) : (
+            <Text style={{ textAlign: 'center', marginTop: 20, color: '#666' }}>
+              No learners in this cohort yet.
+            </Text>
+          )}
+        </ScrollView>
       )}
       {/* Bottom Sheet */}
       <BottomSheet
@@ -266,10 +275,12 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
         <BottomSheetView style={styles.contentContainer}>
           {selectedLearner ? (
             <View style={{ padding: 16, gap: 24 }}>
-              <Text style={{ fontSize: 16, fontWeight: '600', textAlign: 'center' }}>
+              <Text
+                style={{ fontSize: 16, fontWeight: '600', textAlign: 'center' }}
+              >
                 {selectedLearner.first_name} {selectedLearner.last_name}
               </Text>
-              
+
               <TouchableOpacity
                 style={{ gap: 4 }}
                 onPress={() => {
@@ -278,13 +289,20 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
                     `Remove ${selectedLearner.first_name} from this cohort?`,
                     [
                       { text: 'Cancel', style: 'cancel' },
-                      { text: 'Remove', style: 'destructive', onPress: () => handleRemoveLearner(selectedLearner.member_id) },
-                    ]
+                      {
+                        text: 'Remove',
+                        style: 'destructive',
+                        onPress: () =>
+                          handleRemoveLearner(selectedLearner.member_id),
+                      },
+                    ],
                   );
                   bottomSheetRef.current?.close();
                 }}
               >
-                <Text style={{ color: '#EE3D3E', fontWeight: '500' }}>Remove learner</Text>
+                <Text style={{ color: '#EE3D3E', fontWeight: '500' }}>
+                  Remove learner
+                </Text>
                 <Text style={{ color: '#8D9091', fontSize: 12 }}>
                   Learner will lose access to this cohort and its communities.
                 </Text>
@@ -295,18 +313,20 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
                   setDeleteModalVisible(true);
                   bottomSheetRef.current?.close();
                 }}
-                
                 style={{ gap: 4 }}
               >
-                <Text style={{ color: '#8D9091', fontWeight: '500' }}>Restrict learner</Text>
+                <Text style={{ color: '#8D9091', fontWeight: '500' }}>
+                  Restrict learner
+                </Text>
                 <Text style={{ color: '#8D9091', fontSize: 12 }}>
                   Learner will be restricted from commenting and creating posts.
                 </Text>
               </TouchableOpacity>
-
             </View>
           ) : (
-            <Text style={{ textAlign: 'center', color: '#666' }}>Select a learner</Text>
+            <Text style={{ textAlign: 'center', color: '#666' }}>
+              Select a learner
+            </Text>
           )}
         </BottomSheetView>
       </BottomSheet>
@@ -411,9 +431,9 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
           <View>
             <Text style={{ color: '#1F1F1F', marginTop: 16 }}>
               If you proceed, you will permanently lose ALL the data associated
-              with this cohort group. This includes:
+              with this cohort group
             </Text>
-            <View>
+            {/* <View>
               <TouchableOpacity
                 onPress={() => setIsOpen(!isOpen)}
                 style={{
@@ -472,7 +492,7 @@ const [selectedLearner, setSelectedLearner] = useState<any>(null);
                   </View>
                 )}
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
           <Text style={{ color: '#1F1F1F', marginTop: 16, marginBottom: 8 }}>
             To confirm, please type{' '}
@@ -560,8 +580,13 @@ const styles = StyleSheet.create({
 
 export default EditCohort;
 
-
-const LearnerItem = ({ learner, onPressOptions }: { learner: any; onPressOptions: (learner: any) => void }) => (
+const LearnerItem = ({
+  learner,
+  onPressOptions,
+}: {
+  learner: any;
+  onPressOptions: (learner: any) => void;
+}) => (
   <View
     style={{
       flexDirection: 'row',
@@ -584,7 +609,8 @@ const LearnerItem = ({ learner, onPressOptions }: { learner: any; onPressOptions
       }}
     >
       <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>
-        {learner.first_name[0]}{learner.last_name[0]}
+        {learner.first_name[0]}
+        {learner.last_name[0]}
       </Text>
     </View>
 

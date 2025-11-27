@@ -1,4 +1,11 @@
-import { ActivityIndicator, Clipboard, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Clipboard,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, { useCallback, useRef, useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
@@ -20,11 +27,13 @@ const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
     name: '',
     description: '',
+    url: '',
   });
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
   /// Note: Instead of calling the communities withing a cohort, its the cohort that is being called in this case. a major oversight
-  const { data: cohorts = [], isLoading, isError } = useConvenersCohorts();
+  const { data: cohortsResponse, isLoading, isError } = useConvenersCohorts();
+  const cohorts = cohortsResponse || [];
   const { mutate: createCohort } = useCreateCohort();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -36,26 +45,40 @@ const Cohorts = () => {
   }, []);
 
   const handleCreateCohort = () => {
-    if (!cohortData.name.trim() || !cohortData.description.trim()) {
-      alert('Please fill in the field');
+    if (
+      !cohortData.name.trim() ||
+      !cohortData.description.trim() ||
+      !cohortData.url.trim()
+    ) {
+      showMessage({
+        message: 'Validation Error',
+        description: 'Please fill in all fields',
+        type: 'warning',
+        backgroundColor: '#FF9500',
+        color: '#fff',
+        icon: 'warning',
+        duration: 3000,
+      });
       return;
     }
+
     const payload: CohortType = {
-      name: cohortData.name,
-      description: cohortData.description,
+      name: cohortData.name.trim(),
+      description: cohortData.description.trim(),
+      url: cohortData.url.trim(),
     };
 
     createCohort(payload, {
-      onSuccess: (data: any) => {
-        setCohortData({
-          name: '',
-          description: '',
-        });
-        alert('Success!');
+      onSuccess: (data) => {
+        // ✅ Reset form
+        setCohortData({ name: '', description: '', url: '' });
+
+        // ✅ Close modal
+        setModalVisible(false);
+
+        console.log('Cohort created:', data);
       },
-      onError: (error: any) => {
-        console.log('Not working');
-      },
+      // onError is handled in the hook now
     });
   };
   const updateCohortData = (field: string, value: string) => {
@@ -99,63 +122,72 @@ const Cohorts = () => {
         </View>
       </View>
       {isLoading ? (
-  // Loading State
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
-    <ActivityIndicator size="large" color="#391D65" />
-    <Text style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}>
-      Loading your cohorts...
-    </Text>
-  </View>
-) : cohorts.length === 0 ? (
-  // Empty State
-  <View style={{ marginVertical: 'auto', paddingHorizontal: 32 }}>
-    <Text
-      style={{
-        color: '#000000',
-        fontFamily: 'DMSansSemiBold',
-        fontSize: 24,
-        textAlign: 'center',
-      }}
-    >
-      Welcome to your cohort
-    </Text>
-    <Text style={{ textAlign: 'center', marginTop: 12, color: '#666', lineHeight: 22 }}>
-      This is where you’ll create, edit, and manage your communities and learners.
-    </Text>
-    <Pressable
-      onPress={toggleModal}
-      style={{
-        backgroundColor: '#391D65',
-        paddingVertical: 16,
-        alignItems: 'center',
-        borderRadius: 32,
-        marginTop: 48,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-      }}
-    >
-      <Text style={{ color: '#fff', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
-        Create first cohort
-      </Text>
-    </Pressable>
-  </View>
-) : (
-  // Cohorts List
-  <View style={{ gap: 15, paddingBottom: 20 }}>
-    {cohorts.map((cohort: any) => (
-      <Cohort
-        key={cohort.id}
-        name={cohort.name}
-        onPress={() => {
-          handleCohortPress(cohort.id, cohort.name);
-        }}
-        onOpenBottomSheet={() => openBottomSheet(cohort.id)}
-      />
-    ))}
-  </View>
-)}
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
+          <ActivityIndicator size="large" color="#391D65" />
+          <Text
+            style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}
+          >
+            Loading your cohorts...
+          </Text>
+        </View>
+      ) : cohorts.length === 0 ? (
+        <View
+          style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 32 }}
+        >
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: 12,
+            }}
+          >
+            Welcome to your cohort
+          </Text>
+          <Text
+            style={{
+              textAlign: 'center',
+              color: '#666',
+              lineHeight: 22,
+              marginBottom: 40,
+            }}
+          >
+            This is where you'll create, edit, and manage your communities and
+            learners.
+          </Text>
+          <Pressable
+            onPress={toggleModal}
+            style={{
+              backgroundColor: '#391D65',
+              paddingVertical: 16,
+              borderRadius: 32,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+              Create first cohort
+            </Text>
+          </Pressable>
+        </View>
+      ) : (
+        <View style={{ gap: 15, paddingBottom: 20 }}>
+          {cohorts.map((cohort: any) => (
+            <Cohort
+              key={cohort.id}
+              name={cohort.name}
+              onPress={() => handleCohortPress(cohort.id, cohort.name)}
+              onOpenBottomSheet={() => openBottomSheet(cohort.id)}
+            />
+          ))}
+        </View>
+      )}
       <Modal isVisible={isModalVisible}>
         <View
           style={{
@@ -194,7 +226,12 @@ const Cohorts = () => {
               label="Description"
               placeholder="Cohort description"
             />
-            <Input label="Community Name" placeholder="Cohort title" />
+            <Input
+              value={cohortData.url}
+              onChangeText={(text: string) => updateCohortData('url', text)}
+              label="Cohort Code Prefix"
+              placeholder="Sal-Cohort"
+            />
           </View>
           <View style={{ alignItems: 'center' }}>
             <Pressable
@@ -241,11 +278,11 @@ const Cohorts = () => {
               onPress={() => {
                 if (!selectedCohort?.url) {
                   showMessage({
-                    message: "Error",
-                    description: "Invite link not available",
-                    type: "danger",
-                    icon: "danger",
-                    backgroundColor: "#EE3D3E",
+                    message: 'Error',
+                    description: 'Invite link not available',
+                    type: 'danger',
+                    icon: 'danger',
+                    backgroundColor: '#EE3D3E',
                   });
                   return;
                 }
@@ -254,20 +291,20 @@ const Cohorts = () => {
                 Clipboard.setString(selectedCohort.url);
 
                 showMessage({
-                  message: "Copied!",
-                  description: "Invite code copied to clipboard",
-                  type: "success",
-                  backgroundColor: "#391D65",
-                  color: "#fff",
-                  icon: "success",
+                  message: 'Copied!',
+                  description: 'Invite code copied to clipboard',
+                  type: 'success',
+                  backgroundColor: '#391D65',
+                  color: '#fff',
+                  icon: 'success',
                   duration: 2500,
-                  titleStyle: { fontFamily: "DMSansSemiBold", fontSize: 16 },
+                  titleStyle: { fontFamily: 'DMSansSemiBold', fontSize: 16 },
                 });
 
                 bottomSheetRef.current?.close();
               }}
             >
-  <Text>Add learners (copy join code)</Text>
+              <Text>Add learners (copy join code)</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>

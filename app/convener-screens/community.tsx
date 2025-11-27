@@ -51,7 +51,6 @@ const Community = () => {
           Cohortle
         </Link>
         <View
-        
           // href={'/convener-screens/(cohorts)/upload'}
           // href={'/convener-screens/(cohorts)/upload'}
           style={{
@@ -83,10 +82,16 @@ const Community = () => {
 
       {/* Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
-       
-          <View style={{width: '100%', height: 400, justifyContent: 'center', alignItems: 'center'}}>
-            <Text>Comming Soon...</Text>
-          </View>
+        <View
+          style={{
+            width: '100%',
+            height: 400,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text>Comming Soon...</Text>
+        </View>
         {/* {activeTab === 'convener' ? (
           <>
             {posts.map((post) => (

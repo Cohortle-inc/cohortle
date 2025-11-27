@@ -141,7 +141,7 @@ const About = () => {
             value={data.lastName}
             onChangeText={(value: string) => handleUpdate('lastName', value)}
           />
-          <Input
+          {/* <Input
             label="Password"
             value={data.password}
             onChangeText={(value: string) => handleUpdate('password', value)}
@@ -154,7 +154,7 @@ const About = () => {
             onChangeText={setConfirmPassword}
             placeholder="Re-type your password"
             secureTextEntry
-          />
+          /> */}
         </View>
 
         <View style={styles.checkboxContainer}>

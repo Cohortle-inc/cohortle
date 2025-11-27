@@ -24,6 +24,8 @@ import { Image, ActivityIndicator } from 'react-native';
 import { useProfile } from '@/hooks/api/useProfileHook';
 import { useGetCohort } from '@/api/cohorts/getCohort';
 import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
+import { useQueryClient } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = React.useState<'Communities' | 'Social'>(
@@ -33,9 +35,33 @@ const Profile = () => {
   // Use React Query instead of useState + useEffect
   const { data: profile, isLoading, error } = useProfile();
 
-  const {data: cohorts = []} = useConvenersCohorts()
+  const { data: cohorts = [] } = useConvenersCohorts();
   const bottomSheetRef = useRef<BottomSheet>(null);
 
+  const queryClient = useQueryClient();
+
+  const logOut = async () => {
+    try {
+      // Clear ALL query data
+      queryClient.clear();
+
+      // Clear auth storage
+      await AsyncStorage.removeItem('authToken');
+      // Optional: Clear other stored data
+      await AsyncStorage.removeItem('userData');
+
+      console.log('Logout successful - cache cleared');
+
+      // Navigate to login (use replace to prevent going back)
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Ensure cleanup happens even on error
+      queryClient.clear();
+      await AsyncStorage.removeItem('authToken');
+      router.replace('/(auth)/login');
+    }
+  };
   const Community = (name: any) => {
     return (
       <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
@@ -149,7 +175,9 @@ const Profile = () => {
           </View>
 
           <Pressable
-            onPress={() => router.push('/convener-screens/(profile)/edit-profile')}
+            onPress={() =>
+              router.push('/convener-screens/(profile)/edit-profile')
+            }
             style={styles.editButton}
           >
             <Text style={styles.editButtonText}>Edit profile</Text>
@@ -183,7 +211,7 @@ const Profile = () => {
         {activeTab === 'Communities' ? (
           <View style={{ gap: 16 }}>
             {cohorts.map((data: any) => {
-              <Community key={data.id} name={data.name} />
+              <Community key={data.id} name={data.name} />;
             })}
           </View>
         ) : (
@@ -269,7 +297,7 @@ const Profile = () => {
                 Edit profile
               </Text>
             </Pressable>
-            <Pressable
+            {/*<Pressable
               style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
             >
               <Notifications />
@@ -284,8 +312,9 @@ const Profile = () => {
               <Text style={{ color: '#1F1F1F', fontFamily: 'DMSansRegular' }}>
                 Account authentication
               </Text>
-            </Pressable>
+            </Pressable> */}
             <Pressable
+              onPress={logOut}
               style={{
                 marginTop: 'auto',
                 paddingVertical: 16,

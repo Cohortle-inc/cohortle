@@ -89,7 +89,7 @@ const EditProfile = (props: Props) => {
         'You have unsaved changes. Are you sure you want to leave?',
         [
           { text: 'Stay', style: 'cancel' },
-          { text: 'Leave', onPress: () => {}},
+          { text: 'Leave', onPress: () => {} },
         ],
       );
     } else {

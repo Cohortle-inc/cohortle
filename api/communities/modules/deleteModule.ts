@@ -11,13 +11,19 @@ interface DeleteModuleParams {
   module_id: number;
 }
 
-const deleteModuleFn = async ({ community_id, module_id }: DeleteModuleParams) => {
+const deleteModuleFn = async ({
+  community_id,
+  module_id,
+}: DeleteModuleParams) => {
   const token = await AsyncStorage.getItem('authToken');
   if (!token) throw new Error('No auth token');
 
-  await axios.delete(`${apiURL}/v1/api/communities/${community_id}/modules/${module_id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  await axios.delete(
+    `${apiURL}/v1/api/communities/${community_id}/modules/${module_id}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
 };
 
 export const useDeleteModule = () => {
@@ -31,7 +37,10 @@ export const useDeleteModule = () => {
       queryClient.invalidateQueries({ queryKey: ['modules', community_id] });
     },
     onError: (error: any) => {
-      console.error('Failed to delete module:', error.response?.data || error.message);
+      console.error(
+        'Failed to delete module:',
+        error.response?.data || error.message,
+      );
     },
   });
 };

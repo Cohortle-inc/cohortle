@@ -12,7 +12,10 @@ interface RemoveLearnerParams {
 }
 
 // Correct API call to remove a learner
-const removeCohortLearner = async ({ cohortId, learnerId }: RemoveLearnerParams) => {
+const removeCohortLearner = async ({
+  cohortId,
+  learnerId,
+}: RemoveLearnerParams) => {
   const token = await AsyncStorage.getItem('authToken');
 
   if (!token) {
@@ -28,12 +31,15 @@ const removeCohortLearner = async ({ cohortId, learnerId }: RemoveLearnerParams)
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
 
     return response.data;
   } catch (error: any) {
-    console.error('Failed to remove learner:', error.response?.data || error.message);
+    console.error(
+      'Failed to remove learner:',
+      error.response?.data || error.message,
+    );
 
     const message =
       error.response?.data?.message ||

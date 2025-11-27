@@ -98,7 +98,7 @@ const CommunityInfo = () => {
               placeholder="muhammads-community"
             />
             <Text style={{ fontSize: 12, color: '#999', paddingTop: 8 }}>
-              We'll and the "/cohortz.com"
+              We will add a code to it E.g
             </Text>
           </View>
         </View>

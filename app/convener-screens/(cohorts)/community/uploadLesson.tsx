@@ -10,7 +10,7 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';           // <-- EXPO IMAGE PICKER
+import * as ImagePicker from 'expo-image-picker'; // <-- EXPO IMAGE PICKER
 import * as DocumentPicker from 'expo-document-picker';
 import type { DocumentPickerAsset } from 'expo-document-picker';
 // import Video from 'react-native-video';
@@ -25,7 +25,7 @@ import { TextArea } from '@/components/Form';
 // Unified type for any file/media selected
 interface MediaFile {
   uri: string;
-  type: 'video'
+  type: 'video';
   name: string;
   size?: number;
 }
@@ -33,14 +33,14 @@ interface MediaFile {
 const CreateLesson = () => {
   const [title, setTitle] = useState<string>('Introduction');
   const [media, setMedia] = useState<MediaFile | null>(null);
-  const [description, setDescription] = useState('')
+  const [description, setDescription] = useState('');
   const [text, setText] = useState<string>('');
   const lessonID = useLocalSearchParams().lessonId as string;
   const moduleID = useLocalSearchParams().moduleId as string;
   const moduleTitle = useLocalSearchParams().moduleTitle;
   const { data: lessonData, isLoading } = useGetLesson(lessonID, moduleID);
   const [loading, setLoading] = useState(false);
-  console.log(lessonData)
+  console.log(lessonData);
 
   useEffect(() => {
     if (lessonData?.description) {
@@ -49,43 +49,52 @@ const CreateLesson = () => {
   }, [lessonData]);
 
   // Normalizes both ImagePicker and DocumentPicker results
-const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPickerAsset) => {
-  // Helper to safely get file name
-  const getFileName = (): string => {
-    // expo-image-picker uses `fileName` (iOS/Android)
-    if ('fileName' in asset && asset.fileName) return asset.fileName;
-    // expo-document-picker uses `name`
-    if ('name' in asset && asset.name) return asset.name;
-    // Fallback: extract from URI
-    return asset.uri.split('/').pop() || 'file';
+  const handleMediaSelected = (
+    asset: ImagePicker.ImagePickerAsset | DocumentPickerAsset,
+  ) => {
+    // Helper to safely get file name
+    const getFileName = (): string => {
+      // expo-image-picker uses `fileName` (iOS/Android)
+      if ('fileName' in asset && asset.fileName) return asset.fileName;
+      // expo-document-picker uses `name`
+      if ('name' in asset && asset.name) return asset.name;
+      // Fallback: extract from URI
+      return asset.uri.split('/').pop() || 'file';
+    };
+
+    // Helper to detect type from mime or fallback
+    const getMediaType = (): MediaFile['type'] => {
+      const mime = (asset as any).mimeType?.toLowerCase() || '';
+
+      // if (mime.startsWith('image/')) return 'image';
+      if (mime.startsWith('video/')) return 'video';
+      // if (mime.startsWith('audio/')) return 'audio';
+    };
+
+    const unified: MediaFile = {
+      uri: asset.uri,
+      name: getFileName(),
+      type: getMediaType(),
+      size:
+        'fileSize' in asset
+          ? (asset.fileSize ?? undefined)
+          : 'size' in asset
+            ? asset.size
+            : undefined,
+    };
+
+    console.log('Selected media:', unified);
+    setMedia(unified);
   };
-
-  // Helper to detect type from mime or fallback
-  const getMediaType = (): MediaFile['type'] => {
-    const mime = (asset as any).mimeType?.toLowerCase() || '';
-
-    // if (mime.startsWith('image/')) return 'image';
-    if (mime.startsWith('video/')) return 'video';
-    // if (mime.startsWith('audio/')) return 'audio';
-    
-  };
-
-  const unified: MediaFile = {
-    uri: asset.uri,
-    name: getFileName(),
-    type: getMediaType(),
-    size: 'fileSize' in asset ? asset.fileSize ?? undefined : 'size' in asset ? asset.size : undefined,
-  };
-
-  console.log('Selected media:', unified);
-  setMedia(unified);
-};
 
   // Photos & Videos (uses expo-image-picker)
   const pickMediaFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission required', 'Please allow access to your photo library');
+      Alert.alert(
+        'Permission required',
+        'Please allow access to your photo library',
+      );
       return;
     }
 
@@ -116,11 +125,15 @@ const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPicke
   };
 
   const handleUploadPress = () => {
-    Alert.alert('Choose Media Type', 'Select the type of file you want to upload', [
-      { text: 'Photos & Videos', onPress: pickMediaFromLibrary },
-      { text: 'Documents & Audio', onPress: pickDocumentsOrAudio },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    Alert.alert(
+      'Choose Media Type',
+      'Select the type of file you want to upload',
+      [
+        { text: 'Photos & Videos', onPress: pickMediaFromLibrary },
+        { text: 'Documents & Audio', onPress: pickDocumentsOrAudio },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+    );
   };
 
   const handleUpdateForm = async () => {
@@ -142,22 +155,24 @@ const handleMediaSelected = (asset: ImagePicker.ImagePickerAsset | DocumentPicke
 
   // Just replace your renderPreview() and related code with this:
 
-const renderPreview = () => {
-  // Use selected media OR the current lesson media from backend
-  const currentVideoUrl = media?.uri || lessonData?.media || lessonData?.url;
+  const renderPreview = () => {
+    // Use selected media OR the current lesson media from backend
+    const currentVideoUrl = media?.uri || lessonData?.media || lessonData?.url;
 
-  if (!currentVideoUrl) return null;
+    if (!currentVideoUrl) return null;
 
-  return (
-    <View style={styles.previewBox}>
-      {/* Simple black box with big Play icon + video filename */}
-      
-      <Text style={styles.videoName} numberOfLines={2}>
-        {media?.name || currentVideoUrl.split('/').pop()?.split('?')[0] || 'Video'}
-      </Text>
-    </View>
-  );
-};
+    return (
+      <View style={styles.previewBox}>
+        {/* Simple black box with big Play icon + video filename */}
+
+        <Text style={styles.videoName} numberOfLines={2}>
+          {media?.name ||
+            currentVideoUrl.split('/').pop()?.split('?')[0] ||
+            'Video'}
+        </Text>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -177,7 +192,10 @@ const renderPreview = () => {
         </View>
 
         {/* Upload Section */}
-        <TouchableOpacity style={styles.uploadSection} onPress={handleUploadPress}>
+        <TouchableOpacity
+          style={styles.uploadSection}
+          onPress={handleUploadPress}
+        >
           <Ionicons name="videocam" color={colors.primary} size={25} />
           <View style={styles.uploadContent}>
             {renderPreview() ? (
@@ -190,7 +208,9 @@ const renderPreview = () => {
             ) : (
               <View style={{ alignItems: 'center', gap: 5 }}>
                 <Text style={{ fontSize: 48 }}>Upload Video</Text>
-                <Text style={styles.uploadSubtext}>Tap to add a video lesson</Text>
+                <Text style={styles.uploadSubtext}>
+                  Tap to add a video lesson
+                </Text>
               </View>
             )}
 
@@ -199,7 +219,7 @@ const renderPreview = () => {
             </Text>
           </View>
         </TouchableOpacity>
-        
+
         {/* <View>
           <TextInput
             style={[styles.input, styles.textArea]}
@@ -334,7 +354,12 @@ const styles = StyleSheet.create({
   },
   documentIcon: { fontSize: 32, marginBottom: 5 },
   documentName: { fontSize: 12, color: '#333', textAlign: 'center' },
-  mediaName: { fontSize: 14, color: '#333', fontWeight: '500', marginBottom: 5 },
+  mediaName: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+    marginBottom: 5,
+  },
   changeMediaText: { fontSize: 12, color: '#666', fontStyle: 'italic' },
   label: {
     fontSize: 14,
@@ -355,8 +380,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 12,
   },
-},
-
-);
+});
 
 export default CreateLesson;

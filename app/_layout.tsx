@@ -6,7 +6,9 @@ import { ThemeProvider } from '@shopify/restyle';
 import theme from '@/theme/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import FlashMessage from "react-native-flash-message";
+import FlashMessage from 'react-native-flash-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -19,7 +21,6 @@ export default function RootLayout() {
     DMSansLight: require('../assets/fonts/DMSans-Light.ttf'),
     DMSansSemiBold: require('../assets/fonts/DMSans-SemiBold.ttf'),
   });
-  
 
   useEffect(() => {
     if (loaded) {
@@ -27,9 +28,22 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+        if (!token) {
+          router.replace('/(auth)/login');
+        }
+      } catch (error) {
+        console.error('Error checking auth token:', error);
+        router.replace('/(auth)/login');
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -46,13 +60,14 @@ export default function RootLayout() {
       <ThemeProvider theme={theme}>
         <GestureHandlerRootView>
           <Stack screenOptions={{ headerShown: false }}>
-            
             <Stack.Screen name="(tabs)" />
           </Stack>
-          <FlashMessage position="top"
+          <FlashMessage
+            position="top"
             floating={true}
             duration={3000}
-            style={{ marginTop: 50 }} />
+            style={{ marginTop: 50 }}
+          />
         </GestureHandlerRootView>
       </ThemeProvider>
     </QueryClientProvider>

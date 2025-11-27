@@ -14,6 +14,7 @@ import { BottomSheet } from '@/components/ui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useGetModules from '@/api/communities/modules/getModules';
 import { useGetLessons } from '@/api/communities/lessons/getLessons';
+import { useGetPublishedLessons } from '@/api/communities/lessons/publishedLessons';
 
 type ModuleType = {
   id: number;
@@ -30,17 +31,17 @@ const Course = () => {
   const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
   const [isSheetVisible, setSheetVisible] = useState(false);
   const [communityId, setCommunityId] = useState<string | null>(null);
-  const [title, setTitle] = useState<string | null>(null)
-  const {data: moduleData} = useGetModules(Number(communityId))
+  const [title, setTitle] = useState<string | null>(null);
+  const [convenerName, setConvenerName] = useState<string | null>(null);
+  const { data: moduleData = [] } = useGetModules(Number(communityId));
   const [module, setModule] = useState<number | null>(null);
-  const {data: lessonData} = useGetLessons(module)
+  const { data: lessonData = [] } = useGetPublishedLessons(module);
 
-
-  console.log(lessonData)
-  console.log(title)
+  console.log(lessonData);
+  console.log(title);
   useEffect(() => {
     const loadId = async () => {
-      const id = await AsyncStorage.getItem("communityID");
+      const id = await AsyncStorage.getItem('communityID');
       setCommunityId(id);
     };
 
@@ -49,10 +50,12 @@ const Course = () => {
 
   useEffect(() => {
     const name = async () => {
-      const title = await AsyncStorage.getItem("communityName");
-      setTitle(title);
+      const name = await AsyncStorage.getItem('communityName');
+      const instructorName = await AsyncStorage.getItem('convenerName');
+      setTitle(name);
+      setConvenerName(instructorName);
     };
-
+    console.log(name);
     name();
   }, []);
 
@@ -76,9 +79,7 @@ const Course = () => {
         <TouchableOpacity onPress={() => router.back()}>
           <Back />
         </TouchableOpacity>
-        <Text style={{ fontSize: 10, fontWeight: 'semibold' }}>
-          {title}
-        </Text>
+        <Text style={{ fontSize: 10, fontWeight: 'semibold' }}>{title}</Text>
         <TouchableOpacity onPress={() => setSheetVisible(true)}>
           <Options />
         </TouchableOpacity>
@@ -91,9 +92,9 @@ const Course = () => {
             marginBottom: 4,
           }}
         >
-          Name of Cohort
+          {title}
         </Text>
-        <Text onPress={() => {}}>Name of Convener</Text>
+        <Text onPress={() => {}}>{convenerName}</Text>
       </View>
       <View style={{ flex: 1 }}>
         {/* Tab Bar */}
@@ -143,48 +144,55 @@ const Course = () => {
               <View>
                 <Text>Modules</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {moduleData?.map((mod: ModuleType) => (
-                    <TouchableOpacity
-                      onPress={() => setModule(mod.id)}
-                      key={mod.id}
-                      style={[
-                        mod.id === module && { backgroundColor: 'purple' },
-                        {
-                          flexDirection: 'row',
-                          gap: 4,
-                          borderWidth: 1,
-                          borderColor: '#DABCFF',
-                          paddingHorizontal: 8,
-                          paddingVertical: 4,
-                          borderRadius: 12,
-                          marginRight: 8,
-                          marginTop: 8,
-                          minWidth: 32,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        },
-                      ]}
-                    >
-                      <Text
+                  {moduleData
+                    .slice()
+                    .sort((a: ModuleType, b: ModuleType) => a.id - b.id)
+                    .map((mod: ModuleType) => (
+                      <TouchableOpacity
+                        onPress={() => setModule(mod.id)}
+                        key={mod.id}
                         style={[
-                          mod.id === module && { color: '#DABCFF' },
-                          { fontSize: 10 },
+                          mod.id === module && { backgroundColor: 'purple' },
+                          {
+                            flexDirection: 'row',
+                            gap: 4,
+                            borderWidth: 1,
+                            borderColor: '#DABCFF',
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 12,
+                            marginRight: 8,
+                            marginTop: 8,
+                            minWidth: 32,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          },
                         ]}
                       >
-                        {mod.title}
-                      </Text>
-                      <Check color="#DABCFF" />
-                    </TouchableOpacity>
-                  ))}
-
+                        <Text
+                          style={[
+                            mod.id === module && { color: '#DABCFF' },
+                            { fontSize: 10 },
+                          ]}
+                        >
+                          {mod.title}
+                        </Text>
+                        <Check color="#DABCFF" />
+                      </TouchableOpacity>
+                    ))}
                 </ScrollView>
                 <View style={{ marginTop: 16 }}>
                   {/* <Module />
                   <Module />
                   <Module /> */}
-                  {lessonData?.map((lesson: LessonProp) => (
-                    <Lesson key={lesson.id} {...lesson} />
-                  ))}
+                  {lessonData
+                    ?.filter(
+                      (lesson: LessonProp) => lesson.status === 'published',
+                    ) // Only published
+                    .sort((a: LessonProp, b: LessonProp) => a.id - b.id) // Sort by order
+                    .map((lesson: LessonProp) => (
+                      <Lesson key={lesson.id} {...lesson} />
+                    ))}
                 </View>
               </View>
             </View>
@@ -253,17 +261,17 @@ interface LessonProp {
   media: string;
   order_number: string;
   status: string;
-  
 }
 const Lesson = (lesson: LessonProp) => {
   const router = useRouter();
   const [checkedModule, setCheckedModule] = useState(false);
 
   const handlePress = async () => {
-    await AsyncStorage.setItem("media", lesson.media)
-    await AsyncStorage.setItem("name", lesson.name)
-    router.navigate('/student-screens/cohorts/module')
-  }
+    await AsyncStorage.setItem('media', lesson.media);
+    console.log(lesson.media);
+    await AsyncStorage.setItem('name', lesson.name);
+    router.navigate('/student-screens/cohorts/module');
+  };
 
   return (
     <TouchableOpacity

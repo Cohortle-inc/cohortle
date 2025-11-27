@@ -1,11 +1,14 @@
 import {
+  ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
 import { Plus } from '@/assets/icons';
@@ -13,6 +16,8 @@ import { useRouter } from 'expo-router';
 import { useGetLearnerCohorts } from '@/api/learners/cohortsJoined';
 import { CommunityType } from '@/api/communities/postCommunity';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { colors } from '@/utils/color';
+import { useJoinCohort } from '@/api/cohorts/joinCohorts';
 
 interface CommunityData {
   id: string;
@@ -32,9 +37,21 @@ interface CommunityData {
 }
 
 const Community = () => {
-  const {data: communityData, isLoading: communityLoading} = useGetLearnerCohorts()
+  const { data: communityData, isLoading: communityLoading } =
+    useGetLearnerCohorts();
   // const {data}
-  console.log("KKK: ", communityData)
+  console.log('KKK: ', communityData);
+  const [code, setCode] = useState('');
+  const { mutate: joinMutation, isPending: joinPending } = useJoinCohort();
+
+  const handleJoin = () => {
+    if (!code.trim()) {
+      Alert.alert('Invalid Code', 'Please enter a valid join code.');
+      return;
+    }
+
+    joinMutation(code.trim());
+  };
   return (
     <SafeAreaWrapper>
       <View style={{ flex: 1, backgroundColor: 'white', marginVertical: 16 }}>
@@ -51,13 +68,83 @@ const Community = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {!communityLoading && communityData && (
+          {communityLoading ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 16,
+              }}
+            >
+              <ActivityIndicator size="large" color="#391D65" />
+              <Text
+                style={{
+                  color: '#666',
+                  fontSize: 16,
+                  fontFamily: 'DMSansMedium',
+                }}
+              >
+                Loading your cohorts...
+              </Text>
+            </View>
+          ) : communityData.length > 0 ? (
             <View>
               {communityData.map((data: any, index: number) => (
-                <View key={data.id || index} style={{}}>
+                <View key={data.id || index}>
                   <Course {...data} />
                 </View>
               ))}
+            </View>
+          ) : (
+            // Optional: Handle empty state when not loading and no data
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  color: '#666',
+                  fontSize: 16,
+                  fontFamily: 'DMSansMedium',
+                }}
+              >
+                No cohorts found.
+              </Text>
+              <View style={{ width: '100%', gap: 5 }}>
+                <Text style={{ textAlign: 'center' }}>
+                  Enter a Cohort Code to get Started
+                </Text>
+                <TextInput
+                  placeholder="Enter Join Code"
+                  value={code}
+                  onChangeText={setCode}
+                  style={{
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    borderColor: colors.purpleShade,
+                    fontSize: 16,
+                    padding: 5,
+                  }}
+                />
+                <Pressable
+                  onPress={handleJoin}
+                  style={{
+                    width: '100%',
+                    paddingVertical: 10,
+                    backgroundColor: colors.primary,
+                    borderRadius: 5,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ color: 'white' }}>
+                    {joinPending ? 'Joining...' : 'Join Cohort'}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           )}
         </ScrollView>
@@ -71,15 +158,24 @@ export default Community;
 const Course = (community: CommunityData) => {
   const router = useRouter();
   const handlePress = async () => {
-    await AsyncStorage.setItem("communityID", String(community.id))
-    await AsyncStorage.setItem("communityaName", String(community.name))
-    // await AsyncStorage.setItem("communityID", String(community.id))
-    router.navigate('/student-screens/cohorts/course')
+    await AsyncStorage.setItem('communityID', String(community.id));
+    await AsyncStorage.setItem('communityName', String(community.name));
+    await AsyncStorage.setItem(
+      'communityDescription',
+      String(community.description),
+    );
+    await AsyncStorage.setItem(
+      'convenerName',
+      `${community.first_name} ${community.last_name}`,
+    );
+    router.navigate('/student-screens/cohorts/course');
     // await AsyncStorage.setItem()
-  }
+  };
   return (
     <TouchableOpacity
-      onPress={() => {handlePress()}}
+      onPress={() => {
+        handlePress();
+      }}
       style={{
         marginBottom: 16,
         borderWidth: 1,

@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import {
   Calender,
@@ -19,9 +19,11 @@ import BottomSheet, {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
-import { router } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 import { Image, ActivityIndicator } from 'react-native';
 import { useProfile } from '@/hooks/api/useProfileHook';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = React.useState<'Communities' | 'Social'>(
@@ -30,7 +32,31 @@ const Profile = () => {
 
   // Use React Query instead of useState + useEffect
   const { data: profile, isLoading, error } = useProfile();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
+  const logOut = async () => {
+    try {
+      // Clear ALL query data
+      queryClient.clear();
+
+      // Clear auth storage
+      await AsyncStorage.removeItem('authToken');
+      // Optional: Clear other stored data
+      await AsyncStorage.removeItem('userData');
+
+      console.log('Logout successful - cache cleared');
+
+      // Navigate to login (use replace to prevent going back)
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Ensure cleanup happens even on error
+      queryClient.clear();
+      await AsyncStorage.removeItem('authToken');
+      router.replace('/(auth)/login');
+    }
+  };
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const Community = () => {
@@ -267,22 +293,7 @@ const Profile = () => {
               </Text>
             </Pressable>
             <Pressable
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
-            >
-              <Notifications />
-              <Text style={{ color: '#1F1F1F', fontFamily: 'DMSansRegular' }}>
-                Cohort notifications
-              </Text>
-            </Pressable>
-            <Pressable
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
-            >
-              <Lock />
-              <Text style={{ color: '#1F1F1F', fontFamily: 'DMSansRegular' }}>
-                Account authentication
-              </Text>
-            </Pressable>
-            <Pressable
+              onPress={logOut}
               style={{
                 marginTop: 'auto',
                 paddingVertical: 16,

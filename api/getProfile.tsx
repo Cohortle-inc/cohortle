@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
@@ -12,4 +13,12 @@ export const getProfile = async () => {
   });
   console.log(response);
   return response.data.message;
+};
+
+export const useGetProfile = () => {
+  return useQuery({
+    queryKey: ['profile'],
+    queryFn: getProfile,
+    refetchOnReconnect: true,
+  });
 };

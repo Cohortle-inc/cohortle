@@ -1,136 +1,170 @@
-import { StyleSheet, Text, TouchableOpacity, View, Dimensions, ActivityIndicator } from 'react-native';
-// import { useVideoPlayer, VideoView } from 'expo-video';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+  Dimensions,
+} from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Video, ResizeMode } from 'expo-av';
+import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
+import { useRouter } from 'expo-router';
+
+const { width } = Dimensions.get('window');
 
 const Module = () => {
-  const [title, setTitle] = useState<string | null>(null);
+  const router = useRouter();
+  const [title, setTitle] = useState('Untitled Lesson');
   const [media, setMedia] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<any>({});
-  const video = useRef<Video>(null);
-
+  const [isLoading, setIsLoading] = useState(true);
+  const videoRef = useRef<Video>(null);
+  const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
+  const [showControls, setShowControls] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   useEffect(() => {
-  const loadLessonData = async () => {
-    try {
-      const [savedMedia, savedTitle] = await Promise.all([
-        AsyncStorage.getItem("media"),
-        AsyncStorage.getItem("name"),
-      ]);
+    if (!showControls) return;
+    const timer = setTimeout(() => setShowControls(false), 4000);
+    return () => clearTimeout(timer);
+  }, [showControls]);
 
-      setMedia(savedMedia || "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4");
-      setTitle(savedTitle || "Untitled Lesson");
-    } catch (error) {
-      console.error("Failed to load lesson data:", error);
-      // Fallback to demo video
-      setMedia("https://d23dyxeqlo5psv.cloudfront.net/big_buck_b://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4");
-      setTitle("Demo Lesson");
-    } finally {
-      setIsLoading(false); // Don't forget to hide loader!
+  const togglePlayPause = () => {
+    if (status?.isPlaying) {
+      videoRef.current?.pauseAsync();
+    } else {
+      videoRef.current?.playAsync();
     }
   };
 
-  loadLessonData();
-}, []); // ← Empty array = run only once on mount
-  // const videoSource = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-  // const player = useVideoPlayer(videoSource, (player) => {
-  //   // 2. Configure the player
-  //   player.loop = true; // Set to loop
-  //   player.play();      // Start playing immediately
-  // });
-  // useEffect(() => {
-  //   const loadData = async () => {
-  //     try {
-  //       setIsLoading(true);
-  //       const [mediaUrl, titleText] = await Promise.all([
-  //         AsyncStorage.getItem("media"),
-  //         AsyncStorage.getItem("name")
-  //       ]);
-  //       setMedia(mediaUrl);
-  //       setTitle(titleText);
-  //     } catch (error) {
-  //       console.error('Error loading data:', error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-    
-  //   loadData();
-  // }, []);
+  const skip = (seconds: number) => {
+    if (status?.positionMillis) {
+      videoRef.current?.setPositionAsync(
+        status.positionMillis + seconds * 1000,
+      );
+    }
+  };
+
+  const formatTime = (millis: number) => {
+    const minutes = Math.floor(millis / 60000);
+    const seconds = Math.floor((millis % 60000) / 1000);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
+  const duration = status?.durationMillis || 0;
+  const position = status?.positionMillis || 0;
+
+  useEffect(() => {
+    const loadLessonData = async () => {
+      try {
+        setIsLoading(true);
+
+        const [savedMedia, savedTitle] = await Promise.all([
+          AsyncStorage.getItem('media'),
+          AsyncStorage.getItem('name'),
+        ]);
+
+        const videoUrl =
+          savedMedia ||
+          'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4';
+
+        setMedia(videoUrl);
+        setTitle(savedTitle || 'Untitled Lesson');
+      } catch (error) {
+        console.error('Failed to load lesson data:', error);
+        setMedia('https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4');
+        setTitle('Demo Lesson');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadLessonData();
+  }, []);
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#B085EF" />
-          <Text>Loading video...</Text>
+          <Text style={styles.loadingText}>Loading video...</Text>
         </View>
       </SafeAreaView>
     );
-  } 
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
-      {/* 3. Attach the player to the VideoView component */}
-      <Video
-        ref={video}
-        style={styles.video}
-        source={{
-          uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        }}
-        // Or local file:
-        // source={require('./assets/videos/sample.mp4')}
-
-        useNativeControls // This adds the default play/pause, fullscreen, etc.
-        resizeMode={ResizeMode.CONTAIN}
-        isLooping
-        onPlaybackStatusUpdate={setStatus}
-      />
-      
-    </View>
-
-      <View style={styles.contentSection}>
-        <Text style={styles.title}>
-          {title || 'Untitled Lesson'}
-        </Text>
-        <Text style={styles.description}>
-          Create High-Fidelity Designs and Prototypes in Figma
-        </Text>
+      {/* Video Player */}
+      <View style={styles.videoWrapper}>
+        {media ? (
+          <View style={styles.videoWrapper}>
+            <Video
+              ref={videoRef}
+              style={styles.video}
+              source={{ uri: media }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              isLooping={false}
+              onPlaybackStatusUpdate={setStatus}
+              onLoad={() => setShowControls(true)}
+              onError={(e) => console.log('Video Error:', e)}
+            />
+          </View>
+        ) : (
+          <View style={styles.noVideo}>
+            <Text>Video not available</Text>
+          </View>
+        )}
       </View>
-      
+
+      {/* Content */}
+      <View style={styles.contentSection}>
+        <Text style={styles.title}>{title}</Text>
+        {/* <Text style={styles.description}>
+          Create High-Fidelity Designs and Prototypes in Figma
+        </Text> */}
+      </View>
+
+      {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={() => console.log('Mark as complete Pressed')}
-        >
-          <Text style={styles.buttonText}>Mark as complete</Text>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Mark as Complete</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.button}
-          onPress={() => console.log('Next Pressed')}
+
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={[styles.button, styles.nextButton]}
         >
-          <Text style={styles.buttonText}>Next</Text>
+          <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+            Back
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
 
-export default Module; // Crucial: Default export
+export default Module;
 
 const styles = StyleSheet.create({
-  videoContainer: {
-    flex: 1,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
-  vwVideo: {
-    width: Dimensions.get('window').width,
-    height: 300, // Define the size for the video view
+  overlayTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  playButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 50,
   },
   container: {
     flex: 1,
@@ -140,49 +174,67 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 16,
   },
-  videoSection: {
-    flex: 1,
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  videoWrapper: {
+    width: '100%',
+    height: 250,
+    backgroundColor: '#000',
   },
   video: {
     width: '100%',
-    height: 300,
+    height: '100%',
+    overflow: 'hidden', // This makes borderRadius work!
+    elevation: 8, // Android shadow
+    shadowColor: '#000',
   },
-  noVideoContainer: {
-    width: '100%',
-    height: 300,
-    backgroundColor: '#f0f0f0',
+  noVideo: {
+    flex: 1,
+    backgroundColor: '#111',
     justifyContent: 'center',
     alignItems: 'center',
   },
   contentSection: {
-    padding: 16,
+    padding: 20,
+    gap: 8,
   },
   title: {
-    fontSize: 14,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#1F1F1F',
   },
   description: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 16,
+    color: '#555',
+    lineHeight: 24,
   },
   buttonContainer: {
-    marginTop: 'auto',
     flexDirection: 'row',
-    gap: 8,
-    padding: 16,
-    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    gap: 12,
+    marginTop: 'auto',
   },
   button: {
-    backgroundColor: '#B085EF',
-    padding: 10,
-    borderRadius: 10,
     flex: 1,
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  nextButton: {
+    backgroundColor: '#391D65',
   },
   buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 10,
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'grey',
+  },
+  nextButtonText: {
+    color: 'red',
   },
 });

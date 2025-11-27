@@ -14,6 +14,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Eye, EyeOff } from 'lucide-react-native'; // or another icon library
+import { useGetProfile } from '@/api/getProfile';
 
 type Props = {};
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
@@ -24,6 +25,7 @@ const LoginScreen = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  // const { data: profileData } = useGetProfile()
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,11 +67,13 @@ const LoginScreen = (props: Props) => {
         await AsyncStorage.setItem('userData', JSON.stringify(result.user));
         console.log(result.token);
 
-        // Navigate to onboarding with token
-        router.replace({
-          pathname: '/convener-screens/(cohorts)',
-          params: { token: result.token },
-        });
+        const userRole = result.user.role;
+
+        if (userRole === 'convener') {
+          router.replace('/convener-screens/(cohorts)');
+        } else {
+          router.replace('/student-screens/cohorts');
+        }
       } else {
         setError(result.message || 'Login failed. Please try again.');
       }
@@ -153,7 +157,7 @@ const LoginScreen = (props: Props) => {
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push('/(auth)/signUp')}
+          onPress={() => router.push('/(auth)/email-confirmation')}
         >
           <Text style={styles.signupText}>
             Don't have an account?{' '}

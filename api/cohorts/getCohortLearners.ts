@@ -1,38 +1,33 @@
+// hooks/useGetCohortLearners.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
-export const getCohortLearners = async (id: string) => {
-  const apiURL = process.env.EXPO_PUBLIC_API_URL;
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+const getCohortLearners = async (id: string) => {
   const token = await AsyncStorage.getItem('authToken');
 
-  if (!apiURL) throw new Error('Missing API URL');
+  if (!API_URL) throw new Error('Missing API URL');
   if (!token) throw new Error('Missing auth token');
 
-  try {
-    const response = await axios.get(`${apiURL}/v1/api/cohorts/${id}/learners`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Cache-Control': 'no-cache',
-      },
-    });
+  const response = await axios.get(`${API_URL}/v1/api/cohorts/${id}/learners`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    console.log("ppp: ", response.data.learners)
-    return response.data.learners;
-  } catch (error: any) {
-    console.error(
-      'Error fetching cohort:',
-      error?.response?.data || error.message,
-    );
-    throw new Error(`Failed to fetch cohort ${id}`);
-  }
+  console.log(response.data.learners);
+  return response.data.learners;
 };
-export const useGetCohortLearners = (id: string | undefined) => {
+
+export const useGetCohortLearners = (cohortId: string | undefined) => {
   return useQuery({
-    queryKey: ['cohort-learners', id],
-    queryFn: () => getCohortLearners(id as string),
+    queryKey: ['joinedCohorts', cohortId], // consistent key
+    queryFn: () => getCohortLearners(cohortId!),
+    enabled: !!cohortId, // only run if ID exists
+    staleTime: 5000, // 30 seconds
     refetchOnReconnect: true,
-    refetchInterval: 5000,
-    staleTime: 0
+    refetchOnWindowFocus: false,
   });
 };

@@ -15,7 +15,11 @@ interface EditModuleParams {
   };
 }
 
-const updateModule = async ({ community_id, module_id, data }: EditModuleParams) => {
+const updateModule = async ({
+  community_id,
+  module_id,
+  data,
+}: EditModuleParams) => {
   const token = await AsyncStorage.getItem('authToken');
   if (!token) throw new Error('Authentication required');
 
@@ -27,7 +31,7 @@ const updateModule = async ({ community_id, module_id, data }: EditModuleParams)
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-    }
+    },
   );
 
   return response.data;
@@ -44,7 +48,9 @@ export const useEditModule = () => {
 
       // Instant UI update in modules list
       queryClient.setQueryData(['modules', community_id], (old: any) =>
-        old?.map((m: any) => (m.id === module_id ? { ...m, ...updatedModule } : m))
+        old?.map((m: any) =>
+          m.id === module_id ? { ...m, ...updatedModule } : m,
+        ),
       );
 
       // Update single module if cached
@@ -56,7 +62,10 @@ export const useEditModule = () => {
     },
 
     onError: (error: any) => {
-      console.error('Failed to update module:', error.response?.data || error.message);
+      console.error(
+        'Failed to update module:',
+        error.response?.data || error.message,
+      );
     },
   });
 };

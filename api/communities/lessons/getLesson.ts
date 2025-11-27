@@ -27,6 +27,6 @@ export const useGetLesson = (lessonId: string, moduleId: string) => {
     queryKey: ['lesson', lessonId, moduleId],
     queryFn: () => getLesson(lessonId, moduleId),
     refetchOnReconnect: true,
-    refetchInterval: 5000
+    refetchInterval: 5000,
   });
 };
