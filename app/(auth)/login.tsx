@@ -25,7 +25,7 @@ const LoginScreen = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // const { data: profileData } = useGetProfile()
 
   const validateEmail = (email: string) => {
@@ -116,7 +116,7 @@ const LoginScreen = (props: Props) => {
             keyboardType="email-address"
           />
         </View>
- 
+
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Password</Text>
           <View style={styles.passwordContainer}>

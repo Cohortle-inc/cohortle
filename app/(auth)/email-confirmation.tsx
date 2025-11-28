@@ -23,7 +23,6 @@ const EmailConfirmation = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-    
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -82,74 +81,77 @@ const EmailConfirmation = (props: Props) => {
         <Text>Fill in the field to create an account</Text>
         {/* <Text>We'll send you a quick email to confirm your address.</Text> */}
 
-        <View style={{gap: 5, marginTop:15}}>
-          
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Email</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={email}
-                    placeholder="Enter your email"
-                    placeholderTextColor="#999"
-                    editable={!loading}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                  />
-                </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.passwordContainer}>
+        <View style={{ gap: 5, marginTop: 15 }}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Email</Text>
             <TextInput
-              style={styles.passwordInput}
-              value={password}
-              placeholder="Enter your password"
+              style={styles.input}
+              value={email}
+              placeholder="Enter your email"
               placeholderTextColor="#999"
               editable={!loading}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
+              onChangeText={setEmail}
               autoCapitalize="none"
+              keyboardType="email-address"
             />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOff size={20} color="#666" />
-              ) : (
-                <Eye size={20} color="#666" />
-              )}
-            </TouchableOpacity>
           </View>
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Confirm password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              value={confirmPassword}
-              placeholder="Confirm password"
-              placeholderTextColor="#999"
-              editable={!loading}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOff size={20} color="#666" />
-              ) : (
-                <Eye size={20} color="#666" />
-              )}
-            </TouchableOpacity>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                value={password}
+                placeholder="Enter your password"
+                placeholderTextColor="#999"
+                editable={!loading}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} color="#666" />
+                ) : (
+                  <Eye size={20} color="#666" />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Confirm password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                value={confirmPassword}
+                placeholder="Confirm password"
+                placeholderTextColor="#999"
+                editable={!loading}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} color="#666" />
+                ) : (
+                  <Eye size={20} color="#666" />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
         <View style={{ marginTop: 36 }}>
-          <Button disabled={loading} text={!loading ? "Next" : "Creating account..."} onPress={handleSubmit} />
+          <Button
+            disabled={loading}
+            text={!loading ? 'Next' : 'Creating account...'}
+            onPress={handleSubmit}
+          />
         </View>
         {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
       </View>
@@ -167,7 +169,7 @@ const styles = StyleSheet.create({
   header: {
     fontWeight: 'bold',
   },
-  
+
   inputContainer: {
     marginBottom: 20,
   },
@@ -215,7 +217,7 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontWeight: '600',
   },
-  
+
   input: {
     borderRadius: 8,
     padding: 15,

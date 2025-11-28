@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
-import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useTheme } from '@shopify/restyle';
 import Onboarding from 'react-native-onboarding-swiper';
 import Lottie from 'lottie-react-native';
 import { useRouter } from 'expo-router';
 import { setItem } from '@/utils/asyncStorage';
 import { Theme, Text } from '@/theme/theme';
-import OnboardOne from '../../assets/icons/onboarding/1.svg'
-import OnboardTwo from '../../assets/icons/onboarding/2.svg'
-import OnboardFour from '../../assets/icons/onboarding/3.svg'
-import OnboardThree from '../../assets/icons/onboarding/5.svg'
+import OnboardOne from '../../assets/icons/onboarding/1.svg';
+import OnboardTwo from '../../assets/icons/onboarding/2.svg';
+import OnboardFour from '../../assets/icons/onboarding/3.svg';
+import OnboardThree from '../../assets/icons/onboarding/5.svg';
 
 const { width } = Dimensions.get('window');
 
@@ -69,7 +75,7 @@ const OnBoarding = () => {
           {
             backgroundColor: 'white',
             image: (
-              <View style={{alignItems: 'center'}}>
+              <View style={{ alignItems: 'center' }}>
                 <Text style={[styles.header]} variant="headerTwo">
                   Learning feels better with others
                 </Text>
@@ -103,7 +109,7 @@ const OnBoarding = () => {
             image: (
               <View>
                 <Text style={styles.header} variant="headerTwo">
-                  Share your knowledge, one lesson at a time
+                  Share knowledge, one lesson at a time
                 </Text>
                 <OnboardThree width={400} height={400} />
               </View>

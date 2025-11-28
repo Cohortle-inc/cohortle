@@ -25,6 +25,6 @@ export const useGetLearnerCohorts = () => {
     queryFn: getLearnerCohorts,
     refetchInterval: 15000,
     staleTime: 500,
-    refetchOnReconnect: true
+    refetchOnReconnect: true,
   });
 };

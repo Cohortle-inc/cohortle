@@ -55,7 +55,7 @@ const courseOptions = [
     key: 'self_paced',
     title: 'Self-paced',
     description: 'Learners can start immediately and learn at their own pace',
-  }
+  },
 ];
 const getButtonStyle = (isActive: any) => ({
   width: 270, // fallback for string percentage, but better to use number below
@@ -88,13 +88,13 @@ const Index = (props: Props) => {
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
 
   console.log(apiURL);
-  const { mutate: createCommunity } = usePostCommunity(numericId);
+  const { mutate: createCommunity, isPending } = usePostCommunity(numericId);
   const { data: communities = [], isLoading } = useGetCommunities(numericId);
   const handleStep = () => {
     setStep(step + 1);
   };
-  
-  console.log(communities)
+
+  console.log(communities);
 
   console.log('Sol', communities);
 
@@ -119,7 +119,7 @@ const Index = (props: Props) => {
 
     createCommunity(payload, {
       onSuccess: (data: any) => {
-        console.log('Community created successfully:', data);
+        console.log('Track created successfully:', data);
         // Close modal and reset form
         setModalVisible(false);
         setFormData({
@@ -148,6 +148,7 @@ const Index = (props: Props) => {
   }, []);
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
+    setStep(1);
   };
   const openBottomSheet = () => {
     bottomSheetRef.current?.expand();
@@ -183,102 +184,131 @@ const Index = (props: Props) => {
             <Plus />
           </TouchableOpacity> */}
         </View>
-      </View>{isLoading ? (
-  // Loading State
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
-    <ActivityIndicator size="large" color="#391D65" />
-    <Text style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}>
-      Loading communities...
-    </Text>
-  </View>
-) : communities.length > 0 ? (
-  // Has Communities
-  <ScrollView
-    contentContainerStyle={{ paddingVertical: 16, gap: 16 }}
-    showsVerticalScrollIndicator={false}
-  >
-    {communities.map((community: CommunityType) => (
-      <Community
-        key={community.id}
-        {...community}
-        onOpenBottomSheet={openBottomSheet}
-      />
-    ))}
+      </View>
+      {isLoading ? (
+        // Loading State
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
+          <ActivityIndicator size="large" color="#391D65" />
+          <Text
+            style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}
+          >
+            Loading tracks...
+          </Text>
+        </View>
+      ) : communities.length > 0 ? (
+        // Has Communities
+        <ScrollView
+          contentContainerStyle={{ paddingVertical: 16, gap: 16 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {communities.map((community: CommunityType) => (
+            <Community
+              key={community.id}
+              {...community}
+              onOpenBottomSheet={openBottomSheet}
+            />
+          ))}
 
-    {/* Show "Create Community" button only if less than 2 communities */}
-    {communities.length < 10 && (
-      <TouchableOpacity
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          marginTop: 24,
-          paddingVertical: 16,
-          backgroundColor: '#F8F1FF',
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: '#E8DDFD',
-        }}
-        onPress={toggleModal}
-      >
-        <PlusSmall />
-        <Text style={{ color: '#391D65', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
-          Create Community
-        </Text>
-      </TouchableOpacity>
-    )}
-  </ScrollView>
-) : (
-  // Empty State
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
-    <Text
-      style={{
-        color: '#1F1F1F',
-        fontSize: 22,
-        fontFamily: 'DMSansSemiBold',
-        textAlign: 'center',
-        marginBottom: 12,
-      }}
-    >
-      No communities yet
-    </Text>
-    <Text
-      style={{
-        color: '#666',
-        textAlign: 'center',
-        fontSize: 15,
-        lineHeight: 22,
-        marginBottom: 32,
-      }}
-    >
-      Create communities and let the discussion begin. Group members by topics,
-      courses, or interests.
-    </Text>
+          {/* Show "Create Community" button only if less than 2 communities */}
+          {communities.length < 10 && (
+            <TouchableOpacity
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                marginTop: 24,
+                paddingVertical: 16,
+                backgroundColor: '#F8F1FF',
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: '#E8DDFD',
+              }}
+              onPress={toggleModal}
+            >
+              <PlusSmall />
+              <Text
+                style={{
+                  color: '#391D65',
+                  fontFamily: 'DMSansSemiBold',
+                  fontSize: 16,
+                }}
+              >
+                Create Track
+              </Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      ) : (
+        // Empty State
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 32,
+          }}
+        >
+          <Text
+            style={{
+              color: '#1F1F1F',
+              fontSize: 22,
+              fontFamily: 'DMSansSemiBold',
+              textAlign: 'center',
+              marginBottom: 12,
+            }}
+          >
+            No cohort yet!
+          </Text>
+          <Text
+            style={{
+              color: '#666',
+              textAlign: 'center',
+              fontSize: 15,
+              lineHeight: 22,
+              marginBottom: 32,
+            }}
+          >
+            Create your first cohort and let the discussion begin. Group members
+            by topics, courses, or interests.
+          </Text>
 
-    <TouchableOpacity
-      style={{
-        backgroundColor: '#391D65',
-        paddingVertical: 16,
-        paddingHorizontal: 32,
-        borderRadius: 32,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 2 },
-      }}
-      onPress={toggleModal}
-    >
-      <PlusSmall color="#fff" />
-      <Text style={{ color: '#fff', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
-        Create Community
-      </Text>
-    </TouchableOpacity>
-  </View>
-)}
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#391D65',
+              paddingVertical: 16,
+              paddingHorizontal: 32,
+              borderRadius: 32,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOpacity: 0.1,
+              shadowOffset: { width: 0, height: 2 },
+            }}
+            onPress={toggleModal}
+          >
+            {/* <PlusSmall color="#fff" /> */}
+            <Text
+              style={{
+                color: '#fff',
+                fontFamily: 'DMSansSemiBold',
+                fontSize: 16,
+              }}
+            >
+              Create a cohort
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <Modal isVisible={isModalVisible}>
         <View
@@ -292,7 +322,11 @@ const Index = (props: Props) => {
         >
           <TouchableOpacity
             onPress={toggleModal}
-            style={{ alignItems: 'flex-end', position: 'relative', paddingVertical: 5}}
+            style={{
+              alignItems: 'flex-end',
+              position: 'relative',
+              paddingVertical: 5,
+            }}
           >
             <Close />
           </TouchableOpacity>
@@ -304,9 +338,7 @@ const Index = (props: Props) => {
               textAlign: 'center',
             }}
           >
-            {step === 1
-              ? 'Choose community Type'
-              : 'Choose community structure'}
+            {step === 1 ? 'Choose track Type' : 'Choose structure'}
           </Text>
           {/* {step == 1 && (
                 <ScrollView>
@@ -350,9 +382,9 @@ const Index = (props: Props) => {
           {step === 2 && (
             <ScrollView contentContainerStyle={styles.container}>
               {/* Course name */}
-              <Text style={styles.label}>Course name</Text>
+              <Text style={styles.label}>Track title</Text>
               <TextInput
-                placeholder="Your course name"
+                placeholder="Introduction to HTML"
                 value={formData.name}
                 onChangeText={(text) =>
                   setFormData({ ...formData, name: text })
@@ -362,9 +394,9 @@ const Index = (props: Props) => {
               />
 
               {/* Cohort Description */}
-              <Text style={styles.label}>Cohort Description</Text>
+              <Text style={styles.label}>Track Description</Text>
               <TextInput
-                placeholder="Describe what your cohort is about..."
+                placeholder="Beginner friendly course on HTML..."
                 style={[styles.input, styles.textarea]}
                 placeholderTextColor="#888"
                 value={formData.description}
@@ -421,12 +453,13 @@ const Index = (props: Props) => {
                 borderRadius: 32,
                 marginTop: 32,
                 backgroundColor: '#391D65',
-                width: 155
-                
+                width: 155,
               }}
               onPress={step < 2 ? handleStep : createCommunityHandler}
             >
-              <Text style={{ color: '#fff' }}>Next</Text>
+              <Text style={{ color: '#fff' }}>
+                {!isPending ? 'Next' : 'Creating...'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -521,7 +554,16 @@ const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
       }
       style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}
     >
-      <Ionicons name='grid' size={20} color={colors.primary} style={{padding: 5, backgroundColor: colors.purpleShade, borderRadius: 8}} />
+      <Ionicons
+        name="grid"
+        size={20}
+        color={colors.primary}
+        style={{
+          padding: 5,
+          backgroundColor: colors.purpleShade,
+          borderRadius: 8,
+        }}
+      />
       <View>
         <Text
           style={{ fontFamily: 'DMSansMedium', fontSize: 12, color: '#1F1F1F' }}
@@ -529,7 +571,7 @@ const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
           {name}
         </Text>
         {/* <View style={{ flexDirection: 'row', gap: 8 }}> */}
-          {/* <Text
+        {/* <Text
             style={{
               color: '#8D9091',
               marginTop: 4,
@@ -539,7 +581,7 @@ const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
           >
             3 Modules
           </Text> */}
-          {/* <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
+        {/* <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
             200 memebers
           </Text> */}
         {/* </View> */}

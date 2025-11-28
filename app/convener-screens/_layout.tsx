@@ -54,8 +54,8 @@ export default function TabLayout() {
         },
       })}
     >
-      <Tabs.Screen name="community" options={{ title: 'Community' }} />
-      <Tabs.Screen name="(cohorts)" options={{ title: 'Cohortz' }} />
+      <Tabs.Screen name="community" options={{ title: 'Home' }} />
+      <Tabs.Screen name="(cohorts)" options={{ title: 'Track' }} />
       <Tabs.Screen name="(profile)" options={{ title: 'Profile' }} />
     </Tabs>
   );

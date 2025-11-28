@@ -37,6 +37,6 @@ export const useGetCohort = (id: string | undefined) => {
     queryKey: ['cohort', id],
     queryFn: () => getCohort(id as string),
     refetchInterval: 15000,
-    refetchOnReconnect: true
+    refetchOnReconnect: true,
   });
 };

@@ -65,7 +65,10 @@ const Profile = () => {
   };
   const Community = (id: any, name: string) => {
     return (
-      <View key={id} style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+      <View
+        key={id}
+        style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}
+      >
         <View
           style={{
             backgroundColor: '#F2750D',
@@ -163,23 +166,27 @@ const Profile = () => {
             </Text>
           </View>
 
-            <Pressable
-              onPress={() => {
-                const url = profile?.socials || 'https://copywritingprompts.com';
-                Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
-              }}
-            >
-          <View style={styles.infoRow}>
-            <Share />
-              <Text style={[styles.infoText, { textDecorationLine: 'underline' }]}>
-                {profile?.socials &&  'Social Link'}
+          <Pressable
+            onPress={() => {
+              const url = profile?.socials || 'https://copywritingprompts.com';
+              Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
+            }}
+          >
+            <View style={styles.infoRow}>
+              <Share />
+              <Text
+                style={[styles.infoText, { textDecorationLine: 'underline' }]}
+              >
+                {profile?.socials && 'Social Link'}
               </Text>
-          </View>
-            </Pressable>
+            </View>
+          </Pressable>
 
           <View style={styles.infoRow}>
             <Calender />
-            <Text style={styles.infoText}>Joined {formatJoinedDate(profile.created_at)}</Text>
+            <Text style={styles.infoText}>
+              Joined {formatJoinedDate(profile.created_at)}
+            </Text>
           </View>
 
           <Pressable

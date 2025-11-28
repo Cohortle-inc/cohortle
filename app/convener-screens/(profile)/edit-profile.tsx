@@ -21,7 +21,7 @@ type Props = {};
 const EditProfile = (props: Props) => {
   // Initialize state with profile data
   const { data: profileData, isLoading: isProfileLoading } = useProfile();
-  console.log(profileData.profile_image)
+  console.log(profileData.profile_image);
   const updateProfileMutation = useUpdateProfile();
   const router = useRouter();
 
@@ -55,7 +55,7 @@ const EditProfile = (props: Props) => {
         socials: profileData.socials || '',
         bio: profileData.bio || '',
       };
-      
+
       setFormData(newFormData);
       setOriginalData({
         ...newFormData,
@@ -82,7 +82,7 @@ const EditProfile = (props: Props) => {
     if (!hasChanges) return;
 
     setIsSaving(true);
-    
+
     const payload = {
       first_name: formData.firstName.trim(),
       last_name: formData.lastName.trim(),
@@ -96,37 +96,34 @@ const EditProfile = (props: Props) => {
       { data: payload },
       {
         onSuccess: () => {
-          Alert.alert(
-            'Success', 
-            'Profile updated successfully!',
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  setIsSaving(false);
-                  router.back();
-                },
+          Alert.alert('Success', 'Profile updated successfully!', [
+            {
+              text: 'OK',
+              onPress: () => {
+                setIsSaving(false);
+                router.back();
               },
-            ]
-          );
+            },
+          ]);
         },
         onError: (error: any) => {
           setIsSaving(false);
           Alert.alert('Error', error.message || 'Failed to update profile');
         },
-      }
+      },
     );
   };
 
   const pickImage = useCallback(async () => {
     try {
       setIsPickingImage(true);
-      
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
-          'Permission Required', 
-          'We need access to your photos to update your profile picture.'
+          'Permission Required',
+          'We need access to your photos to update your profile picture.',
         );
         return;
       }
@@ -160,17 +157,17 @@ const EditProfile = (props: Props) => {
       'You have unsaved changes. Are you sure you want to discard them?',
       [
         { text: 'Stay', style: 'cancel' },
-        { 
-          text: 'Discard', 
+        {
+          text: 'Discard',
           style: 'destructive',
-          onPress: () => router.back() 
+          onPress: () => router.back(),
         },
-      ]
+      ],
     );
   };
 
   const updateFormField = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -179,7 +176,9 @@ const EditProfile = (props: Props) => {
   // Loading state
   if (isProfileLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center' }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center' }}
+      >
         <ActivityIndicator size="large" color="#391D65" />
       </SafeAreaView>
     );
@@ -187,13 +186,16 @@ const EditProfile = (props: Props) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <ScrollView 
-        contentContainerStyle={{ paddingBottom: 40 }} 
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={handleCancel} disabled={isSaving || isPickingImage}>
+          <Pressable
+            onPress={handleCancel}
+            disabled={isSaving || isPickingImage}
+          >
             <Back />
           </Pressable>
           <Text style={styles.headerTitle}>Edit Profile</Text>
@@ -216,7 +218,7 @@ const EditProfile = (props: Props) => {
               onPress={pickImage}
               style={[
                 styles.cameraBadge,
-                (isSaving || isPickingImage) && styles.cameraBadgeDisabled
+                (isSaving || isPickingImage) && styles.cameraBadgeDisabled,
               ]}
               disabled={isSaving || isPickingImage}
             >
@@ -233,12 +235,14 @@ const EditProfile = (props: Props) => {
         <View style={styles.formContainer}>
           <Input
             value={formData.firstName}
-            onChangeText={(value: string) => updateFormField('firstName', value)}
+            onChangeText={(value: string) =>
+              updateFormField('firstName', value)
+            }
             label="First Name"
             placeholder="Enter your first name"
             editable={!isSaving}
           />
-          
+
           <Input
             value={formData.lastName}
             onChangeText={(value: string) => updateFormField('lastName', value)}
@@ -246,7 +250,7 @@ const EditProfile = (props: Props) => {
             placeholder="Enter your last name"
             editable={!isSaving}
           />
-          
+
           <TextArea
             label="Bio"
             value={formData.bio}
@@ -255,7 +259,7 @@ const EditProfile = (props: Props) => {
             editable={!isSaving}
             maxLength={500}
           />
-          
+
           <Input
             value={formData.location}
             onChangeText={(value: string) => updateFormField('location', value)}
@@ -263,7 +267,7 @@ const EditProfile = (props: Props) => {
             placeholder="Enter your location"
             editable={!isSaving}
           />
-          
+
           <Input
             value={formData.socials}
             onChangeText={(value: string) => updateFormField('socials', value)}
@@ -278,8 +282,8 @@ const EditProfile = (props: Props) => {
           <Pressable
             onPress={handleCancel}
             style={[
-              styles.cancelBtn, 
-              (isSaving || isPickingImage) && styles.buttonDisabled
+              styles.cancelBtn,
+              (isSaving || isPickingImage) && styles.buttonDisabled,
             ]}
             disabled={isSaving || isPickingImage}
           >
@@ -291,7 +295,8 @@ const EditProfile = (props: Props) => {
             disabled={isSaving || isPickingImage || !hasChanges}
             style={[
               styles.saveBtn,
-              (isSaving || isPickingImage || !hasChanges) && styles.saveBtnDisabled,
+              (isSaving || isPickingImage || !hasChanges) &&
+                styles.saveBtnDisabled,
             ]}
           >
             {isSaving ? (
@@ -304,9 +309,7 @@ const EditProfile = (props: Props) => {
 
         {/* Changes Indicator */}
         {hasChanges && !isSaving && !isPickingImage && (
-          <Text style={styles.changesText}>
-            You have unsaved changes
-          </Text>
+          <Text style={styles.changesText}>You have unsaved changes</Text>
         )}
       </ScrollView>
     </SafeAreaView>

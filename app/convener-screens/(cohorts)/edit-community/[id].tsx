@@ -40,6 +40,7 @@ const EditCohort = () => {
   const { data: cohortLearners } = useGetCohortLearners(id);
   const updateCohort = useUpdateCohort();
   const deleteCohort = useDeleteCohort();
+  const [loading, setLoading] = useState(false);
   const removeLearnerMutation = useRemoveCohortLearner();
   // console.log(cohortLearners)
 
@@ -129,21 +130,23 @@ const EditCohort = () => {
   };
 
   const handleDeleteCohort = async () => {
+    setLoading(true);
     try {
       await deleteCohort.mutateAsync(String(id));
-      Alert.alert('Success', 'Cohort deleted successfully');
+      Alert.alert('Success', 'Community deleted successfully');
       router.push('/convener-screens/(cohorts)');
       // Navigate back or to another screen if necessary
     } catch (err: any) {
       Alert.alert('Error', err?.response?.data?.message || 'Delete failed');
     }
+    setLoading(false);
   };
 
   const [activeTab, setActiveTab] = useState<'details' | 'members'>('details');
 
   return (
     <SafeAreaWrapper>
-      <Header title="Edit cohort group" />
+      <Header title="Edit Community" />
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
@@ -216,7 +219,7 @@ const EditCohort = () => {
                   color: 'red',
                 }}
               >
-                Delete Cohort
+                Delete
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -258,7 +261,7 @@ const EditCohort = () => {
             ))
           ) : (
             <Text style={{ textAlign: 'center', marginTop: 20, color: '#666' }}>
-              No learners in this cohort yet.
+              No learners yet.
             </Text>
           )}
         </ScrollView>
@@ -286,7 +289,7 @@ const EditCohort = () => {
                 onPress={() => {
                   Alert.alert(
                     'Remove Learner',
-                    `Remove ${selectedLearner.first_name} from this cohort?`,
+                    `Remove ${selectedLearner.first_name} from this group?`,
                     [
                       { text: 'Cancel', style: 'cancel' },
                       {
@@ -304,7 +307,7 @@ const EditCohort = () => {
                   Remove learner
                 </Text>
                 <Text style={{ color: '#8D9091', fontSize: 12 }}>
-                  Learner will lose access to this cohort and its communities.
+                  Learner will lose access to this community and its content.
                 </Text>
               </TouchableOpacity>
 
@@ -426,12 +429,12 @@ const EditCohort = () => {
               textAlign: 'center',
             }}
           >
-            Delete this cohort group?
+            Delete this Community?
           </Text>
           <View>
             <Text style={{ color: '#1F1F1F', marginTop: 16 }}>
               If you proceed, you will permanently lose ALL the data associated
-              with this cohort group
+              with it
             </Text>
             {/* <View>
               <TouchableOpacity
@@ -510,6 +513,7 @@ const EditCohort = () => {
             }}
           >
             <TouchableOpacity
+              onPress={() => setDeleteCohortVisible(false)}
               style={{
                 borderWidth: 1,
                 borderColor: '#F8F1FF',
@@ -534,8 +538,11 @@ const EditCohort = () => {
                 width: '50%',
                 flex: 1,
               }}
+              disabled={loading}
             >
-              <Text style={{ color: '#fff' }}>Confirm</Text>
+              <Text style={{ color: '#fff' }}>
+                {loading ? 'Deleting...' : 'Confirm'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
