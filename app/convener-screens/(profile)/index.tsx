@@ -163,19 +163,19 @@ const Profile = () => {
             </Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Share />
             <Pressable
               onPress={() => {
                 const url = profile?.socials || 'https://copywritingprompts.com';
                 Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
               }}
             >
+          <View style={styles.infoRow}>
+            <Share />
               <Text style={[styles.infoText, { textDecorationLine: 'underline' }]}>
-                {profile?.socials || 'copywritingprompts.com'}
+                {profile?.socials && 'Social link'}
               </Text>
-            </Pressable>
           </View>
+            </Pressable>
 
           <View style={styles.infoRow}>
             <Calender />

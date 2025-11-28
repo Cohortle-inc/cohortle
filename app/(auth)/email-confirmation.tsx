@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import axios, { AxiosError } from 'axios';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 type Props = {};
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
@@ -21,6 +22,8 @@ const EmailConfirmation = (props: Props) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+    
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -79,40 +82,74 @@ const EmailConfirmation = (props: Props) => {
         <Text>Fill in the field to create an account</Text>
         {/* <Text>We'll send you a quick email to confirm your address.</Text> */}
 
-        <View style={{ gap: 2, marginTop: 8 }}>
-          <Text>Email</Text>
-          <TextInput
-            style={styles.input}
-            autoCapitalize="none"
-            value={email}
-            editable={!loading}
-            onChangeText={setEmail}
-          />
+        <View style={{gap: 5, marginTop:15}}>
+          
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Email</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={email}
+                    placeholder="Enter your email"
+                    placeholderTextColor="#999"
+                    editable={!loading}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              value={password}
+              placeholder="Enter your password"
+              placeholderTextColor="#999"
+              editable={!loading}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <EyeOff size={20} color="#666" />
+              ) : (
+                <Eye size={20} color="#666" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={{ gap: 2, marginTop: 8 }}>
-          <Text>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            editable={!loading}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholder="Confirm Password"
-          />
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Confirm password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              value={confirmPassword}
+              placeholder="Confirm password"
+              placeholderTextColor="#999"
+              editable={!loading}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <EyeOff size={20} color="#666" />
+              ) : (
+                <Eye size={20} color="#666" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={{ gap: 2, marginTop: 8 }}>
-          <Text>Confirm Password</Text>
-          <TextInput
-            style={styles.input}
-            value={confirmPassword}
-            editable={!loading}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            placeholder="Confirm Password"
-          />
         </View>
         <View style={{ marginTop: 36 }}>
-          <Button text="Next" onPress={handleSubmit} />
+          <Button disabled={loading} text={!loading ? "Next" : "Creating account..."} onPress={handleSubmit} />
         </View>
         {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
       </View>
@@ -127,13 +164,63 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  input: {
-    borderRadius: 5,
-    paddingHorizontal: 4,
-    borderColor: 'black',
-    borderWidth: 1,
-  },
   header: {
     fontWeight: 'bold',
+  },
+  
+  inputContainer: {
+    marginBottom: 20,
+  },
+  label: {
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 15,
+    fontSize: 16,
+  },
+  eyeIcon: {
+    padding: 10,
+  },
+  buttonContainer: {
+    marginTop: 10,
+    position: 'relative',
+  },
+  loader: {
+    position: 'absolute',
+    right: 20,
+    top: 15,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  signupLink: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  signupText: {
+    color: '#666',
+  },
+  signupHighlight: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  
+  input: {
+    borderRadius: 8,
+    padding: 15,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    fontSize: 16,
   },
 });

@@ -21,6 +21,7 @@ import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typesc
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
 import { Link } from 'expo-router';
+import OnboardFive from '../../assets/icons/onboarding/4.svg'
 
 const { width, height } = Dimensions.get('window');
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 20 : Constants.statusBarHeight;
@@ -70,13 +71,8 @@ const Welcome = (props: Props) => {
               Let's embark on your learning adventure together.
             </Text>
           </View>
-          <View>
-            <Lottie
-              style={styles.lottie}
-              source={require('../../assets/images/lottie.json')}
-              autoPlay
-              loop
-            />
+          <View style={{alignItems: 'center'}}>
+            <OnboardFive width={320} height={320} />
           </View>
           <View style={styles.buttonContainer}>
             <Button onPress={openBottomSheet} text="Get Started" />

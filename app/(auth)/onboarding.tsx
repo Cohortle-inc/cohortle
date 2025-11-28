@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@shopify/restyle';
 import Onboarding from 'react-native-onboarding-swiper';
 import Lottie from 'lottie-react-native';
 import { useRouter } from 'expo-router';
 import { setItem } from '@/utils/asyncStorage';
 import { Theme, Text } from '@/theme/theme';
+import OnboardOne from '../../assets/icons/onboarding/1.svg'
+import OnboardTwo from '../../assets/icons/onboarding/2.svg'
+import OnboardFour from '../../assets/icons/onboarding/3.svg'
+import OnboardThree from '../../assets/icons/onboarding/5.svg'
 
 const { width } = Dimensions.get('window');
 
@@ -63,79 +67,59 @@ const OnBoarding = () => {
         }}
         pages={[
           {
-            backgroundColor: theme.colors.skyBlue,
+            backgroundColor: 'white',
             image: (
-              <View>
+              <View style={{alignItems: 'center'}}>
                 <Text style={[styles.header]} variant="headerTwo">
-                  Learn and network at the same time!
+                  Learning feels better with others
                 </Text>
-                <Lottie
-                  style={styles.lottie}
-                  source={require('../../assets/images/lottie.json')}
-                  autoPlay
-                  loop
-                />
-                <Text style={styles.subHeading} variant="subheading">
+                <OnboardOne width={400} height={400} />
+                {/* <Text style={styles.subHeading} variant="subheading">
                   Invited to Cohortle{' '}
                   <Text style={{ textDecorationLine: 'underline' }}>
                     Accept Invitation
                   </Text>
-                </Text>
+                </Text> */}
               </View>
             ),
             title: '',
             subtitle: '',
           },
           {
-            backgroundColor: theme.colors.mintGreen,
+            backgroundColor: 'white',
             image: (
               <View>
                 <Text style={styles.header} variant="headerTwo">
-                  You can be a Convener
+                  Create a space where people grow
                 </Text>
-                <Lottie
-                  style={styles.lottie}
-                  source={require('../../assets/images/lottie.json')}
-                  autoPlay
-                  loop
-                />
+                <OnboardTwo width={400} height={400} />
               </View>
             ),
             title: '',
             subtitle: '',
           },
           {
-            backgroundColor: theme.colors.lightYellow,
+            backgroundColor: 'white',
             image: (
               <View>
                 <Text style={styles.header} variant="headerTwo">
-                  A Creator
+                  Share your knowledge, one lesson at a time
                 </Text>
-                <Lottie
-                  style={styles.lottie}
-                  source={require('../../assets/images/lottie.json')}
-                  autoPlay
-                  loop
-                />
+                <OnboardThree width={400} height={400} />
               </View>
             ),
             title: '',
             subtitle: '',
           },
           {
-            backgroundColor: theme.colors.lightGreen,
+            backgroundColor: 'white',
             title: '',
             image: (
               <View>
                 <Text style={styles.header} variant="headerTwo">
-                  Or a Student
+                  Stay motivated, finish what you start
                 </Text>
-                <Lottie
-                  style={styles.lottie}
-                  source={require('../../assets/images/lottie.json')}
-                  autoPlay
-                  loop
-                />
+                <OnboardFour width={400} height={400} />
               </View>
             ),
             subtitle: '',
