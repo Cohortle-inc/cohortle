@@ -158,7 +158,7 @@ const LoginScreen = (props: Props) => {
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push('/(auth)/email-confirmation')}
+          onPress={() => router.push('/(auth)/onboarding')}
         >
           <Text style={styles.signupText}>
             Don't have an account?{' '}

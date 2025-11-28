@@ -119,7 +119,7 @@ const Index = (props: Props) => {
 
     createCommunity(payload, {
       onSuccess: (data: any) => {
-        console.log('Track created successfully:', data);
+        console.log('Cohort created successfully:', data);
         // Close modal and reset form
         setModalVisible(false);
         setFormData({
@@ -199,7 +199,7 @@ const Index = (props: Props) => {
           <Text
             style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}
           >
-            Loading tracks...
+            Loading cohorts...
           </Text>
         </View>
       ) : communities.length > 0 ? (
@@ -241,7 +241,7 @@ const Index = (props: Props) => {
                   fontSize: 16,
                 }}
               >
-                Create Track
+                Create Cohort
               </Text>
             </TouchableOpacity>
           )}
@@ -338,7 +338,7 @@ const Index = (props: Props) => {
               textAlign: 'center',
             }}
           >
-            {step === 1 ? 'Choose track Type' : 'Choose structure'}
+            {step === 1 ? 'Choose cohort Type' : 'Choose cohort structure'}
           </Text>
           {/* {step == 1 && (
                 <ScrollView>
@@ -382,7 +382,7 @@ const Index = (props: Props) => {
           {step === 2 && (
             <ScrollView contentContainerStyle={styles.container}>
               {/* Course name */}
-              <Text style={styles.label}>Track title</Text>
+              <Text style={styles.label}>Cohort title</Text>
               <TextInput
                 placeholder="Introduction to HTML"
                 value={formData.name}
@@ -394,7 +394,7 @@ const Index = (props: Props) => {
               />
 
               {/* Cohort Description */}
-              <Text style={styles.label}>Track Description</Text>
+              <Text style={styles.label}>Cohort Description</Text>
               <TextInput
                 placeholder="Beginner friendly course on HTML..."
                 style={[styles.input, styles.textarea]}
