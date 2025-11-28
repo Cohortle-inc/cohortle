@@ -11,7 +11,7 @@ export const getProfile = async () => {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log(response);
+  console.log(response.data.message);
   return response.data.message;
 };
 
@@ -19,6 +19,8 @@ export const useGetProfile = () => {
   return useQuery({
     queryKey: ['profile'],
     queryFn: getProfile,
-    refetchOnReconnect: true,
+    // refetchOnReconnect: true,
+    refetchInterval: 5000,
+    staleTime: 1
   });
 };

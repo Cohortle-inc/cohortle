@@ -338,7 +338,7 @@ const Cohort = ({ name, onOpenBottomSheet, onPress }: CohortProps) => {
       onPress={onPress}
       style={{
         gap: 16,
-        alignItems: 'flex-start',
+        alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
       }}
