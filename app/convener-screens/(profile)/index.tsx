@@ -20,12 +20,13 @@ import BottomSheet, {
 } from '@gorhom/bottom-sheet';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import { router } from 'expo-router';
-import { Image, ActivityIndicator } from 'react-native';
+import { Image, ActivityIndicator, Linking } from 'react-native';
 import { useProfile } from '@/hooks/api/useProfileHook';
 import { useGetCohort } from '@/api/cohorts/getCohort';
 import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 import { useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { formatJoinedDate } from '@/utils/date';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = React.useState<'Communities' | 'Social'>(
@@ -35,7 +36,7 @@ const Profile = () => {
   // Use React Query instead of useState + useEffect
   const { data: profile, isLoading, error } = useProfile();
 
-  const { data: cohorts = [] } = useConvenersCohorts();
+  // const { data: cohorts = [] } = useConvenersCohorts();
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const queryClient = useQueryClient();
@@ -62,9 +63,9 @@ const Profile = () => {
       router.replace('/(auth)/login');
     }
   };
-  const Community = (name: any) => {
+  const Community = (id: any, name: string) => {
     return (
-      <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+      <View key={id} style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
         <View
           style={{
             backgroundColor: '#F2750D',
@@ -134,7 +135,7 @@ const Profile = () => {
     <SafeAreaWrapper>
       {/* Header Section */}
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Sadiq's Cohort</Text>
+        <Text style={styles.headerTitle}>My Cohort</Text>
         <Pressable onPress={openBottomSheet}>
           <Options />
         </Pressable>
@@ -164,14 +165,21 @@ const Profile = () => {
 
           <View style={styles.infoRow}>
             <Share />
-            <Text style={styles.infoText}>
-              {profile?.socials || 'copywritingprompts.com'}
-            </Text>
+            <Pressable
+              onPress={() => {
+                const url = profile?.socials || 'https://copywritingprompts.com';
+                Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
+              }}
+            >
+              <Text style={[styles.infoText, { textDecorationLine: 'underline' }]}>
+                {profile?.socials || 'copywritingprompts.com'}
+              </Text>
+            </Pressable>
           </View>
 
           <View style={styles.infoRow}>
             <Calender />
-            <Text style={styles.infoText}>Joined August 2011</Text>
+            <Text style={styles.infoText}>Joined {formatJoinedDate(profile.created_at)}</Text>
           </View>
 
           <Pressable
@@ -210,15 +218,16 @@ const Profile = () => {
       <View>
         {activeTab === 'Communities' ? (
           <View style={{ gap: 16 }}>
-            {cohorts.map((data: any) => {
-              <Community key={data.id} name={data.name} />;
-            })}
+            {/* {cohorts.map((data: any) => (
+              <Community key={data.id} name={data.name} />
+            ))} */}
           </View>
         ) : (
           <View style={{ gap: 16 }}>
-            <View
+            {/* <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
             >
+              
               <X />
               <Text
                 style={{
@@ -229,8 +238,8 @@ const Profile = () => {
               >
                 {profile?.socials || 'copywritingprompts.com'}
               </Text>
-            </View>
-            <View
+            </View> */}
+            {/* <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
             >
               <Facebook />
@@ -271,7 +280,7 @@ const Profile = () => {
               >
                 {profile?.socials || 'copywritingprompts.com'}
               </Text>
-            </View>
+            </View> */}
           </View>
         )}
       </View>

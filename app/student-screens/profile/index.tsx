@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import {
   Calender,
@@ -19,11 +19,14 @@ import BottomSheet, {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
-import { router, useRouter } from 'expo-router';
-import { Image, ActivityIndicator } from 'react-native';
+import { router } from 'expo-router';
+import { Image, ActivityIndicator, Linking } from 'react-native';
 import { useProfile } from '@/hooks/api/useProfileHook';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useGetCohort } from '@/api/cohorts/getCohort';
+import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 import { useQueryClient } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { formatJoinedDate } from '@/utils/date';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = React.useState<'Communities' | 'Social'>(
@@ -32,7 +35,10 @@ const Profile = () => {
 
   // Use React Query instead of useState + useEffect
   const { data: profile, isLoading, error } = useProfile();
-  const router = useRouter();
+
+  // const { data: cohorts = [] } = useConvenersCohorts();
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
   const queryClient = useQueryClient();
 
   const logOut = async () => {
@@ -57,11 +63,9 @@ const Profile = () => {
       router.replace('/(auth)/login');
     }
   };
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  const Community = () => {
+  const Community = (id: any, name: string) => {
     return (
-      <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+      <View key={id} style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
         <View
           style={{
             backgroundColor: '#F2750D',
@@ -78,7 +82,7 @@ const Profile = () => {
               color: '#1F1F1F',
             }}
           >
-            Branding & Brand Design
+            {name}
           </Text>
           <Text style={{ color: '#8D9091', fontSize: 10 }}>15.8K Members</Text>
         </View>
@@ -131,7 +135,7 @@ const Profile = () => {
     <SafeAreaWrapper>
       {/* Header Section */}
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Sadiq's Cohort</Text>
+        <Text style={styles.headerTitle}>My Cohort</Text>
         <Pressable onPress={openBottomSheet}>
           <Options />
         </Pressable>
@@ -161,18 +165,27 @@ const Profile = () => {
 
           <View style={styles.infoRow}>
             <Share />
-            <Text style={styles.infoText}>
-              {profile?.socials || 'copywritingprompts.com'}
-            </Text>
+            <Pressable
+              onPress={() => {
+                const url = profile?.socials || 'https://copywritingprompts.com';
+                Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
+              }}
+            >
+              <Text style={[styles.infoText, { textDecorationLine: 'underline' }]}>
+                {profile?.socials || 'copywritingprompts.com'}
+              </Text>
+            </Pressable>
           </View>
 
           <View style={styles.infoRow}>
             <Calender />
-            <Text style={styles.infoText}>Joined August 2011</Text>
+            <Text style={styles.infoText}>Joined {formatJoinedDate(profile.created_at)}</Text>
           </View>
 
           <Pressable
-            onPress={() => router.push('/student-screens/profile/edit-profile')}
+            onPress={() =>
+              router.push('/convener-screens/(profile)/edit-profile')
+            }
             style={styles.editButton}
           >
             <Text style={styles.editButtonText}>Edit profile</Text>
@@ -205,15 +218,16 @@ const Profile = () => {
       <View>
         {activeTab === 'Communities' ? (
           <View style={{ gap: 16 }}>
-            <Community />
-            <Community />
-            <Community />
+            {/* {cohorts.map((data: any) => (
+              <Community key={data.id} name={data.name} />
+            ))} */}
           </View>
         ) : (
           <View style={{ gap: 16 }}>
-            <View
+            {/* <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
             >
+              
               <X />
               <Text
                 style={{
@@ -224,8 +238,8 @@ const Profile = () => {
               >
                 {profile?.socials || 'copywritingprompts.com'}
               </Text>
-            </View>
-            <View
+            </View> */}
+            {/* <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
             >
               <Facebook />
@@ -266,7 +280,7 @@ const Profile = () => {
               >
                 {profile?.socials || 'copywritingprompts.com'}
               </Text>
-            </View>
+            </View> */}
           </View>
         )}
       </View>
@@ -292,6 +306,22 @@ const Profile = () => {
                 Edit profile
               </Text>
             </Pressable>
+            {/*<Pressable
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
+            >
+              <Notifications />
+              <Text style={{ color: '#1F1F1F', fontFamily: 'DMSansRegular' }}>
+                Cohort notifications
+              </Text>
+            </Pressable>
+            <Pressable
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
+            >
+              <Lock />
+              <Text style={{ color: '#1F1F1F', fontFamily: 'DMSansRegular' }}>
+                Account authentication
+              </Text>
+            </Pressable> */}
             <Pressable
               onPress={logOut}
               style={{

@@ -1,6 +1,11 @@
-# TODO: Implement Authentication Check in Root Layout
+# Task: Reformat profile.created_at
 
-- [ ] Import AsyncStorage and router in app/\_layout.tsx
-- [ ] Add useEffect hook to check for 'authToken' in AsyncStorage
-- [ ] Implement redirection to '/(auth)/login' if token is not present
-- [ ] Test the authentication flow
+## Completed Tasks
+- [x] Created date formatting utility in `utils/date.ts`
+- [x] Added `formatJoinedDate` function to format ISO timestamps to "Month Year" format
+- [x] Imported the formatting function in `app/convener-screens/(profile)/index.tsx`
+- [x] Updated the profile display to use formatted date instead of raw timestamp
+- [x] Fixed syntax errors in the profile component
+
+## Summary
+The profile.created_at field is now displayed in a user-friendly format (e.g., "Joined January 2023") instead of the raw ISO timestamp string.
