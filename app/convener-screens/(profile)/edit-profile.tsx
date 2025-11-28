@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   cancelText: {
     color: '#391D65',
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 14,
   },
   saveBtn: {
     backgroundColor: '#391D65',
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   saveText: {
     color: 'white',
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 14,
   },
   changesText: {
     marginTop: 24,

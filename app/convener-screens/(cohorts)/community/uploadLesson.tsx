@@ -129,9 +129,9 @@ const CreateLesson = () => {
       'Choose Media Type',
       'Select the type of file you want to upload',
       [
-        { text: 'Photos & Videos', onPress: pickMediaFromLibrary },
-        { text: 'Documents & Audio', onPress: pickDocumentsOrAudio },
-        { text: 'Cancel', style: 'cancel' },
+        // { text: 'Photos & Videos', onPress: pickMediaFromLibrary },
+        { text: 'Videos only', onPress: pickDocumentsOrAudio },
+        // { text: 'Cancel', style: 'cancel' },
       ],
     );
   };
