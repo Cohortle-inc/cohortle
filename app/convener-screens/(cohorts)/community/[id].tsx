@@ -88,7 +88,7 @@ const Index = (props: Props) => {
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
 
   console.log(apiURL);
-  const { mutate: createCommunity } = usePostCommunity(numericId);
+  const { mutate: createCommunity, isPending } = usePostCommunity(numericId);
   const { data: communities = [], isLoading } = useGetCommunities(numericId);
   const handleStep = () => {
     setStep(step + 1);
@@ -119,7 +119,7 @@ const Index = (props: Props) => {
 
     createCommunity(payload, {
       onSuccess: (data: any) => {
-        console.log('Community created successfully:', data);
+        console.log('Track created successfully:', data);
         // Close modal and reset form
         setModalVisible(false);
         setFormData({
@@ -148,6 +148,7 @@ const Index = (props: Props) => {
   }, []);
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
+    setStep(1)
   };
   const openBottomSheet = () => {
     bottomSheetRef.current?.expand();
@@ -188,7 +189,7 @@ const Index = (props: Props) => {
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
     <ActivityIndicator size="large" color="#391D65" />
     <Text style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}>
-      Loading communities...
+      Loading tracks...
     </Text>
   </View>
 ) : communities.length > 0 ? (
@@ -224,7 +225,7 @@ const Index = (props: Props) => {
       >
         <PlusSmall />
         <Text style={{ color: '#391D65', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
-          Create Community
+          Create Track
         </Text>
       </TouchableOpacity>
     )}
@@ -241,7 +242,7 @@ const Index = (props: Props) => {
         marginBottom: 12,
       }}
     >
-      No communities yet
+      No cohort yet!
     </Text>
     <Text
       style={{
@@ -252,7 +253,7 @@ const Index = (props: Props) => {
         marginBottom: 32,
       }}
     >
-      Create communities and let the discussion begin. Group members by topics,
+      Create your first cohort and let the discussion begin. Group members by topics,
       courses, or interests.
     </Text>
 
@@ -272,9 +273,9 @@ const Index = (props: Props) => {
       }}
       onPress={toggleModal}
     >
-      <PlusSmall color="#fff" />
+      {/* <PlusSmall color="#fff" /> */}
       <Text style={{ color: '#fff', fontFamily: 'DMSansSemiBold', fontSize: 16 }}>
-        Create Community
+        Create a cohort
       </Text>
     </TouchableOpacity>
   </View>
@@ -305,8 +306,8 @@ const Index = (props: Props) => {
             }}
           >
             {step === 1
-              ? 'Choose community Type'
-              : 'Choose community structure'}
+              ? 'Choose track Type'
+              : 'Choose structure'}
           </Text>
           {/* {step == 1 && (
                 <ScrollView>
@@ -350,9 +351,9 @@ const Index = (props: Props) => {
           {step === 2 && (
             <ScrollView contentContainerStyle={styles.container}>
               {/* Course name */}
-              <Text style={styles.label}>Course name</Text>
+              <Text style={styles.label}>Track title</Text>
               <TextInput
-                placeholder="Your course name"
+                placeholder="Introduction to HTML"
                 value={formData.name}
                 onChangeText={(text) =>
                   setFormData({ ...formData, name: text })
@@ -362,9 +363,9 @@ const Index = (props: Props) => {
               />
 
               {/* Cohort Description */}
-              <Text style={styles.label}>Cohort Description</Text>
+              <Text style={styles.label}>Track Description</Text>
               <TextInput
-                placeholder="Describe what your cohort is about..."
+                placeholder="Beginner friendly course on HTML..."
                 style={[styles.input, styles.textarea]}
                 placeholderTextColor="#888"
                 value={formData.description}
@@ -426,7 +427,7 @@ const Index = (props: Props) => {
               }}
               onPress={step < 2 ? handleStep : createCommunityHandler}
             >
-              <Text style={{ color: '#fff' }}>Next</Text>
+              <Text style={{ color: '#fff' }}>{!isPending ? 'Next' : 'Creating...'}</Text>
             </TouchableOpacity>
           </View>
         </View>

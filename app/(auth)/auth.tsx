@@ -21,7 +21,7 @@ import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typesc
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
 import { Link } from 'expo-router';
-import OnboardFive from '../../assets/icons/onboarding/4.svg'
+import OnboardFive from '../../assets/icons/onboarding/2.svg'
 
 const { width, height } = Dimensions.get('window');
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 20 : Constants.statusBarHeight;

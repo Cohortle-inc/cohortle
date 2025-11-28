@@ -101,9 +101,10 @@ const OnBoarding = () => {
           {
             backgroundColor: 'white',
             image: (
-              <View>
+              <View >
                 <Text style={styles.header} variant="headerTwo">
-                  Share your knowledge, one lesson at a time
+                  Share knowledge,
+                    one lesson at a time
                 </Text>
                 <OnboardThree width={400} height={400} />
               </View>
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
   header: {
     padding: 24,
     textAlign: 'center',
-    marginTop: 150,
+    marginTop: 150
   },
   subHeading: {
     textAlign: 'center',

@@ -34,7 +34,7 @@ const Cohorts = () => {
   /// Note: Instead of calling the communities withing a cohort, its the cohort that is being called in this case. a major oversight
   const { data: cohortsResponse, isLoading, isError } = useConvenersCohorts();
   const cohorts = cohortsResponse || [];
-  const { mutate: createCohort } = useCreateCohort();
+  const { mutate: createCohort, isPending } = useCreateCohort();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
@@ -134,7 +134,7 @@ const Cohorts = () => {
           <Text
             style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}
           >
-            Loading your cohorts...
+            Loading communities...
           </Text>
         </View>
       ) : cohorts.length === 0 ? (
@@ -149,7 +149,7 @@ const Cohorts = () => {
               marginBottom: 12,
             }}
           >
-            Welcome to your cohort
+            Welcome to Cohortle
           </Text>
           <Text
             style={{
@@ -172,7 +172,7 @@ const Cohorts = () => {
             }}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-              Create first cohort
+              Create a community
             </Text>
           </Pressable>
         </View>
@@ -209,14 +209,14 @@ const Cohorts = () => {
               textAlign: 'center',
             }}
           >
-            Create Cohort
+            Create Community
           </Text>
           <View style={{ gap: 16, marginTop: 26 }}>
             <Input
               value={cohortData.name}
               onChangeText={(text: string) => updateCohortData('name', text)}
-              label="Cohort Name"
-              placeholder="Cohort title"
+              label="Community Name"
+              placeholder="Digital Marketing Simplified"
             />
             <Input
               value={cohortData.description}
@@ -224,12 +224,12 @@ const Cohorts = () => {
                 updateCohortData('description', text)
               }
               label="Description"
-              placeholder="Cohort description"
+              placeholder="Self-paced learning program"
             />
             <Input
               value={cohortData.url}
               onChangeText={(text: string) => updateCohortData('url', text)}
-              label="Cohort Code Prefix"
+              label="Community code (prefix)"
               placeholder="Sal-Cohort"
             />
           </View>
@@ -245,9 +245,10 @@ const Cohorts = () => {
                 backgroundColor: '#391D65',
                 width: '70%',
               }}
+              disabled={isPending}
               onPress={handleCreateCohort}
             >
-              <Text style={{ color: '#fff' }}>Create</Text>
+              <Text style={{ color: '#fff' }}>{!isPending ? 'Create' : "Creating community..."}</Text>
             </Pressable>
           </View>
         </View>
