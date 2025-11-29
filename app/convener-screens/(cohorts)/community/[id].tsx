@@ -87,16 +87,13 @@ const Index = (props: Props) => {
 
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
 
-  console.log(apiURL);
+  // console.log(apiURL);
   const { mutate: createCommunity, isPending } = usePostCommunity(numericId);
   const { data: communities = [], isLoading } = useGetCommunities(numericId);
   const handleStep = () => {
     setStep(step + 1);
   };
 
-  console.log(communities);
-
-  console.log('Sol', communities);
 
   const createCommunityHandler = () => {
     // Validate required fields
@@ -119,7 +116,6 @@ const Index = (props: Props) => {
 
     createCommunity(payload, {
       onSuccess: (data: any) => {
-        console.log('Cohort created successfully:', data);
         // Close modal and reset form
         setModalVisible(false);
         setFormData({
@@ -129,7 +125,7 @@ const Index = (props: Props) => {
         });
         setStep(1);
         // Optionally refresh communities list or navigate
-        alert('Community created successfully!');
+        alert('Cohort created successfully!');
       },
       onError: (error: any) => {
         console.error('Error creating community:', error);

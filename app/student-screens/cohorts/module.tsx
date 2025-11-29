@@ -5,24 +5,34 @@ import {
   View,
   ActivityIndicator,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import { useRouter } from 'expo-router';
+import { RichEditor } from 'react-native-pell-rich-editor';
 
 const { width } = Dimensions.get('window');
+
+// ✅ Define RichEditor ref interface
+interface RichEditorRef {
+  setContentHTML: (html: string) => void;
+}
 
 const Module = () => {
   const router = useRouter();
   const [title, setTitle] = useState('Untitled Lesson');
   const [media, setMedia] = useState<string | null>(null);
+  const [text, setText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<Video>(null);
+  const richEditorRef = useRef<RichEditorRef>(null); // ✅ Proper ref for RichEditor
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
   useEffect(() => {
     if (!showControls) return;
     const timer = setTimeout(() => setShowControls(false), 4000);
@@ -36,6 +46,8 @@ const Module = () => {
       videoRef.current?.playAsync();
     }
   };
+
+  console.log('media: ', media);
 
   const skip = (seconds: number) => {
     if (status?.positionMillis) {
@@ -59,21 +71,36 @@ const Module = () => {
       try {
         setIsLoading(true);
 
-        const [savedMedia, savedTitle] = await Promise.all([
+        const [savedMedia, savedTitle, savedText] = await Promise.all([
           AsyncStorage.getItem('media'),
           AsyncStorage.getItem('name'),
+          AsyncStorage.getItem('text'),
         ]);
 
-        const videoUrl =
-          savedMedia ||
-          'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4';
+        console.log('📥 Loaded from storage:', {
+          media: savedMedia?.substring(0, 50),
+          title: savedTitle,
+          textLength: savedText?.length
+        });
 
+        // ✅ Handle media URL properly
+        const videoUrl = savedMedia || null;
         setMedia(videoUrl);
         setTitle(savedTitle || 'Untitled Lesson');
+        setText(savedText || '<p>No content available</p>');
+        
+        // ✅ Update RichEditor content after a short delay
+        setTimeout(() => {
+          if (richEditorRef.current && savedText) {
+            richEditorRef.current.setContentHTML(savedText);
+          }
+        }, 100);
+
       } catch (error) {
         console.error('Failed to load lesson data:', error);
-        setMedia('https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4');
-        setTitle('Demo Lesson');
+        setMedia(null);
+        setTitle('Untitled Lesson');
+        setText('<p>Failed to load content</p>');
       } finally {
         setIsLoading(false);
       }
@@ -82,12 +109,25 @@ const Module = () => {
     loadLessonData();
   }, []);
 
+  // ✅ Safe RichEditor ref handler
+  const handleEditorRef = (ref: RichEditorRef | null) => {
+    if (ref) {
+      richEditorRef.current = ref;
+      // ✅ Set content if text is already loaded
+      if (text && text !== '<p>No content available</p>') {
+        setTimeout(() => {
+          ref.setContentHTML(text);
+        }, 50);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#B085EF" />
-          <Text style={styles.loadingText}>Loading video...</Text>
+          <Text style={styles.loadingText}>Loading lesson...</Text>
         </View>
       </SafeAreaView>
     );
@@ -96,7 +136,6 @@ const Module = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Video Player */}
-      <View style={styles.videoWrapper}>
         {media ? (
           <View style={styles.videoWrapper}>
             <Video
@@ -107,24 +146,39 @@ const Module = () => {
               resizeMode={ResizeMode.CONTAIN}
               isLooping={false}
               onPlaybackStatusUpdate={setStatus}
-              onLoad={() => setShowControls(true)}
-              onError={(e) => console.log('Video Error:', e)}
+              onLoad={() => {
+                console.log('✅ Video loaded successfully');
+                setShowControls(true);
+              }}
+              onError={(e) => {
+                console.log('❌ Video Error:', e);
+                setMedia(null); // Fallback to no video state
+              }}
             />
           </View>
         ) : (
-          <View style={styles.noVideo}>
-            <Text>Video not available</Text>
+          <View>
           </View>
         )}
-      </View>
 
       {/* Content */}
-      <View style={styles.contentSection}>
+      <ScrollView 
+        style={styles.contentSection}
+        contentContainerStyle={styles.scrollContent}
+      >
         <Text style={styles.title}>{title}</Text>
-        {/* <Text style={styles.description}>
-          Create High-Fidelity Designs and Prototypes in Figma
-        </Text> */}
-      </View>
+        
+        {/* ✅ Fixed RichEditor with proper ref handling */}
+        <View style={styles.editorContainer}>
+          <RichEditor
+            ref={handleEditorRef}
+            initialContentHTML={text || '<p>No content available</p>'}
+            disabled={true}
+            style={styles.richEditor}
+            useContainer={true}
+          />
+        </View>
+      </ScrollView>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
@@ -136,7 +190,7 @@ const Module = () => {
           onPress={() => router.back()}
           style={[styles.button, styles.nextButton]}
         >
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+          <Text style={styles.nextButtonText}>
             Back
           </Text>
         </TouchableOpacity>
@@ -188,24 +242,43 @@ const styles = StyleSheet.create({
   video: {
     width: '100%',
     height: '100%',
-    overflow: 'hidden', // This makes borderRadius work!
-    elevation: 8, // Android shadow
+    overflow: 'hidden',
+    elevation: 8,
     shadowColor: '#000',
   },
   noVideo: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
     backgroundColor: '#111',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  noVideoText: {
+    color: '#fff',
+    fontSize: 16,
+  },
   contentSection: {
+    flex: 1,
+  },
+  scrollContent: {
     padding: 20,
-    gap: 8,
+    paddingBottom: 100, // Space for buttons
   },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#1F1F1F',
+    marginBottom: 16,
+  },
+  editorContainer: {
+    minHeight: 200,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  richEditor: {
+    minHeight: 200,
+    backgroundColor: '#fff',
   },
   description: {
     fontSize: 16,
@@ -215,9 +288,15 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingVertical: 16,
     gap: 12,
-    marginTop: 'auto',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   button: {
     flex: 1,
@@ -225,6 +304,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   nextButton: {
     backgroundColor: '#391D65',
@@ -235,6 +315,8 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   nextButtonText: {
-    color: 'red',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

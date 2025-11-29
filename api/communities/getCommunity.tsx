@@ -14,7 +14,6 @@ const getCommunity = async (cohortId: number, id: string) => {
         },
       },
     );
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching community:', error);

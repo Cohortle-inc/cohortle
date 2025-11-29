@@ -17,7 +17,6 @@ const getCohortLearners = async (id: string) => {
     },
   });
 
-  console.log(response.data.learners);
   return response.data.learners;
 };
 

@@ -49,7 +49,6 @@ const Index = () => {
   const { data: modules = [], isLoading: modulesLoading } =
     useGetModules(numeric);
 
-  console.log(modules);
   const handleCreateModule = () => {
     const newModule = {
       community_id: numeric,
