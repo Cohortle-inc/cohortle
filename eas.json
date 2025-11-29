@@ -10,6 +10,7 @@
         "distribution": "internal",
         "buildType": "apk",
         "env": {
+          "EXPO_PUBLIC_API_URL": "https://cohortle-api.onrender.com",
           "EXPO_PUBLIC_SUPABASE_URL": "https://oewgmuhohrqzpjuvkuhk.supabase.com",
           "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ld2dtdWhvaHJxenBqdXZrdWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMzM3MjIsImV4cCI6MjA1NzYwOTcyMn0.1DlqVzBjDWnG2qjS20AvieF99xLr4kP6qWQFh1PdfBA"
         }
