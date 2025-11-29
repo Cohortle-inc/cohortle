@@ -14,7 +14,6 @@ const getLesson = async (lessonId: string, moduleId: string) => {
         },
       },
     );
-    console.log(response.data);
     return response.data.lesson;
   } catch (error) {
     console.error('Error fetching Lesson: ', error);

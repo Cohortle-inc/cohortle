@@ -1,28 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   StyleSheet,
   SafeAreaView,
   ScrollView,
   Alert,
-  TextInput,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker'; // <-- EXPO IMAGE PICKER
+import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import type { DocumentPickerAsset } from 'expo-document-picker';
-// import Video from 'react-native-video';
 import { colors } from '@/utils/color';
 import { NavHead } from '@/components/HeadRoute';
 import { useLocalSearchParams } from 'expo-router';
 import { useGetLesson } from '@/api/communities/lessons/getLesson';
 import { uploadLessonMedia } from '@/api/communities/lessons/uploadMedia';
 import { Ionicons } from '@expo/vector-icons';
-import { TextArea } from '@/components/Form';
+import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
 
-// Unified type for any file/media selected
 interface MediaFile {
   uri: string;
   type: 'video';
@@ -30,76 +25,120 @@ interface MediaFile {
   size?: number;
 }
 
+interface RichEditorRef {
+  setContentHTML: (html: string) => void;
+  getContentHtml: () => Promise<string>;
+  focusContent: () => void;
+  blurContent: () => void;
+}
+
 const CreateLesson = () => {
   const [title, setTitle] = useState<string>('Introduction');
   const [media, setMedia] = useState<MediaFile | null>(null);
   const [description, setDescription] = useState('');
-  const [text, setText] = useState<string>('');
+  const [text, setText] = useState<string>(''); // Only for initial load and display
+  const [editorKey, setEditorKey] = useState(0);
+  const [isEditorReady, setIsEditorReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
   const lessonID = useLocalSearchParams().lessonId as string;
   const moduleID = useLocalSearchParams().moduleId as string;
   const moduleTitle = useLocalSearchParams().moduleTitle;
   const { data: lessonData, isLoading } = useGetLesson(lessonID, moduleID);
-  const [loading, setLoading] = useState(false);
-  console.log(lessonData);
+
+  const richEditor = useRef<RichEditorRef>(null);
+  
+  // ✅ Store content in ref to prevent re-renders
+  const currentContentRef = useRef('');
+  const hasUnsavedChangesRef = useRef(false);
+  const isInitialLoad = useRef(true);
+
+  // ✅ Safe editor reference
+  const getEditorRef = useCallback(() => {
+    return isEditorReady ? richEditor.current : null;
+  }, [isEditorReady]);
 
   useEffect(() => {
-    if (lessonData?.description) {
-      setDescription(lessonData.description);
+    if (lessonData && !isLoading && isInitialLoad.current) {
+      console.log('📥 Loading lesson data into editor');
+      
+      setDescription(lessonData.description || '');
+      
+      const lessonText = lessonData.text || '<p>Start writing your lesson content...</p>';
+      
+      // ✅ Set both state and ref for initial content
+      setText(lessonText);
+      currentContentRef.current = lessonText;
+      
+      setEditorKey(prev => prev + 1);
+      isInitialLoad.current = false;
     }
-  }, [lessonData]);
+  }, [lessonData, isLoading]);
 
-  // Normalizes both ImagePicker and DocumentPicker results
+  // ✅ Minimal ref assignment
+  const handleEditorRef = useCallback((ref: RichEditorRef | null) => {
+    richEditor.current = ref;
+    if (ref) {
+      console.log('✅ Editor ref assigned');
+    }
+  }, []);
+
+  // ✅ FIX: Store content in ref ONLY - no state updates during typing
+  const handleContentChange = useCallback((html: string) => {
+    // ✅ Only update the ref - this doesn't cause re-renders
+    currentContentRef.current = html;
+    hasUnsavedChangesRef.current = true;
+    
+    // ✅ Optional: Log changes without affecting state
+    console.log('📝 Content changed (ref only):', html.substring(0, 50) + '...');
+  }, []);
+
+  // ✅ Editor initialization
+  const handleEditorInitialized = useCallback(() => {
+    console.log('✅ Editor initialized');
+    setIsEditorReady(true);
+  }, []);
+
+  // ✅ Get current content for saving (always from ref)
+  const getCurrentContent = useCallback((): string => {
+    return currentContentRef.current || text;
+  }, [text]);
+
+  // Media handling functions...
   const handleMediaSelected = (
-    asset: ImagePicker.ImagePickerAsset | DocumentPickerAsset,
+    asset: ImagePicker.ImagePickerAsset | DocumentPicker.DocumentPickerAsset,
   ) => {
-    // Helper to safely get file name
     const getFileName = (): string => {
-      // expo-image-picker uses `fileName` (iOS/Android)
       if ('fileName' in asset && asset.fileName) return asset.fileName;
-      // expo-document-picker uses `name`
       if ('name' in asset && asset.name) return asset.name;
-      // Fallback: extract from URI
       return asset.uri.split('/').pop() || 'file';
     };
 
-    // Helper to detect type from mime or fallback
     const getMediaType = (): MediaFile['type'] => {
       const mime = (asset as any).mimeType?.toLowerCase() || '';
-
-      // if (mime.startsWith('image/')) return 'image';
       if (mime.startsWith('video/')) return 'video';
-      // if (mime.startsWith('audio/')) return 'audio';
+      return 'video';
     };
 
     const unified: MediaFile = {
       uri: asset.uri,
       name: getFileName(),
       type: getMediaType(),
-      size:
-        'fileSize' in asset
-          ? (asset.fileSize ?? undefined)
-          : 'size' in asset
-            ? asset.size
-            : undefined,
+      size: 'fileSize' in asset ? (asset.fileSize ?? undefined) : 'size' in asset ? asset.size : undefined,
     };
 
-    console.log('Selected media:', unified);
     setMedia(unified);
   };
 
-  // Photos & Videos (uses expo-image-picker)
   const pickMediaFromLibrary = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert(
-        'Permission required',
-        'Please allow access to your photo library',
-      );
+      Alert.alert('Permission required', 'Please allow access to your photo library');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All, // Images + Videos
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
       allowsEditing: true,
       quality: 1,
       videoQuality: ImagePicker.UIImagePickerControllerQualityType.High,
@@ -110,7 +149,6 @@ const CreateLesson = () => {
     }
   };
 
-  // Documents & Audio (uses expo-document-picker)
   const pickDocumentsOrAudio = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: '*/*',
@@ -129,21 +167,24 @@ const CreateLesson = () => {
       'Choose Media Type',
       'Select the type of file you want to upload',
       [
-        // { text: 'Photos & Videos', onPress: pickMediaFromLibrary },
         { text: 'Videos only', onPress: pickDocumentsOrAudio },
-        // { text: 'Cancel', style: 'cancel' },
       ],
     );
   };
 
   const handleUpdateForm = async () => {
-    if (!media) {
-      Alert.alert('Error', 'Please select a media file first');
-      return;
-    }
     setLoading(true);
     try {
-      await uploadLessonMedia(moduleID, lessonID, media);
+      // ✅ Always get content from ref (most up-to-date)
+      const currentContent = getCurrentContent();
+      console.log('💾 Saving content from ref:', currentContent.substring(0, 100) + '...');
+      
+      await uploadLessonMedia(moduleID, lessonID, media, currentContent);
+      
+      // ✅ Update state only after successful save to reflect changes
+      setText(currentContent);
+      hasUnsavedChangesRef.current = false;
+      
       setLoading(false);
       Alert.alert('Success', 'Lesson updated!');
     } catch (error: any) {
@@ -153,22 +194,18 @@ const CreateLesson = () => {
     }
   };
 
-  // Just replace your renderPreview() and related code with this:
-
   const renderPreview = () => {
-    // Use selected media OR the current lesson media from backend
     const currentVideoUrl = media?.uri || lessonData?.media || lessonData?.url;
 
     if (!currentVideoUrl) return null;
 
     return (
       <View style={styles.previewBox}>
-        {/* Simple black box with big Play icon + video filename */}
-
+        <View style={styles.videoPlaceholder}>
+          <Ionicons name="play-circle" size={48} color="#fff" />
+        </View>
         <Text style={styles.videoName} numberOfLines={2}>
-          {media?.name ||
-            currentVideoUrl.split('/').pop()?.split('?')[0] ||
-            'Video'}
+          {media?.name || currentVideoUrl.split('/').pop()?.split('?')[0] || 'Video'}
         </Text>
       </View>
     );
@@ -178,20 +215,12 @@ const CreateLesson = () => {
     <SafeAreaView style={styles.container}>
       <NavHead text={moduleTitle} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={{ fontSize: 20, fontWeight: '700' }}>
             {isLoading ? '...' : lessonData?.name}
           </Text>
-          {/* <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>
-            Course type:{' '}
-            <Text style={{ textDecorationLine: 'underline', color: '#000' }}>
-              Self-paced
-            </Text>
-          </Text> */}
         </View>
 
-        {/* Upload Section */}
         <TouchableOpacity
           style={styles.uploadSection}
           onPress={handleUploadPress}
@@ -207,7 +236,6 @@ const CreateLesson = () => {
               </>
             ) : (
               <View style={{ alignItems: 'center', gap: 5 }}>
-                <Text style={{ fontSize: 48 }}>Upload Video</Text>
                 <Text style={styles.uploadSubtext}>
                   Tap to add a video lesson
                 </Text>
@@ -215,39 +243,63 @@ const CreateLesson = () => {
             )}
 
             <Text style={styles.uploadButton}>
-              {media || lessonData?.media ? 'Change Video' : 'Upload Video'}
+              {media || lessonData?.media ? 'Change Video' : 'Select Video'}
             </Text>
           </View>
         </TouchableOpacity>
 
-        {/* <View>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Write a detailed description for this lesson..."
-            placeholderTextColor="#999"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={10}
-            textAlignVertical="top"
-          />
-        </View> */}
+        {/* ✅ Fixed Rich Text Editor - No re-renders during typing */}
+        <View style={styles.richEditorContainer}>
+          <Text style={styles.editorLabel}>Lesson Content</Text>
+          
+          {isEditorReady && (
+            <RichToolbar
+              getEditor={getEditorRef}
+              selectedIconTint={colors.primary}
+              iconTint={'#000'}
+              actions={[
+                actions.setBold,
+                actions.setItalic,
+                actions.setUnderline,
+                actions.insertBulletsList,
+                actions.insertOrderedList,
+                actions.insertLink,
+                actions.setStrikethrough,
+                actions.checkboxList,
+                actions.undo,
+                actions.redo,
+              ]}
+              style={styles.toolbar}
+            />
+          )}
+          
+          <View style={styles.editorWrapper}>
+            <RichEditor
+              key={editorKey}
+              ref={handleEditorRef}
+              initialContentHTML={text} // Only used for initial load
+              onChange={handleContentChange} // Only updates ref, not state
+              editorInitializedCallback={handleEditorInitialized}
+              placeholder="Start writing your lesson content..."
+              style={styles.richEditor}
+              useContainer={true}
+              initialHeight={250}
+              autoCapitalize="none"
+              allowFileAccess={true}
+              automaticallyAdjustContentInsets={false}
+              initialFocus={false}
+              disabled={false}
+            />
+          </View>
+        </View>
 
         <TouchableOpacity
           onPress={handleUpdateForm}
           disabled={loading}
-          style={{
-            marginTop: 50,
-            width: '100%',
-            height: 45,
-            backgroundColor: colors.primary,
-            borderRadius: 50,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
+          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
         >
-          <Text style={{ color: colors.white }}>
-            {loading ? 'Saving...' : 'Save'}
+          <Text style={styles.saveButtonText}>
+            {loading ? 'Saving...' : 'Save Lesson'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -256,22 +308,45 @@ const CreateLesson = () => {
 };
 
 const styles = StyleSheet.create({
+  container: { paddingTop: 25, flex: 1, backgroundColor: '#f8f9fa' },
+  scrollContent: { padding: 20, gap: 20 },
+  header: { marginBottom: 20 },
+  uploadSection: {
+    borderWidth: 2,
+    borderColor: colors.purpleShade,
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: 20,
+    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  uploadContent: { alignItems: 'center', width: '100%' },
+  uploadSubtext: { fontSize: 14, color: '#666', textAlign: 'center' },
+  uploadButton: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '600',
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.purpleShade,
+    borderRadius: 25,
+  },
   previewBox: {
     alignItems: 'center',
     marginBottom: 12,
   },
   videoPlaceholder: {
-    width: 180,
-    height: 180,
+    width: 120,
+    height: 120,
     backgroundColor: '#000',
-    borderRadius: 16,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
-  },
-  playIcon: {
-    fontSize: 48,
-    color: '#fff',
   },
   videoName: {
     fontSize: 14,
@@ -285,100 +360,56 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
-  uploadButton: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#8B5CF6',
-    fontWeight: '600',
-    paddingHorizontal: 24,
-    paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: '#B085EF',
-    borderRadius: 50,
-  },
-  container: { paddingTop: 25, flex: 1, backgroundColor: '#f8f9fa' },
-  scrollContent: { padding: 20, gap: 10 },
-  header: { marginBottom: 30 },
-  uploadSection: {
-    borderWidth: 2,
-    borderColor: colors.purpleShade,
-    borderStyle: 'dashed',
-    borderRadius: 10,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  uploadContent: { alignItems: 'center', width: '100%' },
-  uploadIcon: { fontSize: 40 },
-  uploadText: {
-    fontSize: 16,
-    color: colors.primary,
-    fontWeight: '500',
-    marginTop: 10,
-    padding: 6,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderRadius: 50,
-    borderColor: colors.purpleShade,
-  },
-  uploadSubtext: { fontSize: 12, color: '#666', textAlign: 'center' },
-  mediaPreview: { width: 120, height: 120, borderRadius: 8, marginBottom: 10 },
-  videoContainer: {
-    position: 'relative',
-    width: 120,
-    height: 120,
-    borderRadius: 8,
-    backgroundColor: '#000',
-    marginBottom: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  videoPreview: { width: '100%', height: '100%', borderRadius: 8 },
-  videoIcon: { position: 'absolute', fontSize: 24 },
-  audioContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  richEditorContainer: {
     backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  audioIcon: { fontSize: 24, marginRight: 10 },
-  audioText: { fontSize: 14, color: '#333', flex: 1 },
-  documentContainer: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  documentIcon: { fontSize: 32, marginBottom: 5 },
-  documentName: { fontSize: 12, color: '#333', textAlign: 'center' },
-  mediaName: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-    marginBottom: 5,
-  },
-  changeMediaText: { fontSize: 12, color: '#666', fontStyle: 'italic' },
-  label: {
-    fontSize: 14,
-    color: '#391D65',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 12,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: '#391D65',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    marginTop: 10,
+  },
+  editorLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    padding: 16,
+    paddingBottom: 8,
+    backgroundColor: '#f8fafc',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  toolbar: {
+    backgroundColor: '#f8fafc',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  editorWrapper: {
+    minHeight: 250,
+  },
+  richEditor: {
+    flex: 1,
+    minHeight: 250,
+    padding: 16,
     backgroundColor: '#fff',
   },
-  textArea: {
-    height: 150, // You can adjust based on lines
-    paddingTop: 12,
-    paddingBottom: 12,
+  saveButton: {
+    marginTop: 30,
+    width: '100%',
+    height: 50,
+    backgroundColor: colors.primary,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#9ca3af',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

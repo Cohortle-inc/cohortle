@@ -16,7 +16,6 @@ export const getCohort = async (id: string) => {
         'Cache-Control': 'no-cache',
       },
     });
-    console.log('Cohort API response:', response.data);
     const cohort = response.data?.cohort ?? response.data ?? null;
 
     if (!cohort) {

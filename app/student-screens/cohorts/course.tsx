@@ -32,6 +32,7 @@ const Course = () => {
   const [isSheetVisible, setSheetVisible] = useState(false);
   const [communityId, setCommunityId] = useState<string | null>(null);
   const [title, setTitle] = useState<string | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
   const [convenerName, setConvenerName] = useState<string | null>(null);
   const { data: moduleData = [] } = useGetModules(Number(communityId));
   const [module, setModule] = useState<number | null>(null);
@@ -52,8 +53,10 @@ const Course = () => {
     const name = async () => {
       const name = await AsyncStorage.getItem('communityName');
       const instructorName = await AsyncStorage.getItem('convenerName');
+      const description = await AsyncStorage.getItem('description');
       setTitle(name);
       setConvenerName(instructorName);
+      setDescription(description)
     };
     console.log(name);
     name();
@@ -201,10 +204,7 @@ const Course = () => {
               <View></View>
               <Text style={{ fontWeight: 'bold' }}>Course Description</Text>
               <Text style={{ marginTop: 8, fontSize: 12, letterSpacing: 1 }}>
-                This course will teach you how to create high-fidelity designs
-                and prototypes using Figma. You will learn the principles of
-                design, how to use Figma's tools effectively, and how to create
-                interactive prototypes.
+                {description}
               </Text>
             </View>
           )}
@@ -261,15 +261,20 @@ interface LessonProp {
   media: string;
   order_number: string;
   status: string;
+  text: string;
 }
 const Lesson = (lesson: LessonProp) => {
   const router = useRouter();
   const [checkedModule, setCheckedModule] = useState(false);
 
   const handlePress = async () => {
-    await AsyncStorage.setItem('media', lesson.media);
+    console.log('leading');
+    await AsyncStorage.setItem('media', lesson.media || '');
+    console.log('leading');
     console.log(lesson.media);
-    await AsyncStorage.setItem('name', lesson.name);
+    console.log('leading');
+    await AsyncStorage.setItem('name', lesson.name || 'Untitled Lesson');
+    await AsyncStorage.setItem('text', lesson.text || '');
     router.navigate('/student-screens/cohorts/module');
   };
 
@@ -299,6 +304,20 @@ const Lesson = (lesson: LessonProp) => {
             marginTop: 8,
           }}
         >
+          {lesson.media && lesson.text ? (
+            
+          <Text
+            style={{
+              borderWidth: 1,
+              borderColor: '#ECDCFF',
+              padding: 4,
+              borderRadius: 4,
+              fontSize: 10,
+            }}
+          >
+            Video/Text
+          </Text>
+          ) : lesson.media ? (
           <Text
             style={{
               borderWidth: 1,
@@ -310,6 +329,9 @@ const Lesson = (lesson: LessonProp) => {
           >
             Video
           </Text>
+            
+          ) : (
+            
           <Text
             style={{
               borderWidth: 1,
@@ -319,8 +341,20 @@ const Lesson = (lesson: LessonProp) => {
               fontSize: 10,
             }}
           >
-            2 min
+            Text
           </Text>
+          )}
+          {/* <Text
+            style={{
+              borderWidth: 1,
+              borderColor: '#ECDCFF',
+              padding: 4,
+              borderRadius: 4,
+              fontSize: 10,
+            }}
+          >
+            2 min
+          </Text> */}
         </View>
       </View>
 

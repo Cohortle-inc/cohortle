@@ -12,7 +12,6 @@ const convenersCohorts = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log("Fetched convener's cohorts:", response.data.cohorts);
     return response.data.cohorts;
   } catch (error) {
     console.error("Error fetching convener's cohorts:", error);

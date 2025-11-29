@@ -23,7 +23,7 @@ export const useGetLearnerCohorts = () => {
   return useQuery({
     queryKey: ['learnerCohorts'],
     queryFn: getLearnerCohorts,
-    refetchInterval: 15000,
+    refetchInterval: 7000,
     staleTime: 500,
     refetchOnReconnect: true,
   });

@@ -55,7 +55,7 @@ export const useJoinCohort = (): UseMutationResult<
     mutationFn: joinCohort,
 
     onSuccess: (data, joinCode) => {
-      Alert.alert('Success', 'You’ve successfully joined the cohort!');
+      Alert.alert('Success', 'You’ve successfully joined the community!');
 
       // Invalidate all cohort-related queries so they refetch fresh data
       queryClient.invalidateQueries({ queryKey: ['cohort-learners'] }); // all learners lists

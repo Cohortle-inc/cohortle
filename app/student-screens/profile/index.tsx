@@ -34,7 +34,7 @@ const Profile = () => {
   );
 
   // Use React Query instead of useState + useEffect
-  const { data: profile, isLoading, error } = useProfile();
+  const { data: profile, isLoading, error, refetch } = useProfile();
 
   // const { data: cohorts = [] } = useConvenersCohorts();
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -126,7 +126,7 @@ const Profile = () => {
       <SafeAreaWrapper>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Failed to load profile</Text>
-          <Pressable style={styles.retryButton}>
+          <Pressable style={styles.retryButton} onPress={() => refetch}>
             <Text style={styles.retryText}>Retry</Text>
           </Pressable>
         </View>

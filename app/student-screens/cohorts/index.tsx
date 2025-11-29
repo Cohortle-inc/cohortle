@@ -161,7 +161,7 @@ const Course = (community: CommunityData) => {
     await AsyncStorage.setItem('communityID', String(community.id));
     await AsyncStorage.setItem('communityName', String(community.name));
     await AsyncStorage.setItem(
-      'communityDescription',
+      'description',
       String(community.description),
     );
     await AsyncStorage.setItem(
