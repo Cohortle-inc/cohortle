@@ -40,12 +40,12 @@ export default function InitialScreen() {
         router.replace('/(auth)/onboarding');
         return; // Early return to avoid further checks
       }
-      else if (user?.role === 'convener') {
-        router.replace('/convener-screens/(cohorts)'); 
-      }
-      else if (user?.role === 'learner') {
-        router.replace('/student-screens/cohorts'); 
-      }
+      // else if (user?.role === 'convener') {
+      //   router.replace('/convener-screens/(cohorts)'); 
+      // }
+      // else if (user?.role === 'learner') {
+      //   router.replace('/student-screens/cohorts'); 
+      // }
       else {
         router.replace('/(auth)/auth');
       }
