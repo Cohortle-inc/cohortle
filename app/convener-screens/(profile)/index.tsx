@@ -138,7 +138,7 @@ const Profile = () => {
     <SafeAreaWrapper>
       {/* Header Section */}
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>My Cohort</Text>
+        <Text style={styles.headerTitle}>My Profile</Text>
         <Pressable onPress={openBottomSheet}>
           <Options />
         </Pressable>
@@ -304,7 +304,7 @@ const Profile = () => {
           <View style={{ marginTop: 24, flex: 1, gap: 16 }}>
             <Pressable
               onPress={() =>
-                router.push('/student-screens/profile/edit-profile')
+                router.push('/convener-screens/(profile)/edit-profile')
               }
               style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
             >

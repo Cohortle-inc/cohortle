@@ -32,7 +32,7 @@ export default function InitialScreen() {
         // } else if (session && session.user) {
         // router.replace('/(home)/home');
       } else {
-        router.replace('/(auth)/auth');
+        router.replace('/(auth)/login');
       }
     };
 

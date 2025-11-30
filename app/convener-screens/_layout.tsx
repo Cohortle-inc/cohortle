@@ -38,7 +38,7 @@ export default function TabLayout() {
                   <Cohortz fill={focused ? '#391D65' : 'gray'} />
                 </View>
               );
-            case 'profile':
+            case '(profile)':
               return (
                 <View style={iconContainerStyle}>
                   <Profile fill={focused ? '#391D65' : 'gray'} />
