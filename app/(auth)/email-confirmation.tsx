@@ -65,7 +65,7 @@ const EmailConfirmation = (props: Props) => {
       }
     } catch (err) {
       setError('An unexpected error occurred');
-      console.log('9');
+      console.log(err, 'error');
     } finally {
       setLoading(false);
     }
