@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
 import { Close, Options, Pencil, Plus, PlusSmall } from '@/assets/icons';
@@ -22,6 +22,7 @@ import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 import { useCreateCohort } from '@/api/cohorts/postCohort';
 import { CohortType } from '@/types/cohortType';
 import { showMessage } from 'react-native-flash-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
@@ -35,11 +36,11 @@ const Cohorts = () => {
   const { data: cohortsResponse, isLoading, isError } = useConvenersCohorts();
   const cohorts = cohortsResponse || [];
   const { mutate: createCohort, isPending } = useCreateCohort();
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
   const handleSheetChanges = useCallback((index: number) => {
-    // Update state based on the index value
     console.log(index);
     // If index is greater than -1, sheet is active
   }, []);
@@ -121,7 +122,7 @@ const Cohorts = () => {
           </Pressable> */}
         </View>
       </View>
-      {isLoading ? (
+      {isLoading && isCheckingAuth ? (
         <View
           style={{
             flex: 1,

@@ -138,7 +138,7 @@ const Profile = () => {
     <SafeAreaWrapper>
       {/* Header Section */}
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>My Cohort</Text>
+        <Text style={styles.headerTitle}>My Profile</Text>
         <Pressable onPress={openBottomSheet}>
           <Options />
         </Pressable>
