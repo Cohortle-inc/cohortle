@@ -189,7 +189,7 @@ const Profile = () => {
 
           <Pressable
             onPress={() =>
-              router.push('/convener-screens/(profile)/edit-profile')
+              router.push('/student-screens/profile/edit-profile')
             }
             style={styles.editButton}
           >
