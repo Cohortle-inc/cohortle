@@ -141,7 +141,7 @@ const LoginScreen = (props: Props) => {
             </TouchableOpacity>
           </View>
         </View>
-        <Text>V 0.0.3</Text>
+        <Text>V 0.0.2</Text>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
