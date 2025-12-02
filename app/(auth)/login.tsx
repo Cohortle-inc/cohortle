@@ -65,7 +65,6 @@ const LoginScreen = (props: Props) => {
       if (!result.error) {
         // Store token securely
         await AsyncStorage.setItem('authToken', result.token);
-        await AsyncStorage.setItem('userData', JSON.stringify(result.user));
         console.log(result.token);
 
         const userRole = result.user.role;
@@ -165,6 +164,7 @@ const LoginScreen = (props: Props) => {
             <Text style={styles.signupHighlight}>Sign up</Text>
           </Text>
         </TouchableOpacity>
+        <Text>V 0.0.2</Text>
       </View>
     </SafeAreaWrapper>
   );

@@ -48,8 +48,6 @@ const Profile = () => {
 
       // Clear auth storage
       await AsyncStorage.removeItem('authToken');
-      // Optional: Clear other stored data
-      await AsyncStorage.removeItem('userData');
 
       console.log('Logout successful - cache cleared');
 
