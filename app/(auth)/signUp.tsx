@@ -24,15 +24,11 @@ if (Platform.OS === 'android') {
 }
 
 const convenerDefinition = [
-  'A convener is someone who takes the lead in organizing and bringing people together for a common purpose.',
-  'They typically act as a facilitator in meetings or assemblies, ensuring that all voices are heard and that the gathering achieves its objectives.',
-  'Conveners often work behind the scenes to coordinate logistics, communicate with participants, and set the agenda.',
+  'The Convener is the organizer of each cohort. Setting the direction, curationg the learning path and moving the group forward'
 ];
 
-const creatorDefinition = [
-  'A creator is an individual who brings new ideas, content, or art into the world.',
-  "They are often visionaries who use their skills and imagination to produce something unique, whether it's in the form of writing, art, digital content, or other media.",
-  'Creators often have a passion for their craft and are driven by the desire to innovate and inspire others.',
+const learnerDefinition = [
+  'A Learner is an active menmber in a cohort, engaging with lessons, completing tasks and growing alongside the community'
 ];
 
 const SignUp = () => {
@@ -151,12 +147,12 @@ const SignUp = () => {
                 ? 'primary'
                 : 'outline'
             }
-            text="Student"
+            text="Learner"
             onPress={() => handleRoleSelection('learner')}
           />
           {selectedRole === 'learner' &&
             showDefinition &&
-            renderDefinition(creatorDefinition)}
+            renderDefinition(learnerDefinition)}
         </View>
 
         <View style={{ marginTop: 120 }}>
