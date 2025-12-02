@@ -96,7 +96,7 @@ const LoginScreen = (props: Props) => {
     <SafeAreaWrapper>
       <View style={styles.container}>
         <Text variant={'l'} style={styles.header}>
-          Login
+          Login (V 0.0.1)
         </Text>
         <Text style={styles.subtitle}>
           Enter your email and password to continue
@@ -164,7 +164,6 @@ const LoginScreen = (props: Props) => {
             <Text style={styles.signupHighlight}>Sign up</Text>
           </Text>
         </TouchableOpacity>
-        <Text>V 0.0.2</Text>
       </View>
     </SafeAreaWrapper>
   );
