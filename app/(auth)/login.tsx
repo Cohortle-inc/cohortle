@@ -96,7 +96,7 @@ const LoginScreen = (props: Props) => {
     <SafeAreaWrapper>
       <View style={styles.container}>
         <Text variant={'l'} style={styles.header}>
-          Login (V 0.0.1)
+          Login
         </Text>
         <Text style={styles.subtitle}>
           Enter your email and password to continue
@@ -141,6 +141,7 @@ const LoginScreen = (props: Props) => {
             </TouchableOpacity>
           </View>
         </View>
+        <Text>V 0.0.3</Text>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
