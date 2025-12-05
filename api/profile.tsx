@@ -40,6 +40,7 @@ export interface UpdateProfileResponse {
     LOCATION?: string;
     SOCIALS?: string;
     PROFILE_IMAGE?: string;
+    BIO?: string;
   };
 }
 
@@ -54,6 +55,7 @@ export const updateProfile = async (
   if (data.last_name) formData.append('last_name', data.last_name);
   if (data.username) formData.append('username', data.username);
   if (data.password) formData.append('password', data.password);
+  if (data.bio) formData.append('bio', data.bio);
   if (data.location) formData.append('location', data.location);
   if (data.socials) formData.append('socials', data.socials);
 

@@ -1,10 +1,26 @@
 import { Text } from '@/theme/theme';
-import React, { useState } from 'react';
+import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 
-const TextAreaInput = ({ label, placeholder, numberOfLines = 4 }: any) => {
-  const [value, setValue] = useState('');
+interface TextAreaProps {
+  label: string;
+  placeholder?: string;
+  value: string;               // ← Required
+  onChangeText: (text: string) => void;  // ← Required
+  numberOfLines?: number;
+  maxLength?: number;
+  editable?: boolean;
+}
 
+const TextAreaInput: React.FC<TextAreaProps> = ({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  numberOfLines = 4,
+  maxLength,
+  editable = true,
+}) => {
   return (
     <View>
       <Text style={styles.label}>{label}</Text>
@@ -12,12 +28,13 @@ const TextAreaInput = ({ label, placeholder, numberOfLines = 4 }: any) => {
         style={[styles.input, styles.textArea]}
         placeholder={placeholder}
         placeholderTextColor="#999"
-        value={value}
-        onChangeText={setValue}
-        editable={true}
+        value={value}                    // ← Use parent's value
+        onChangeText={onChangeText}      // ← Use parent's handler
         multiline={true}
         numberOfLines={numberOfLines}
-        textAlignVertical="top" // keeps text starting at the top-left
+        textAlignVertical="top"
+        editable={editable}
+        maxLength={maxLength}
       />
     </View>
   );
@@ -28,20 +45,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#391D65',
     marginBottom: 8,
+    fontWeight: '500',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#E0D6EB',
     borderRadius: 12,
-    paddingHorizontal: 12,
-    fontSize: 14,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+    fontSize: 15,
     color: '#391D65',
     backgroundColor: '#fff',
   },
   textArea: {
-    height: 120, // You can adjust based on lines
-    paddingTop: 12,
-    paddingBottom: 12,
+    height: 120,
   },
 });
 

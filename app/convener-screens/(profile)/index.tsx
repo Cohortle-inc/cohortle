@@ -144,14 +144,7 @@ const Profile = () => {
 
       {/* Profile Info */}
       <View style={styles.profileContainer}>
-        {profile?.profile_image ? (
-          <Image
-            source={{ uri: profile.profile_image }}
-            style={[styles.profileImage, { backgroundColor: 'transparent' }]}
-          />
-        ) : (
           <View style={styles.profileImage} />
-        )}
         <View style={styles.profileDetails}>
           <Text style={styles.profileName}>
             {profile?.first_name} {profile?.last_name}

@@ -6,6 +6,7 @@ interface ProfileProp {
   location?: string;
   socials?: string;
   image?: any;
+  bio: string;
 }
 
 export default ProfileProp;

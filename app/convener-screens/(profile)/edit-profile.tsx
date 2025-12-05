@@ -21,7 +21,7 @@ type Props = {};
 const EditProfile = (props: Props) => {
   // Initialize state with profile data
   const { data: profileData, isLoading: isProfileLoading } = useProfile();
-  console.log(profileData.profile_image);
+  // console.log(profileData.profile_image);
   const updateProfileMutation = useUpdateProfile();
   const router = useRouter();
 
@@ -32,7 +32,7 @@ const EditProfile = (props: Props) => {
     socials: '',
     bio: '',
   });
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  // const [profileImage, setProfileImage] = useState<string | null>(null);
   const [originalData, setOriginalData] = useState({
     firstName: '',
     lastName: '',
@@ -61,7 +61,7 @@ const EditProfile = (props: Props) => {
         ...newFormData,
         profileImage: profileData.profile_image || null,
       });
-      setProfileImage(profileData.profile_image || null);
+      // setProfileImage(profileData.profile_image || null);
     }
   }, [profileData]);
 
@@ -72,11 +72,11 @@ const EditProfile = (props: Props) => {
       formData.lastName !== originalData.lastName ||
       formData.location !== originalData.location ||
       formData.socials !== originalData.socials ||
-      formData.bio !== originalData.bio ||
-      profileImage !== originalData.profileImage;
+      formData.bio !== originalData.bio
+      // profileImage !== originalData.profileImage;
 
     setHasChanges(hasFormChanges);
-  }, [formData, profileImage, originalData]);
+  }, [formData, originalData]);
 
   const handleSave = async () => {
     if (!hasChanges) return;
@@ -88,8 +88,8 @@ const EditProfile = (props: Props) => {
       last_name: formData.lastName.trim(),
       location: formData.location.trim(),
       socials: formData.socials.trim(),
-      bio: formData.bio.trim(),
-      profile_image: profileImage || undefined,
+      bio: formData.bio.trim()
+      // profile_image: profileImage || undefined,
     };
 
     updateProfileMutation.mutate(
@@ -135,9 +135,9 @@ const EditProfile = (props: Props) => {
         quality: 0.8,
       });
 
-      if (!result.canceled && result.assets.length > 0) {
-        setProfileImage(result.assets[0].uri);
-      }
+      // if (!result.canceled && result.assets.length > 0) {
+      //   setProfileImage(result.assets[0].uri);
+      // }
     } catch (error) {
       console.error('Image picker error:', error);
       Alert.alert('Error', 'Failed to pick image');
@@ -202,7 +202,7 @@ const EditProfile = (props: Props) => {
         </View>
 
         {/* Profile Image */}
-        <View style={styles.imageContainer}>
+        {/* <View style={styles.imageContainer}>
           <View style={{ position: 'relative' }}>
             {profileImage ? (
               <Image
@@ -229,7 +229,7 @@ const EditProfile = (props: Props) => {
               )}
             </Pressable>
           </View>
-        </View>
+        </View> */}
 
         {/* Form */}
         <View style={styles.formContainer}>
