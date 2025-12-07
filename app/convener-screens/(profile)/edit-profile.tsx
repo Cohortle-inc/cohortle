@@ -23,7 +23,7 @@ const EditProfile = (props: Props) => {
   const { data: profileData, isLoading: isProfileLoading } = useProfile();
   // console.log(profileData.profile_image);
   const updateProfileMutation = useUpdateProfile();
-  const router = useRouter();
+  const router = useRouter(); 
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -45,6 +45,7 @@ const EditProfile = (props: Props) => {
   const [hasChanges, setHasChanges] = useState(false);
   const [isPickingImage, setIsPickingImage] = useState(false);
 
+  console.log(profileData)
   // Load profile data when available
   useEffect(() => {
     if (profileData) {

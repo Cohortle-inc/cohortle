@@ -21,6 +21,6 @@ export const useGetProfile = () => {
     queryFn: getProfile,
     // refetchOnReconnect: true,
     refetchInterval: 5000,
-    // staleTime: 1,
+    staleTime: 1,
   });
 };
