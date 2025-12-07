@@ -213,7 +213,6 @@ const Index = (props: Props) => {
           ))}
 
           {/* Show "Create Community" button only if less than 2 communities */}
-          {communities.length < 1 && (
             <TouchableOpacity
               style={{
                 flexDirection: 'row',
@@ -240,7 +239,6 @@ const Index = (props: Props) => {
                 Create Cohort
               </Text>
             </TouchableOpacity>
-          )}
         </ScrollView>
       ) : (
         // Empty State

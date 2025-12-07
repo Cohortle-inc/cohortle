@@ -36,7 +36,7 @@ const Cohorts = () => {
   const { data: cohortsResponse, isLoading, isError } = useConvenersCohorts();
   const cohorts = cohortsResponse || [];
   const { mutate: createCohort, isPending } = useCreateCohort();
-    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    // const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
@@ -122,7 +122,7 @@ const Cohorts = () => {
           </Pressable> */}
         </View>
       </View>
-      {isLoading && isCheckingAuth ? (
+      {isLoading ? (
         <View
           style={{
             flex: 1,
