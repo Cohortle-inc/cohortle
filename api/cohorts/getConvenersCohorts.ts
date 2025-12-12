@@ -26,6 +26,5 @@ export const useConvenersCohorts = () => {
     // ensure the data stays up todaate
     refetchInterval: 5000,
     refetchOnReconnect: true,
-    staleTime: 1,
   });
 };

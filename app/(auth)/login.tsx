@@ -141,7 +141,6 @@ const LoginScreen = (props: Props) => {
             </TouchableOpacity>
           </View>
         </View>
-        <Text>V 0.0.4</Text>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -158,7 +157,7 @@ const LoginScreen = (props: Props) => {
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push('/(auth)/signUp')}
+          onPress={() => router.push('/(auth)/email-confirmation')}
         >
           <Text style={styles.signupText}>
             Don't have an account?{' '}

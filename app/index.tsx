@@ -30,7 +30,7 @@ export default function InitialScreen() {
         return;
       }
       else {
-        router.replace('/(auth)/login');
+        router.replace('/(auth)/auth');
       }
     };
 
