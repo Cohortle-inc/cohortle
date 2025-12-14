@@ -41,7 +41,7 @@ const Structure = () => {
       console.log('Saved community structure:', selected);
       Alert.alert('Success', 'Cohort info updated successfully');
       // ✅ Navigate to next step
-      router.push(`/(auth)/login`);
+      router.push(`/convener-screens/(cohorts)`);
     } catch (err: any) {
       Alert.alert('Error', err?.response?.data?.message || 'Update failed');
     }
