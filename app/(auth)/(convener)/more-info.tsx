@@ -124,34 +124,36 @@ const MoreInfo = () => {
           <ModalDropdown
             label="Which of these sounds most like you?"
             options={[
-              'I’m an entrepreneur',
-              'I work for a company that sells a product or service',
-              'I work for a membership-based business, organisation, or club',
-              'Other',
+              'I run learning programs or cohorts',
+              'I teach or mentor learners',
+              'I manage learning for an organisation',
+              'I am here to learn',
+              'Just exploring',
             ]}
             selected={description}
             onSelect={setDescription}
           />
 
           <ModalDropdown
-            label="What’s your goal with Cohortly?"
+            label="What do you want to achieve with Cohortle?"
             options={[
-              'Build a community',
-              'Grow my business',
-              'Network with professionals',
-              'Find collaborations',
+              'Run a structured cohort or program',
+              'Deliver live or self-paced lessons',
+              'Track learners progress and outcomes',
+              'Build a learning community',
+              'Not sure yet',
             ]}
             selected={goal}
             onSelect={setGoal}
           />
 
           <ModalDropdown
-            label="How did you hear about Cohortly?"
+            label="How did you discover Cohortle"
             options={[
               'Social media',
-              'Friend or colleague',
-              'Search engine',
-              'Advertisement',
+              'From a friend or colleague',
+              'Community or event',
+              'Online search',
               'Other',
             ]}
             selected={referral}
