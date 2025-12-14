@@ -1,5 +1,11 @@
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+} from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Input } from '@/components/Form';
 import { Header } from '@/ui';
@@ -7,174 +13,266 @@ import { Text } from '@/theme/theme';
 import { BackArrowIcon } from '@/assets/icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import axios from 'axios';
-import { FormData, UpdateProfileResponse } from '@/types/profileFormProp';
 
-// --- Axios instance ---
-const createAxiosInstance = (token: string) => {
-  const apiURL = process.env.EXPO_PUBLIC_API_URL;
+interface FormData {
+  username: string;
+  password: string;
+}
 
-  return axios.create({
-    baseURL: apiURL,
-    headers: { Authorization: `Bearer ${token}` },
-    timeout: 10000,
-  });
-};
+interface FormErrors {
+  username?: string;
+  password?: string;
+  confirmPassword?: string;
+  server?: string;
+}
 
-const CommunityInfo = () => {
+const SetCredentials = () => {
   const [data, setData] = useState<FormData>({
     username: '',
     password: '',
   });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const { token } = useLocalSearchParams<{ token?: string }>();
+  const { token } = useLocalSearchParams<{ token: string }>();
+
+  // Track changes for enabling the button
+  useEffect(() => {
+    const hasChanges = data.username.trim() !== '' || data.password !== '';
+    // You can adjust this logic if pre-filled values exist
+  }, [data.username, data.password]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
+
+    // Clear field error when user types
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+    if (errors.confirmPassword && field === 'password') {
+      setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+    }
+    if (errors.server) {
+      setErrors((prev) => ({ ...prev, server: undefined }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    const trimmedUsername = data.username.trim();
+    if (!trimmedUsername) {
+      newErrors.username = 'Username is required';
+    } else if (trimmedUsername.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    } else if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUsername)) {
+      newErrors.username = 'Only letters, numbers, _, ., - allowed';
+    }
+
+    if (!data.password) {
+      newErrors.password = 'Password is required';
+    } else if (data.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (data.password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
-    if (!hasChanges) {
-      Alert.alert('No Changes', 'No changes to save.');
-      return;
-    }
+    if (!validateForm()) return;
 
     if (!token) {
       Alert.alert('Error', 'Authentication token is missing.');
       return;
     }
 
-    if (!data.username || !data.password) {
-      Alert.alert('Incomplete Fields', 'Please fill all fields.');
-      return;
-    }
-
-    if (data.password !== confirmPassword) {
-      Alert.alert('Password Mismatch', 'Passwords do not match.');
-      return;
-    }
-
     setLoading(true);
+
+    const axiosInstance = axios.create({
+      baseURL: process.env.EXPO_PUBLIC_API_URL,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      timeout: 10000,
+    });
+
     try {
-      const axiosInstance = createAxiosInstance(token);
-
-      const updateData = {
-        username: data.username,
+      const response = await axiosInstance.put('/v1/api/profile', {
+        username: data.username.trim(),
         password: data.password,
-      };
-
-      const response = await axiosInstance.put<UpdateProfileResponse>(
-        '/v1/api/profile',
-        updateData,
-        { headers: { 'Content-Type': 'application/json' } },
-      );
+      });
 
       if (response.data.error) {
-        Alert.alert(
-          'Update Failed',
-          'Failed to update profile. Please try again.',
-        );
+        const msg =
+          typeof response.data.message === 'string'
+            ? response.data.message
+            : 'Failed to update profile.';
+        setErrors({ server: msg });
+        Alert.alert('Update Failed', msg);
       } else {
-        Alert.alert('Success', 'Profile updated successfully!');
-        router.push(`/(auth)/login`);
+        Alert.alert('Success', 'Profile updated successfully!', [
+          {
+            text: 'OK',
+            onPress: () => router.push('/student-screens/cohorts'),
+          },
+        ]);
       }
     } catch (error: any) {
       console.error('Update Error:', error);
-      const message = error.response?.data?.message;
-      error.message || 'Something went wrong while updating your profile.';
+
+      let message = 'Something went wrong. Please try again.';
+
+      if (error.response?.data?.message) {
+        if (typeof error.response.data.message === 'string') {
+          message = error.response.data.message;
+        } else if (error.response.data.message.username) {
+          message = error.response.data.message.username;
+          setErrors((prev) => ({ ...prev, username: message }));
+        }
+      }
+
+      setErrors((prev) => ({ ...prev, server: message }));
       Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }
   };
 
+  const isFormFilled = data.username.trim() && data.password && confirmPassword;
+
   return (
-    <SafeAreaWrapper style={styles.container}>
-      <View style={{ marginTop: 24 }}>
+    <SafeAreaWrapper>
+      <View style={styles.container}>
         <Header number={2} total={2} />
-        <Text style={styles.header}>What username do you want to use?</Text>
+
+        <Text style={styles.title}>What username do you want to use?</Text>
 
         <Input
           label="Username"
+          placeholder="Enter your username"
           value={data.username}
           onChangeText={(value: string) => handleChange('username', value)}
-          placeholder="Username"
+          error={errors.username}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
-      </View>
 
-      <View>
-        <Text style={styles.header}>Set Password</Text>
+        <Text style={styles.sectionTitle}>Set Password</Text>
 
         <Input
           label="Password"
+          placeholder="Create a strong password"
           value={data.password}
           onChangeText={(value: string) => handleChange('password', value)}
-          placeholder="Create a password"
           secureTextEntry
+          error={errors.password}
         />
+
         <Input
-          label="Re-type Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          label="Confirm Password"
           placeholder="Re-type your password"
+          value={confirmPassword}
+          onChangeText={(value: string) => {
+            setConfirmPassword(value);
+            if (errors.confirmPassword) {
+              setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+            }
+          }}
           secureTextEntry
+          error={errors.confirmPassword}
         />
+
+        {/* Server error display */}
+        {errors.server && <Text style={styles.serverError}>{errors.server}</Text>}
+
+        {/* Next Button */}
+        <Pressable
+          onPress={handleSave}
+          disabled={!isFormFilled || loading}
+          style={[
+            styles.nextButton,
+            (!isFormFilled || loading) && styles.nextButtonDisabled,
+          ]}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.nextButtonText}>Next</Text>
+          )}
+        </Pressable>
+
+        {/* Back Button */}
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <BackArrowIcon />
+          <Text style={styles.backText}>Back</Text>
+        </Pressable>
       </View>
-
-      <Pressable
-        onPress={handleSave}
-        disabled={loading || !hasChanges}
-        style={[
-          styles.button,
-          {
-            backgroundColor: loading || !hasChanges ? '#CCC' : '#391D65',
-          },
-        ]}
-      >
-        <Text style={styles.buttonText}>{loading ? 'Saving...' : 'Next'}</Text>
-      </Pressable>
-
-      <Pressable onPress={() => router.back()} style={styles.backButton}>
-        <BackArrowIcon />
-        <Text style={{ color: '#391D65' }}>Back</Text>
-      </Pressable>
     </SafeAreaWrapper>
   );
 };
 
-export default CommunityInfo;
+export default SetCredentials;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'column',
-    gap: 20,
+    flex: 1,
     paddingHorizontal: 20,
+    marginTop: 24,
+    justifyContent: 'space-between',
   },
-  header: {
+  title: {
     fontSize: 18,
     fontFamily: 'DMSansMedium',
-    marginBottom: 18,
-    marginTop: 16,
     color: '#B085EF',
+    textAlign: 'center',
+    marginVertical: 32,
   },
-  button: {
-    borderWidth: 1,
-    borderColor: '#F8F1FF',
-    paddingVertical: 14,
-    alignItems: 'center',
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'DMSansMedium',
+    color: '#B085EF',
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  serverError: {
+    color: 'red',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  nextButton: {
+    backgroundColor: '#391D65',
+    paddingVertical: 16,
     borderRadius: 32,
+    alignItems: 'center',
+    marginTop: 40,
   },
-  buttonText: {
+  nextButtonDisabled: {
+    backgroundColor: '#ccc',
+    opacity: 0.7,
+  },
+  nextButtonText: {
     color: '#fff',
+    fontSize: 16,
+    fontFamily: 'DMSansMedium',
   },
   backButton: {
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 32,
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    marginTop: 20,
+  },
+  backText: {
+    color: '#391D65',
+    fontFamily: 'DMSansMedium',
   },
 });

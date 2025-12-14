@@ -2,7 +2,7 @@ import { Text } from '@/theme/theme';
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 
-const NormalInput = ({ label, placeholder, value, onChangeText }: any) => {
+const NormalInput = ({ label, placeholder, value, onChangeText, error }: any) => {
   return (
     <View>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -14,6 +14,7 @@ const NormalInput = ({ label, placeholder, value, onChangeText }: any) => {
         onChangeText={onChangeText}
         editable={true} // Enable/disable input
       />
+      {error && <Text style={{ color: 'red', marginTop: 4 }}>{error}</Text>}
     </View>
   );
 };
