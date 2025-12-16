@@ -13,6 +13,7 @@ import { Button } from '@/components/ui';
 import { router } from 'expo-router';
 import { useTheme } from '@shopify/restyle';
 import axios from 'axios';
+import Constants from 'expo-constants';
 import { useLocalSearchParams, useSearchParams } from 'expo-router/build/hooks';
 
 const { width } = Dimensions.get('window');
@@ -41,7 +42,12 @@ const SignUp = () => {
   >(null);
   const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
   const [showDefinition, setShowDefinition] = useState(false);
-  const apiURL = process.env.EXPO_PUBLIC_API_URL;
+  // Resolve API URL with fallback (handles preview builds where env may not be injected)
+  const apiURL =
+    process.env.EXPO_PUBLIC_API_URL ||
+    (Constants.expoConfig?.extra as any)?.EXPO_PUBLIC_API_URL ||
+    'https://cohortle-api.onrender.com';
+
   const token = useLocalSearchParams<{ token: string }>();
 
   const handleRoleSelection = (role: 'convener' | 'learner') => {
@@ -67,14 +73,18 @@ const SignUp = () => {
   const handleRole = async () => {
     setLoading(true);
     setError('');
-    console.log(token);
+    // Diagnostics for preview vs dev builds
+    // eslint-disable-next-line no-console
+    console.log('[SignUp] apiURL:', apiURL);
+    // eslint-disable-next-line no-console
+    console.log('[SignUp] token param present:', !!token?.token);
     try {
       const response = await axios.patch(
         `${apiURL}/v1/api/profile/set-role`,
         { role: selectedRole },
         {
           headers: {
-            Authorization: `Bearer ${token.token}`,
+            Authorization: token?.token ? `Bearer ${token.token}` : undefined,
           },
         },
       );
@@ -95,8 +105,16 @@ const SignUp = () => {
         }
         console.log(response.data.token);
       }
-    } catch (err) {
-      setError('error setting role: ' + err);
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('[SignUp] Error setting role:', err.message || err);
+      if (err.response) {
+        // eslint-disable-next-line no-console
+        console.error('status:', err.response.status);
+        // eslint-disable-next-line no-console
+        console.error('data:', err.response.data);
+      }
+      setError('error setting role: ' + (err.message || String(err)));
     } finally {
       setLoading(false);
     }
