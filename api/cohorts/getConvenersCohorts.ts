@@ -8,9 +8,11 @@ const convenersCohorts = async () => {
   const token = await AsyncStorage.getItem('authToken');
   try {
     const response = await axios.get(`${apiURL}/v1/api/cohorts/owner`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  headers: {
+    Authorization: `Bearer ${token}`,
+    'Cache-Control': 'no-cache',
+    Pragma: 'no-cache',
+  },
     });
     return response.data.cohorts;
   } catch (error) {
