@@ -2,33 +2,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
-const getCommunity = async (cohortId: number, id: string) => {
+const getCommunity = async (id: string) => {
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
   const token = await AsyncStorage.getItem('authToken');
   try {
     const response = await axios.get(
-      `${apiURL}/v1/api/cohorts/${cohortId}/communities/${id}`,
+      `${apiURL}/v1/api/communities/${id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       },
     );
-    return response.data;
+    console.log(response.data.community);
+    return response.data.community;
   } catch (error) {
     console.error('Error fetching community:', error);
     throw error;
   }
 };
 
-const useGetCommunity = (cohortId: number, id: string) => {
+const useGetCommunity = (id: string) => {
   return useQuery({
-    queryKey: ['community', cohortId],
-    queryFn: () => getCommunity(cohortId, id),
+    queryKey: ['community'],
+    queryFn: () => getCommunity(id),
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
-    staleTime: 0,
-    enabled: !!cohortId,
+    staleTime: 0
   });
 };
 

@@ -24,6 +24,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDeleteCohort } from '@/api/cohorts/deleteCohort';
 import { useGetCohortLearners } from '@/api/cohorts/getCohortLearners';
 import { useRemoveCohortLearner } from '@/api/cohorts/removeLearner';
+import useGetCommunity from '@/api/communities/getCommunity';
+import { useRemoveCommunity } from '@/api/communities/deleteCommunity';
 
 const EditCohort = () => {
   const router = useRouter();
@@ -36,31 +38,32 @@ const EditCohort = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLearner, setSelectedLearner] = useState<any>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: cohort } = useGetCohort(id as any);
+  const { data: community } = useGetCommunity(id as any);
   const { data: cohortLearners } = useGetCohortLearners(id);
   const updateCohort = useUpdateCohort();
   const deleteCohort = useDeleteCohort();
   const [loading, setLoading] = useState(false);
-  const removeLearnerMutation = useRemoveCohortLearner();
+  const removeCommunityMutation = useRemoveCommunity();
   // console.log(cohortLearners)
 
-  const handleRemoveLearner = async (memberId: string | number) => {
+  const handleRemoveCommunity = async () => {
     if (!id) return;
 
     Alert.alert(
-      'Remove Learner',
-      'Are you sure you want to remove this learner?',
+      'Remove Community',
+      'Are you sure you want to remove this community?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Remove',
           style: 'destructive',
           onPress: () => {
-            removeLearnerMutation.mutate(
-              { cohortId: id, learnerId: memberId },
+            removeCommunityMutation.mutate(
+              { id },
               {
                 onSuccess: () => {
                   bottomSheetRef.current?.close();
+                  router.replace('/convener-screens/(cohorts)');
                 },
               },
             );
@@ -105,42 +108,42 @@ const EditCohort = () => {
     [],
   );
 
-  const handleUpdateCohort = async () => {
-    // Validate input
-    if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a cohort name');
-      return;
-    }
+  // const handleUpdateCohort = async () => {
+  //   // Validate input
+  //   if (!name.trim()) {
+  //     Alert.alert('Error', 'Please enter a cohort name');
+  //     return;
+  //   }
 
-    const token = await AsyncStorage.getItem('authToken');
-    try {
-      await updateCohort.mutateAsync({
-        cohort_id: Number(id),
-        token: String(token),
-        data: {
-          name,
-        },
-      });
+  //   const token = await AsyncStorage.getItem('authToken');
+  //   try {
+  //     await updateCohort.mutateAsync({
+  //       cohort_id: Number(id),
+  //       token: String(token),
+  //       data: {
+  //         name,
+  //       },
+  //     });
 
-      Alert.alert('Success', 'Cohort info updated successfully');
-      console.log('Updated name:', name);
-    } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || 'Update failed');
-    }
-  };
+  //     Alert.alert('Success', 'Cohort info updated successfully');
+  //     console.log('Updated name:', name);
+  //   } catch (err: any) {
+  //     Alert.alert('Error', err?.response?.data?.message || 'Update failed');
+  //   }
+  // };
 
-  const handleDeleteCohort = async () => {
-    setLoading(true);
-    try {
-      await deleteCohort.mutateAsync(String(id));
-      Alert.alert('Success', 'Community deleted successfully');
-      router.push('/convener-screens/(cohorts)');
-      // Navigate back or to another screen if necessary
-    } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || 'Delete failed');
-    }
-    setLoading(false);
-  };
+  // const handleDeleteCohort = async () => {
+  //   setLoading(true);
+  //   try {
+  //     await deleteCohort.mutateAsync(String(id));
+  //     Alert.alert('Success', 'Community deleted successfully');
+  //     router.push('/convener-screens/(cohorts)');
+  //     // Navigate back or to another screen if necessary
+  //   } catch (err: any) {
+  //     Alert.alert('Error', err?.response?.data?.message || 'Delete failed');
+  //   }
+  //   setLoading(false);
+  // };
 
   const [activeTab, setActiveTab] = useState<'details' | 'members'>('details');
 
@@ -162,7 +165,7 @@ const EditCohort = () => {
               activeTab === 'details' ? styles.activeTabText : styles.tabText
             }
           >
-            Details for {cohort?.name}
+            Details for {community.name}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -190,7 +193,7 @@ const EditCohort = () => {
               value={name}
               onChangeText={setName}
               label="Cohort name"
-              placeholder={cohort?.name}
+              placeholder={community?.name}
             />
           </View>
           <View
@@ -229,7 +232,7 @@ const EditCohort = () => {
                 width: '100%',
                 borderRadius: 16,
               }}
-              onPress={handleUpdateCohort}
+            // onPress={handleUpdateCohort}
             >
               <Text
                 style={{
@@ -286,22 +289,7 @@ const EditCohort = () => {
 
               <TouchableOpacity
                 style={{ gap: 4 }}
-                onPress={() => {
-                  Alert.alert(
-                    'Remove Learner',
-                    `Remove ${selectedLearner.first_name} from this group?`,
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Remove',
-                        style: 'destructive',
-                        onPress: () =>
-                          handleRemoveLearner(selectedLearner.member_id),
-                      },
-                    ],
-                  );
-                  bottomSheetRef.current?.close();
-                }}
+                onPress={() => { }}
               >
                 <Text style={{ color: '#EE3D3E', fontWeight: '500' }}>
                   Remove learner
@@ -527,7 +515,7 @@ const EditCohort = () => {
               <Text style={{ color: '#391D65' }}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={handleDeleteCohort}
+              onPress={handleRemoveCommunity}
               style={{
                 borderWidth: 1,
                 borderColor: '#F8F1FF',

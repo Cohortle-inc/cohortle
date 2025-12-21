@@ -23,6 +23,7 @@ import { useCreateCohort } from '@/api/cohorts/postCohort';
 import { CohortType } from '@/types/cohortType';
 import { showMessage } from 'react-native-flash-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useGetCommunities from '@/api/communities/getCommunities';
 
 const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
@@ -33,10 +34,10 @@ const Cohorts = () => {
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
   /// Note: Instead of calling the communities withing a cohort, its the cohort that is being called in this case. a major oversight
-  const { data: cohortsResponse, isLoading, isError } = useConvenersCohorts();
-  const cohorts = cohortsResponse || [];
+  // const { data: cohortsResponse, isError } = useConvenersCohorts();
+  const { data: communities = [], isLoading } = useGetCommunities();
+  // const cohorts = cohortsResponse || [];
   const { mutate: createCohort, isPending } = useCreateCohort();
-    // const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
@@ -86,7 +87,7 @@ const Cohorts = () => {
     setCohortData((prev) => ({ ...prev, [field]: value }));
   };
   const openBottomSheet = (id: number) => {
-    const cohort = cohorts.find((cohort: CohortProps) => cohort.id === id);
+    const cohort = communities.find((cohort: CommunityProps) => cohort.id === id);
     setSelectedCohort(cohort);
     // You can set the selected cohort to state if needed
     console.log('Opening bottom sheet for cohort ID:', cohort);
@@ -138,7 +139,7 @@ const Cohorts = () => {
             Loading communities...
           </Text>
         </View>
-      ) : cohorts.length === 0 ? (
+      ) : communities.length === 0 ? (
         <View
           style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 32 }}
         >
@@ -179,7 +180,7 @@ const Cohorts = () => {
         </View>
       ) : (
         <View style={{ gap: 15, paddingBottom: 20 }}>
-          {cohorts.map((cohort: any) => (
+          {communities.map((cohort: any) => (
             <Cohort
               key={cohort.id}
               name={cohort.name}
@@ -329,13 +330,13 @@ const Cohorts = () => {
 
 export default Cohorts;
 
-interface CohortProps {
+interface CommunityProps {
   id?: number;
   name: string;
   onOpenBottomSheet: () => void;
   onPress: () => void;
 }
-const Cohort = ({ name, onOpenBottomSheet, onPress }: CohortProps) => {
+const Community = ({ name, onOpenBottomSheet, onPress }: CommunityProps) => {
   const router = useRouter();
   return (
     <TouchableOpacity
