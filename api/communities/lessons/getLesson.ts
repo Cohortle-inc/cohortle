@@ -2,12 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
-const getLesson = async (lessonId: string, moduleId: string) => {
+const getLesson = async (lessonId: string) => {
   const token = await AsyncStorage.getItem('authToken');
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
   try {
     const response = await axios.get(
-      `${apiURL}/v1/api/modules/${moduleId}/lessons/${lessonId}`,
+      `${apiURL}/v1/api/lessons/${lessonId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -21,10 +21,10 @@ const getLesson = async (lessonId: string, moduleId: string) => {
   }
 };
 
-export const useGetLesson = (lessonId: string, moduleId: string) => {
+export const useGetLesson = (lessonId: string) => {
   return useQuery({
-    queryKey: ['lesson', lessonId, moduleId],
-    queryFn: () => getLesson(lessonId, moduleId),
+    queryKey: ['lesson', lessonId],
+    queryFn: () => getLesson(lessonId),
     refetchOnReconnect: true,
     refetchInterval: 5000,
   });

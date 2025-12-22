@@ -28,6 +28,8 @@ import { CommunityType } from '@/api/communities/postCommunity';
 import useGetCommunities from '@/api/communities/getCommunities';
 import useGetModules from '@/api/communities/modules/getModules';
 import { colors } from '@/utils/color';
+import { useGetProgrammes } from '@/api/programmes/getProgrammes';
+import { PostProgrammePayload, usePostProgramme } from '@/api/programmes/postProgramme';
 
 interface CreateCommunityHandlerOptions {
   onSuccess?: (data: any) => void;
@@ -49,8 +51,24 @@ interface CommunityResponse {
   // Add other fields as returned by the API
 }
 
-type Props = {};
+interface ProgrammeProps {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+}
+type Props = {}
 const courseOptions = [
+  {
+    key: 'structured',
+    title: 'Structured',
+    description: 'Learners can start immediately and learn at their own pace',
+  },
+  {
+    key: 'scheduled',
+    title: 'Scheduled',
+    description: 'Learners can start immediately and learn at their own pace',
+  },
   {
     key: 'self_paced',
     title: 'Self-paced',
@@ -70,7 +88,7 @@ const Index = (props: Props) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    sub_type: '',
+    type: '',
   });
 
   const [courseType, setCourseType] = useState('self-paced');
@@ -89,49 +107,48 @@ const Index = (props: Props) => {
 
   // console.log(apiURL);
   const { mutate: createCommunity, isPending } = usePostCommunity(numericId);
-  const { data: communities = [], isLoading } = useGetCommunities(numericId);
+  const { mutate: createProgramme, isPending: createProgrammePending } = usePostProgramme(numericId);
+  // const { data: communities = [], isLoading } = useGetCommunities(numericId);
+  const { data: programmes = [], isLoading: programmesLoading } = useGetProgrammes(id);
   const handleStep = () => {
     setStep(step + 1);
   };
 
 
-  const createCommunityHandler = () => {
+  const createProgrammeHandler = () => {
     // Validate required fields
     if (
       !formData.name.trim() ||
       !formData.description.trim() ||
-      !formData.sub_type.trim()
+      !formData.type.trim()
     ) {
       alert('Please fill in all required fields');
       return;
     }
 
-    const payload: CreateCommunityPayload = {
-      cohort_id: numericId,
+    const payload: PostProgrammePayload = {
       name: formData.name,
       description: formData.description,
-      sub_type: formData.sub_type,
-      // Remove sub_type from payload
+      type: formData.type,
     };
 
-    createCommunity(payload, {
+    createProgramme(payload, {
       onSuccess: (data: any) => {
         // Close modal and reset form
         setModalVisible(false);
         setFormData({
           name: '',
           description: '',
-          sub_type: 'structured',
+          type: '',
         });
         setStep(1);
-        // Optionally refresh communities list or navigate
-        alert('Cohort created successfully!');
+        alert('Programme created successfully!');
       },
       onError: (error: any) => {
-        console.error('Error creating community:', error);
+        console.error('Error creating programme:', error);
         // Show specific error message if available
         const errorMessage =
-          error.response?.data?.message || 'Failed to create community';
+          error.response?.data?.message || 'Failed to create programme';
         alert(`Error: ${errorMessage}`);
       },
     });
@@ -181,7 +198,7 @@ const Index = (props: Props) => {
           </TouchableOpacity> */}
         </View>
       </View>
-      {isLoading ? (
+      {programmesLoading ? (
         // Loading State
         <View
           style={{
@@ -195,50 +212,50 @@ const Index = (props: Props) => {
           <Text
             style={{ color: '#666', fontSize: 16, fontFamily: 'DMSansMedium' }}
           >
-            Loading cohorts...
+            Loading programmes...
           </Text>
         </View>
-      ) : communities.length > 0 ? (
+      ) : programmes.length > 0 ? (
         // Has Communities
         <ScrollView
           contentContainerStyle={{ paddingVertical: 16, gap: 16 }}
           showsVerticalScrollIndicator={false}
         >
-          {communities.map((community: CommunityType) => (
+          {programmes.map((programme: ProgrammeProps) => (
             <Community
-              key={community.id}
-              {...community}
+              key={programme.id}
+              {...programme}
               onOpenBottomSheet={openBottomSheet}
             />
           ))}
 
           {/* Show "Create Community" button only if less than 2 communities */}
-            <TouchableOpacity
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              marginTop: 24,
+              paddingVertical: 16,
+              backgroundColor: '#F8F1FF',
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: '#E8DDFD',
+            }}
+            onPress={toggleModal}
+          >
+            <PlusSmall />
+            <Text
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 10,
-                marginTop: 24,
-                paddingVertical: 16,
-                backgroundColor: '#F8F1FF',
-                borderRadius: 16,
-                borderWidth: 1,
-                borderColor: '#E8DDFD',
+                color: '#391D65',
+                fontFamily: 'DMSansSemiBold',
+                fontSize: 16,
               }}
-              onPress={toggleModal}
             >
-              <PlusSmall />
-              <Text
-                style={{
-                  color: '#391D65',
-                  fontFamily: 'DMSansSemiBold',
-                  fontSize: 16,
-                }}
-              >
-                Create Cohort
-              </Text>
-            </TouchableOpacity>
+              Create Programme
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
       ) : (
         // Empty State
@@ -259,7 +276,7 @@ const Index = (props: Props) => {
               marginBottom: 12,
             }}
           >
-            No cohort yet!
+            No programmes yet!
           </Text>
           <Text
             style={{
@@ -270,7 +287,7 @@ const Index = (props: Props) => {
               marginBottom: 32,
             }}
           >
-            Create your first cohort and let the discussion begin. Group members
+            Create your first programme and let the discussion begin. Group members
             by topics, courses, or interests.
           </Text>
 
@@ -298,7 +315,7 @@ const Index = (props: Props) => {
                 fontSize: 16,
               }}
             >
-              Create a cohort
+              Create a Programme
             </Text>
           </TouchableOpacity>
         </View>
@@ -332,7 +349,7 @@ const Index = (props: Props) => {
               textAlign: 'center',
             }}
           >
-            {step === 1 ? 'Choose cohort Type' : 'Choose cohort structure'}
+            {step === 1 ? 'Choose programme Type' : 'Choose programme detail'}
           </Text>
           {/* {step == 1 && (
                 <ScrollView>
@@ -351,15 +368,17 @@ const Index = (props: Props) => {
                 style={{
                   backgroundColor: '#fff',
                   borderRadius: 12,
+                  width: '100%',
+                  alignItems: 'center'
                 }}
               >
                 {courseOptions.map((option) => {
-                  const isActive = formData.sub_type === option.key;
+                  const isActive = formData.type === option.key;
                   return (
                     <TouchableOpacity
                       key={option.key}
                       onPress={() =>
-                        setFormData({ ...formData, sub_type: option.key })
+                        setFormData({ ...formData, type: option.key })
                       }
                       style={getButtonStyle(isActive)}
                     >
@@ -376,7 +395,7 @@ const Index = (props: Props) => {
           {step === 2 && (
             <ScrollView contentContainerStyle={styles.container}>
               {/* Course name */}
-              <Text style={styles.label}>Cohort title</Text>
+              <Text style={styles.label}>Programme title</Text>
               <TextInput
                 placeholder="Introduction to HTML"
                 value={formData.name}
@@ -388,7 +407,7 @@ const Index = (props: Props) => {
               />
 
               {/* Cohort Description */}
-              <Text style={styles.label}>Cohort Description</Text>
+              <Text style={styles.label}>Programme description</Text>
               <TextInput
                 placeholder="Beginner friendly course on HTML..."
                 style={[styles.input, styles.textarea]}
@@ -449,10 +468,10 @@ const Index = (props: Props) => {
                 backgroundColor: '#391D65',
                 width: 155,
               }}
-              onPress={step < 2 ? handleStep : createCommunityHandler}
+              onPress={step < 2 ? handleStep : createProgrammeHandler}
             >
               <Text style={{ color: '#fff' }}>
-                {!isPending ? 'Next' : 'Creating...'}
+                {!createProgrammePending ? 'Next' : 'Creating...'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -533,9 +552,9 @@ const Index = (props: Props) => {
 
 export default Index;
 
-type LessonProps = CommunityType & { onOpenBottomSheet: () => void };
+type ProgrammeProp = ProgrammeProps & { onOpenBottomSheet: () => void };
 
-const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
+const Community = ({ id, type, name, onOpenBottomSheet }: ProgrammeProp) => {
   const router = useRouter();
   return (
     <TouchableOpacity
@@ -543,7 +562,7 @@ const Community = ({ id, cohort_id, name, onOpenBottomSheet }: LessonProps) => {
       onPress={() =>
         router.navigate({
           pathname: '/convener-screens/community/(course)/[id]',
-          params: { name, id, cohort_id },
+          params: { name, id, type },
         })
       }
       style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}

@@ -7,7 +7,7 @@ const getModules = async (id: any) => {
   const token = await AsyncStorage.getItem('authToken');
   try {
     const response = await axios.get(
-      `${apiURL}/v1/api/communities/${id}/modules`,
+      `${apiURL}/v1/api/programmes/${id}/modules`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -25,7 +25,6 @@ const useGetModules = (id: number | null) => {
   return useQuery({
     queryKey: ['modules', id],
     queryFn: () => getModules(id!),
-    refetchInterval: 3000,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
     staleTime: 0,

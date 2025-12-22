@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
 export interface ModuleProp {
-  community_id: number;
+  programme_id: number;
   title: string;
   order_number: number;
 }
@@ -12,7 +12,7 @@ const postModule = async (data: ModuleProp, id: number) => {
   const token = await AsyncStorage.getItem('authToken');
   try {
     const response = await axios.post(
-      `${apiURL}/v1/api/communities/${id}/modules`,
+      `${apiURL}/v1/api/programmes/${id}/modules`,
       data,
       {
         headers: {
@@ -29,7 +29,13 @@ const postModule = async (data: ModuleProp, id: number) => {
 };
 
 export const usePostModule = (id: number) => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: ModuleProp) => postModule(data, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['modules', id],
+      });
+    },
   });
 };

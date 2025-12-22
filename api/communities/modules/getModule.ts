@@ -7,7 +7,7 @@ const getModule = async (id: string) => {
   const token = await AsyncStorage.getItem('authToken');
   try {
     const response = await axios.get(
-      `${apiURL}/v1/api/communities/:community_id/modules/${module}`,
+      `${apiURL}/v1/api/modules/${module}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

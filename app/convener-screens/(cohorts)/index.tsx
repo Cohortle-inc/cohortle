@@ -181,7 +181,7 @@ const Cohorts = () => {
       ) : (
         <View style={{ gap: 15, paddingBottom: 20 }}>
           {communities.map((cohort: any) => (
-            <Cohort
+            <Community
               key={cohort.id}
               name={cohort.name}
               onPress={() => handleCohortPress(cohort.id, cohort.name)}

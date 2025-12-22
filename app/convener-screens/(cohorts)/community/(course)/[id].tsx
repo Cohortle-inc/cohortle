@@ -28,7 +28,7 @@ import { useDeleteLesson } from '@/api/communities/lessons/deleteLesson';
 
 interface ModuleType {
   id: number;
-  community_id: number;
+  programme_id: number;
   title: string;
   order_number: number;
   status: string;
@@ -43,15 +43,16 @@ interface LessonProp {
 const Index = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { name } = useLocalSearchParams<{ name: string }>();
+  const { type } = useLocalSearchParams<{ type: string }>();
   const numeric = Number(id);
 
-  const { mutate } = usePostModule(numeric);
+  const { mutate, isPending: modulePending } = usePostModule(numeric);
   const { data: modules = [], isLoading: modulesLoading } =
     useGetModules(numeric);
 
   const handleCreateModule = () => {
     const newModule = {
-      community_id: numeric,
+      programme_id: numeric,
       title: 'New Module',
       order_number: modules.length + 1,
     };
@@ -69,7 +70,7 @@ const Index = () => {
         <View style={styles.header}>
           <Text style={styles.title}>Modules</Text>
           <Text style={styles.courseType}>
-            Course type: <Text style={styles.link}>Self-paced</Text>
+            Course type: <Text style={styles.link}>{type}</Text>
           </Text>
         </View>
 
@@ -81,6 +82,7 @@ const Index = () => {
             <TouchableOpacity
               onPress={handleCreateModule}
               style={styles.addButton}
+              disabled={modulePending}
             >
               <Text style={styles.addButtonText}>Add module</Text>
             </TouchableOpacity>
@@ -139,7 +141,7 @@ const Index = () => {
 
 export const Module = ({
   id,
-  community_id,
+  programme_id,
   title: initialTitle,
 }: ModuleType) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -162,7 +164,6 @@ export const Module = ({
   const saveModuleTitle = () => {
     if (title.trim() && title !== initialTitle) {
       editModule({
-        community_id,
         module_id: id,
         data: { title: title.trim() },
       });
@@ -218,7 +219,7 @@ export const Module = ({
 
   const handleDeleteModule = () => {
     deleteModule(
-      { community_id, module_id: id },
+      { programme_id, module_id: id },
       { onSuccess: () => setShowDeleteConfirm(false) },
     );
   };

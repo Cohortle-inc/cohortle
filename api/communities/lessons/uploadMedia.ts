@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 export const uploadLessonMedia = async (
-  moduleId: string,
   lessonId: string,
   media: {
     uri: string;
@@ -35,7 +34,7 @@ export const uploadLessonMedia = async (
   }
 
   const response = await axios.put(
-    `${apiURL}/v1/api/modules/${moduleId}/lessons/${lessonId}`,
+    `${apiURL}/v1/api/lessons/${lessonId}`,
     formData,
     {
       headers: {

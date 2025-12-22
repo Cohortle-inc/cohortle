@@ -5,7 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
 
 interface EditModuleParams {
-  community_id: number;
   module_id: number;
   data: {
     title?: string;
@@ -16,7 +15,6 @@ interface EditModuleParams {
 }
 
 const updateModule = async ({
-  community_id,
   module_id,
   data,
 }: EditModuleParams) => {
@@ -24,7 +22,7 @@ const updateModule = async ({
   if (!token) throw new Error('Authentication required');
 
   const response = await axios.put(
-    `${apiURL}/v1/api/communities/${community_id}/modules/${module_id}`,
+    `${apiURL}/v1/api/modules/${module_id}`,
     data,
     {
       headers: {
@@ -44,10 +42,10 @@ export const useEditModule = () => {
     mutationFn: updateModule,
 
     onSuccess: (updatedModule, variables) => {
-      const { community_id, module_id } = variables;
+      const { module_id } = variables;
 
       // Instant UI update in modules list
-      queryClient.setQueryData(['modules', community_id], (old: any) =>
+      queryClient.setQueryData(['modules'], (old: any) =>
         old?.map((m: any) =>
           m.id === module_id ? { ...m, ...updatedModule } : m,
         ),
@@ -57,7 +55,7 @@ export const useEditModule = () => {
       queryClient.setQueryData(['module', module_id], updatedModule);
 
       // Invalidate as safe fallback
-      queryClient.invalidateQueries({ queryKey: ['modules', community_id] });
+      queryClient.invalidateQueries({ queryKey: ['modules'] });
       queryClient.invalidateQueries({ queryKey: ['module', module_id] });
     },
 

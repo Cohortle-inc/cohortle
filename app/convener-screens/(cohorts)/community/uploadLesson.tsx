@@ -12,7 +12,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { colors } from '@/utils/color';
 import { NavHead } from '@/components/HeadRoute';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGetLesson } from '@/api/communities/lessons/getLesson';
 import { uploadLessonMedia } from '@/api/communities/lessons/uploadMedia';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,14 +40,16 @@ const CreateLesson = () => {
   const [editorKey, setEditorKey] = useState(0);
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+  const router = useRouter();
+
   const lessonID = useLocalSearchParams().lessonId as string;
   const moduleID = useLocalSearchParams().moduleId as string;
   const moduleTitle = useLocalSearchParams().moduleTitle;
-  const { data: lessonData, isLoading } = useGetLesson(lessonID, moduleID);
+  const { data: lessonData, isLoading } = useGetLesson(lessonID);
+  console.log(lessonData)
 
   const richEditor = useRef<RichEditorRef>(null);
-  
+
   // ✅ Store content in ref to prevent re-renders
   const currentContentRef = useRef('');
   const hasUnsavedChangesRef = useRef(false);
@@ -61,15 +63,15 @@ const CreateLesson = () => {
   useEffect(() => {
     if (lessonData && !isLoading && isInitialLoad.current) {
       console.log('📥 Loading lesson data into editor');
-      
+
       setDescription(lessonData.description || '');
-      
+
       const lessonText = lessonData.text || '<p>Start writing your lesson content...</p>';
-      
+
       // ✅ Set both state and ref for initial content
       setText(lessonText);
       currentContentRef.current = lessonText;
-      
+
       setEditorKey(prev => prev + 1);
       isInitialLoad.current = false;
     }
@@ -88,7 +90,7 @@ const CreateLesson = () => {
     // ✅ Only update the ref - this doesn't cause re-renders
     currentContentRef.current = html;
     hasUnsavedChangesRef.current = true;
-    
+
     // ✅ Optional: Log changes without affecting state
     console.log('📝 Content changed (ref only):', html.substring(0, 50) + '...');
   }, []);
@@ -178,15 +180,16 @@ const CreateLesson = () => {
       // ✅ Always get content from ref (most up-to-date)
       const currentContent = getCurrentContent();
       console.log('💾 Saving content from ref:', currentContent.substring(0, 100) + '...');
-      
-      await uploadLessonMedia(moduleID, lessonID, media, currentContent);
-      
+
+      await uploadLessonMedia(lessonID, media, currentContent);
+
       // ✅ Update state only after successful save to reflect changes
       setText(currentContent);
       hasUnsavedChangesRef.current = false;
-      
+
       setLoading(false);
       Alert.alert('Success', 'Lesson updated!');
+      router.back()
     } catch (error: any) {
       console.log('Update Error:', error?.response?.data);
       Alert.alert('Error', 'Could not update lesson');
@@ -251,7 +254,7 @@ const CreateLesson = () => {
         {/* ✅ Fixed Rich Text Editor - No re-renders during typing */}
         <View style={styles.richEditorContainer}>
           <Text style={styles.editorLabel}>Lesson Content</Text>
-          
+
           {isEditorReady && (
             <RichToolbar
               getEditor={getEditorRef}
@@ -272,7 +275,7 @@ const CreateLesson = () => {
               style={styles.toolbar}
             />
           )}
-          
+
           <View style={styles.editorWrapper}>
             <RichEditor
               key={editorKey}
