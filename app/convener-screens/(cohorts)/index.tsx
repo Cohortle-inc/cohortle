@@ -315,7 +315,7 @@ const Cohorts = () => {
               onPress={() =>
                 router.navigate({
                   pathname: `/convener-screens/(cohorts)/edit-community/[id]`,
-                  params: { id: selectedCohort?.id },
+                  params: { id: selectedCohort?.id, name: selectedCohort?.name },
                 })
               }
             >

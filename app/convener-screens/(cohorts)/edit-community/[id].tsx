@@ -22,10 +22,10 @@ import { useGetCohort } from '@/api/cohorts/getCohort';
 import { useUpdateCohort } from '@/api/updateCohorts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDeleteCohort } from '@/api/cohorts/deleteCohort';
-import { useGetCohortLearners } from '@/api/cohorts/getCohortLearners';
 import { useRemoveCohortLearner } from '@/api/cohorts/removeLearner';
 import useGetCommunity from '@/api/communities/getCommunity';
 import { useRemoveCommunity } from '@/api/communities/deleteCommunity';
+import { useGetCommunityMembers } from '@/api/communities/getMembers';
 
 const EditCohort = () => {
   const router = useRouter();
@@ -39,12 +39,12 @@ const EditCohort = () => {
   const [selectedLearner, setSelectedLearner] = useState<any>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: community } = useGetCommunity(id as any);
-  const { data: cohortLearners } = useGetCohortLearners(id);
+  const { data: communityMembers } = useGetCommunityMembers(id);
   const updateCohort = useUpdateCohort();
   const deleteCohort = useDeleteCohort();
   const [loading, setLoading] = useState(false);
   const removeCommunityMutation = useRemoveCommunity();
-  // console.log(cohortLearners)
+  // console.log(communityMembers)
 
   const handleRemoveCommunity = async () => {
     if (!id) return;
@@ -165,7 +165,7 @@ const EditCohort = () => {
               activeTab === 'details' ? styles.activeTabText : styles.tabText
             }
           >
-            Details for {community.name}
+            Details for {community?.name}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -254,8 +254,8 @@ const EditCohort = () => {
             { gap: 16, paddingBottom: 16 },
           ]}
         >
-          {cohortLearners && cohortLearners.length > 0 ? (
-            cohortLearners.map((learner: any) => (
+          {communityMembers && communityMembers.length > 0 ? (
+            communityMembers.map((learner: any) => (
               <LearnerItem
                 key={learner.member_id || learner.id}
                 learner={learner}
