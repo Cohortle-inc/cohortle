@@ -14,43 +14,35 @@ import { Text } from '@/theme/theme';
 import { Plus } from '@/assets/icons';
 import { useRouter } from 'expo-router';
 import { useGetLearnerCohorts } from '@/api/learners/cohortsJoined';
-import { CommunityType } from '@/api/communities/postCommunity';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '@/utils/color';
-import { useJoinCohort } from '@/api/cohorts/joinCohorts';
+import { useJoinCommunity } from '@/hooks/api/useJoinCommunity';
 
 interface CommunityData {
   id: string;
-  cohort_id: number;
-  community_owner: number;
-  created_at: string;
-  description: string;
-  first_name: string;
-  last_name: string;
-  module_count: number;
   name: string;
-  status: string;
-  sub_type: string;
-  thumbnail: string | null;
   type: string;
-  updated_at: string;
+  description: string;
+  thumbnail: string | null;
+  status: string;
+  unique_code: string;
+  member_role: string;
+  joined_at: string;
+  programme_count: number;
 }
 
 const Community = () => {
-  const { data: communityData, isLoading: communityLoading } =
-    useGetLearnerCohorts();
-  // const {data}
-  console.log('KKK: ', communityData);
+  const { data: communityData, isLoading: communityLoading } = useGetLearnerCohorts();
+  console.log(communityData);
   const [code, setCode] = useState('');
-  const { mutate: joinMutation, isPending: joinPending } = useJoinCohort();
+  const { mutate: joinCommunity, isPending: joinPending } = useJoinCommunity();
 
   const handleJoin = () => {
     if (!code.trim()) {
       Alert.alert('Invalid Code', 'Please enter a valid join code.');
       return;
     }
-
-    joinMutation(code.trim());
+    joinCommunity(code);
   };
   return (
     <SafeAreaWrapper>
@@ -88,9 +80,9 @@ const Community = () => {
                 Loading your cohorts...
               </Text>
             </View>
-          ) : communityData.length > 0 ? (
+          ) : communityData && communityData.length > 0 ? (
             <View>
-              {communityData.map((data: any, index: number) => (
+              {communityData.map((data: CommunityData, index: number) => (
                 <View key={data.id || index}>
                   <Course {...data} />
                 </View>
@@ -139,6 +131,7 @@ const Community = () => {
                     borderRadius: 5,
                     alignItems: 'center',
                   }}
+                  disabled={joinPending}
                 >
                   <Text style={{ color: 'white' }}>
                     {joinPending ? 'Joining...' : 'Join Cohort'}
@@ -163,10 +156,6 @@ const Course = (community: CommunityData) => {
     await AsyncStorage.setItem(
       'description',
       String(community.description),
-    );
-    await AsyncStorage.setItem(
-      'convenerName',
-      `${community.first_name} ${community.last_name}`,
     );
     router.navigate('/student-screens/cohorts/course');
     // await AsyncStorage.setItem()
@@ -199,15 +188,6 @@ const Course = (community: CommunityData) => {
             borderRadius: 8,
           }}
         ></View>
-        <Text
-          style={{
-            fontSize: 10,
-            fontWeight: '600',
-            color: '#1F1F1F',
-          }}
-        >
-          {community.first_name} {community.last_name}
-        </Text>
       </View>
       <View>
         <Text
@@ -221,16 +201,13 @@ const Course = (community: CommunityData) => {
           {community.name}
         </Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Text style={{ color: '#1F1F1F', fontSize: 10, marginTop: 4 }}>
-            Modules: {community.module_count}
-          </Text>
           <Text
             style={{
               color: '#1F1F1F',
               fontSize: 15,
             }}
           >
-            ~
+            ~ {community.programme_count} Programmes
           </Text>
 
           {/* <Text style={{ color: '#1F1F1F', fontSize: 10, marginTop: 4 }}>

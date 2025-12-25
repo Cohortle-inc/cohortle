@@ -7,12 +7,11 @@ const getLearnerCohorts = async () => {
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
 
   try {
-    const response = await axios.get(`${apiURL}/v1/api/learner/cohorts`, {
+    const response = await axios.get(`${apiURL}/v1/api/communities/joined`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data.communities);
     return response.data.communities;
   } catch (error) {
     throw new Error('API call failed');

@@ -1,13 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import Constants from 'expo-constants';
 
-const getCommunities = async () => {
+const getJoinedCommunities = async () => {
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
-  const token = await AsyncStorage.getItem('authToken')
+  const token = await AsyncStorage.getItem('authToken');
 
-  const response = await axios.get(`${apiURL}/v1/api/communities`, {
+  const response = await axios.get(`${apiURL}/v1/api/communities/joined`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -16,12 +15,12 @@ const getCommunities = async () => {
   return response.data.communities;
 };
 
-const useGetCommunities = () => {
+const useGetJoinedCommunities = () => {
   return useQuery({
-    queryKey: ['communities'],
-    queryFn: getCommunities, 
+    queryKey: ['joinedCommunities'],
+    queryFn: getJoinedCommunities,
     refetchOnReconnect: true,
   });
 };
 
-export default useGetCommunities;
+export default useGetJoinedCommunities;

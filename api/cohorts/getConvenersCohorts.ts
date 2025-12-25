@@ -26,7 +26,6 @@ export const useConvenersCohorts = () => {
     queryKey: ['convenersCohorts'],
     queryFn: convenersCohorts,
     // ensure the data stays up todaate
-    refetchInterval: 5000,
     refetchOnReconnect: true,
   });
 };

@@ -275,6 +275,7 @@ const Lesson = (lesson: LessonProp) => {
     console.log('leading');
     await AsyncStorage.setItem('name', lesson.name || 'Untitled Lesson');
     await AsyncStorage.setItem('text', lesson.text || '');
+    await AsyncStorage.setItem('lessonId', String(lesson.id));
     router.navigate('/student-screens/cohorts/module');
   };
 

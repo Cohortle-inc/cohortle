@@ -5,17 +5,21 @@ import {
   StyleSheet,
   Modal,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaWrapper } from '@/HOC';
 import { Back, Close, Options, Plus, PlusSmall } from '@/assets/icons';
-import { Link, useRouter } from 'expo-router';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { CohortProgressCard } from './(course)/cohorts/CohortProgressCard';
+import { useGetSchedule } from '@/api/cohorts/schedule';
 import { Eclipse, X } from 'lucide-react-native';
 import { NavHead } from '@/components/HeadRoute';
 import { colors } from '@/utils/color';
 
 export default function Dashboard() {
+  const name = useLocalSearchParams<{ name: string }>();
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
   const [courseType, setCourseType] = useState('self-paced');
@@ -31,7 +35,15 @@ export default function Dashboard() {
     },
     {
       icon: <Ionicons name="link-outline" size={22} color="#4B0082" />,
-      label: 'Copy URL',
+      label: 'Invite Link',
+    },
+    {
+      icon: <Ionicons name="megaphone-outline" size={22} color="#4B0082" />,
+      label: 'Announcements',
+    },
+    {
+      icon: <Ionicons name="chatbubbles-outline" size={22} color="#4B0082" />,
+      label: 'Discussions',
     },
     {
       icon: <Ionicons name="book-outline" size={22} color="#4B0082" />,
@@ -49,11 +61,23 @@ export default function Dashboard() {
       icon: <Ionicons name="people-outline" size={22} color="#4B0082" />,
       label: 'Learners',
     },
+    {
+      icon: <Ionicons name="list-outline" size={22} color="#4B0082" />,
+      label: 'Activity Log',
+    },
   ];
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
+
+  // determine cohort id from route params
+  const params = useLocalSearchParams<{ id?: string; cohort_id?: string }>();
+  const cohortId = Number(params.id || params.cohort_id || 0);
+
+  const { data: scheduleResponse, refetch: refetchSchedule } = useGetSchedule(cohortId);
+  const schedules = scheduleResponse?.schedule || scheduleResponse || [];
+
   const courseOptions = [
     {
       key: 'self-paced',
@@ -106,21 +130,18 @@ export default function Dashboard() {
   // });
   return (
     <SafeAreaWrapper>
-      <NavHead text="Branding & Design" icon={<Eclipse />} />
+      <NavHead text={name.name} icon={<Eclipse />} />
       {/* Header */}
       <ScrollView style={styles.container}>
         <View style={styles.headerRow}>
-          <Text style={styles.headerTitle}>Course Dashboard</Text>
+          <Text style={styles.headerTitle}>Cohort Dashboard</Text>
           <TouchableOpacity onPress={toggleModal}>
             <MaterialIcons name="edit" size={22} color="#6B7280" />
           </TouchableOpacity>
         </View>
 
         {/* Status & Type */}
-        <View style={styles.statusRow}>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>Status: Draft</Text>
-          </View>
+        <View style={[styles.statusRow, { justifyContent: 'space-between' }]}>
           <MaterialIcons name="menu-book" size={16} color="#6B7280" />
           <Link
             style={{
@@ -130,27 +151,48 @@ export default function Dashboard() {
             }}
             href={'/convener-screens/(cohorts)/community/create-module'}
           >
-            View Courses
+            View contents
           </Link>
         </View>
 
-        {/* Waitlist */}
+        {/* New Progress Card */}
+        <CohortProgressCard cohortId={cohortId} />
+
+        {/* Schedule / Completion Rate */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Waitlist</Text>
-          <Text style={styles.cardValue}>0</Text>
+          <View style={{ marginTop: 0 }}>
+            <TouchableOpacity 
+              onPress={() => router.push({
+                pathname: '/convener-screens/(cohorts)/community/(course)/cohorts/manage-schedule',
+                params: { id: cohortId }
+              })} 
+              style={{ padding: 12, backgroundColor: '#EDE9FE', borderRadius: 8, alignItems: 'center' }}
+            >
+              <Text>Manage schedule</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Completion Rate */}
+        {/* Schedule list */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Average completion rate</Text>
-          <Text style={styles.cardValue}>0%</Text>
+          <Text style={styles.cardLabel}>Upcoming sessions</Text>
+          {schedules && schedules.length > 0 ? (
+            schedules.map((s: any) => (
+              <View key={s.id} style={{ paddingVertical: 8 }}>
+                <Text style={{ fontWeight: '600' }}>{s.lesson_title || 'Session'}</Text>
+                <Text style={{ color: '#666' }}>{s.scheduled_date} {s.scheduled_time || ''}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ color: '#666', marginTop: 8 }}>No scheduled sessions</Text>
+          )}
         </View>
 
         {/* Draft Notice */}
         <View style={styles.draftNotice}>
-          <Text style={styles.draftTitle}>This course is in draft mode.</Text>
+          <Text style={styles.draftTitle}>This programme is in draft mode.</Text>
           <Text style={styles.draftDescription}>
-            Engagement data will show up here once you publish your course.
+            Engagement data will show up here once you publish your programme.
           </Text>
         </View>
       </ScrollView>
@@ -178,7 +220,7 @@ export default function Dashboard() {
             <Text
               style={{ fontSize: 20, fontWeight: 700, textAlign: 'center' }}
             >
-              Choose course type
+              Choose programme type
             </Text>
 
             {courseOptions.map((option) => {

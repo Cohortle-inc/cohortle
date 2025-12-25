@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { RichEditor } from 'react-native-pell-rich-editor';
+import { LessonCompletionButton } from '@/app/convener-screens/(cohorts)/community/(course)/cohorts/LessonCompletionButton';
 
 const { width } = Dimensions.get('window');
 
@@ -28,7 +29,7 @@ const Module = () => {
   const [text, setText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<Video>(null);
-  const richEditorRef = useRef<RichEditorRef>(null); // ✅ Proper ref for RichEditor
+  const richEditorRef = useRef<any>(null); // use any for editor ref to avoid strict typing issues
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -66,15 +67,20 @@ const Module = () => {
   const duration = status?.durationMillis || 0;
   const position = status?.positionMillis || 0;
 
+  const [lessonId, setLessonId] = useState<number | null>(null);
+  const [cohortId, setCohortId] = useState<number | null>(null);
+
   useEffect(() => {
     const loadLessonData = async () => {
       try {
         setIsLoading(true);
 
-        const [savedMedia, savedTitle, savedText] = await Promise.all([
+        const [savedMedia, savedTitle, savedText, savedLessonId, savedCohortId] = await Promise.all([
           AsyncStorage.getItem('media'),
           AsyncStorage.getItem('name'),
           AsyncStorage.getItem('text'),
+          AsyncStorage.getItem('lessonId'),
+          AsyncStorage.getItem('communityID'),
         ]);
 
         console.log('📥 Loaded from storage:', {
@@ -88,6 +94,10 @@ const Module = () => {
         setMedia(videoUrl);
         setTitle(savedTitle || 'Untitled Lesson');
         setText(savedText || '<p>No content available</p>');
+        // nothing extra required here; lessonId is set when navigating to this screen
+
+        if (savedLessonId) setLessonId(Number(savedLessonId));
+        if (savedCohortId) setCohortId(Number(savedCohortId));
         
         // ✅ Update RichEditor content after a short delay
         setTimeout(() => {
@@ -110,8 +120,10 @@ const Module = () => {
   }, []);
 
   // ✅ Safe RichEditor ref handler
-  const handleEditorRef = (ref: RichEditorRef | null) => {
+  const handleEditorRef = (ref: any | null) => {
     if (ref) {
+      // assign to ref.current safely
+      // eslint-disable-next-line no-param-reassign
       richEditorRef.current = ref;
       // ✅ Set content if text is already loaded
       if (text && text !== '<p>No content available</p>') {
@@ -182,9 +194,14 @@ const Module = () => {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Mark as Complete</Text>
-        </TouchableOpacity>
+        {lessonId && cohortId ? (
+          <View style={{ flex: 1 }}>
+            <LessonCompletionButton 
+              lessonId={lessonId} 
+              cohortId={cohortId} 
+            />
+          </View>
+        ) : null}
 
         <TouchableOpacity
           onPress={() => router.back()}

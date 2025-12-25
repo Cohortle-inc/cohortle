@@ -29,7 +29,8 @@ const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
     name: '',
     description: '',
-    url: '',
+    codePrefix: '',
+    type: '',
   });
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
@@ -45,7 +46,7 @@ const Cohorts = () => {
     console.log(index);
     // If index is greater than -1, sheet is active
   }, []);
-
+ 
   const handleCreateCohort = () => {
     if (
       !cohortData.name.trim() ||
@@ -118,9 +119,9 @@ const Cohorts = () => {
           <Text style={{ color: '#B085EF', fontFamily: 'DMSansSemiBold' }}>
             Cohortle
           </Text>
-          {/* <Pressable onPress={toggleModal}>
+          <Pressable onPress={toggleModal}>
             <Plus />
-          </Pressable> */}
+          </Pressable>
         </View>
       </View>
       {isLoading ? (
@@ -229,8 +230,14 @@ const Cohorts = () => {
               placeholder="Self-paced learning program"
             />
             <Input
-              value={cohortData.url}
-              onChangeText={(text: string) => updateCohortData('url', text)}
+              value={cohortData.type}
+              onChangeText={(text: string) => updateCohortData('type', text)}
+              label="Community Type"
+              placeholder="e.g., 'tech', 'marketing'"
+            />
+            <Input
+              value={cohortData.codePrefix}
+              onChangeText={(text: string) => updateCohortData('codePrefix', text)}
               label="Community code (prefix)"
               placeholder="Sal-Cohort"
             />

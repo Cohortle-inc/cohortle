@@ -13,7 +13,7 @@ import { SafeAreaWrapper } from '@/HOC';
 import { NavHead } from '@/components/HeadRoute';
 import { SlideModal } from '@/components/Modal';
 import { OptionModal } from '@/components/optionModal';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { colors } from '@/utils/color';
 import Dropdown from '@/components/dropdown'; // Your custom dropdown
 
@@ -62,6 +62,8 @@ const Index = () => {
     });
   };
 
+  const router = useRouter();
+
   return (
     <SafeAreaWrapper>
       <NavHead text={name} />
@@ -69,9 +71,27 @@ const Index = () => {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Modules</Text>
-          <Text style={styles.courseType}>
-            Course type: <Text style={styles.link}>{type}</Text>
-          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={styles.courseType}>
+              Course type: <Text style={styles.link}>{type}</Text>
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: '/convener-screens/(cohorts)/community/(course)/cohorts/[id]',
+                  params: { id, name },
+                })
+              }
+              style={{
+                backgroundColor: colors.purpleShade,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 16,
+              }}
+            >
+              <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 13 }}>View Cohorts</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.topInfo}>
@@ -187,7 +207,7 @@ export const Module = ({
     status: 'published' | 'draft',
   ) => {
     editLesson(
-      { module_id: id, lesson_id: lessonId, data: { status } },
+      { lesson_id: lessonId, data: { status } },
       { onSuccess: () => refetch() },
     );
     setLessonModalOpen(false);
@@ -197,7 +217,6 @@ export const Module = ({
     if (!selectedLesson || !newLessonName.trim()) return;
     editLesson(
       {
-        module_id: id,
         lesson_id: selectedLesson.id,
         data: { name: newLessonName.trim() },
       },

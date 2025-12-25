@@ -3,7 +3,9 @@ export interface CohortType {
   url?: string;
   description: string;
   goal?: string;
-  // revenue,
   referral?: string;
   community_structure?: string;
+  start_date: string;
+  end_date: string;
+  max_members: number;
 }
