@@ -68,7 +68,8 @@ export const useRemoveCommunity = () => {
                 queryKey: ['community', variables.id],
             });
 
-            Alert.alert('Success', 'Learner removed successfully');
+
+            Alert.alert('Success', 'Community removed successfully');
         },
 
         onError: (error) => {
