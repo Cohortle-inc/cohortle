@@ -4,32 +4,39 @@ import { SafeAreaWrapper } from '@/HOC';
 import { Input } from '@/components/Form';
 import { Header } from '@/ui';
 import { Text } from '@/theme/theme';
-import { BackArrowIcon } from '@/assets/icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import axios from 'axios';
+import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { usePostCommunity, CommunityType } from '@/api/communities/postCommunity';
 
-interface FormData {
+// Rename local state interface to avoid confusion with API types or global FormData
+interface CommunityFormState {
   name: string;
-  url: string;
+  prefix: string;
+  description: string;
 }
 
 interface FormErrors {
   name?: string;
-  url?: string;
+  prefix?: string;
+  description?: string;
   server?: string;
 }
 
 const CommunityInfo = () => {
-  const [data, setData] = useState<FormData>({ name: '', url: '' });
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<CommunityFormState>({
+    name: '',
+    prefix: '',
+    description: ''
+  });
   const [errors, setErrors] = useState<FormErrors>({});
 
   const router = useRouter();
-  const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
+
+  // Use the mutation hook
+  const { mutateAsync, isPending } = usePostCommunity();
 
   // Clear field-specific error when user starts typing
-  const handleUpdate = (field: keyof FormData, value: string) => {
+  const handleUpdate = (field: keyof CommunityFormState, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -49,22 +56,26 @@ const CommunityInfo = () => {
       newErrors.name = 'Name must be at least 3 characters long';
     }
 
-    if (!data.url.trim()) {
-      newErrors.url = 'Community URL is required';
-    } else if (data.url.trim().length < 4) {
-      newErrors.url = 'URL must be at least 4 characters long';
-    } else if (!/^[a-zA-Z0-9_-]+$/.test(data.url.trim())) {
-      newErrors.url = 'URL can only contain letters, numbers, underscores, and hyphens';
+    if (!data.prefix.trim()) {
+      newErrors.prefix = 'Community prefix is required';
+    } else if (data.prefix.trim().length < 4) {
+      newErrors.prefix = 'Prefix must be at least 4 characters long';
+    } else if (!/^[a-zA-Z0-9_-]+$/.test(data.prefix.trim())) {
+      newErrors.prefix = 'Prefix can only contain letters, numbers, underscores, and hyphens';
+    }
+
+    // Description validation
+    if (!data.description.trim()) {
+      newErrors.description = 'Description is required';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleCohortCreate = async () => {
+  const handleCommunityCreate = async () => {
     if (!validateForm()) return;
 
-    setLoading(true);
     setErrors({}); // Clear any previous server errors
 
     try {
@@ -72,56 +83,59 @@ const CommunityInfo = () => {
 
       if (!token) {
         Alert.alert('Authentication Error', 'No auth token found. Please log in again.');
-        setLoading(false);
         return;
       }
 
-      const response = await axios.post(
-        `${apiURL}/v1/api/cohorts`,
-        {
-          name: data.name.trim(),
-          url: data.url.trim(),
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      // Prepare payload matching CommunityType
+      const payload: CommunityType = {
+        name: data.name.trim(),
+        codePrefix: data.prefix.trim(),
+        description: data.description.trim(),
+        type: 'course', // Defaulting to public
+      };
 
-      console.log('Cohort created:', response.data);
+      const response = await mutateAsync(payload);
 
-      // Navigate to next screen with cohort_id
+      console.log('Community created:', response);
+
+      // Navigate to next screen with community_id
+      // Assuming response contains the created community object which has an id
       router.navigate({
         pathname: '/(auth)/(convener)/more-info',
-        params: { cohort_id: response.data.cohort_id },
+        params: { cohort_id: response.id || response.data?.id || response.community_id },
       });
+
+
     } catch (error: any) {
-      console.error('Error creating cohort:', error.response?.data || error);
+      console.error('Error creating community:', error);
 
       let errorMessage = 'Failed to create community. Please try again.';
 
-      if (error.response?.data?.message) {
-        // Handle specific backend errors (e.g., URL already taken)
-        if (typeof error.response.data.message === 'string') {
-          errorMessage = error.response.data.message;
-        } else if (error.response.data.message?.url) {
-          errorMessage = error.response.data.message.url;
-          setErrors((prev) => ({ ...prev, url: errorMessage }));
-        } else if (error.response.data.message?.name) {
-          errorMessage = error.response.data.message.name;
-          setErrors((prev) => ({ ...prev, name: errorMessage }));
+      // Attempt to parse backend validation errors
+      const responseData = error.message ? null : error.response?.data;
+
+      if (responseData?.message) {
+        if (typeof responseData.message === 'string') {
+          errorMessage = responseData.message;
+        } else if (responseData.message?.codePrefix) {
+          setErrors((prev) => ({ ...prev, prefix: responseData.message.codePrefix }));
+          errorMessage = 'Please fix the errors above.';
+        } else if (responseData.message?.name) {
+          setErrors((prev) => ({ ...prev, name: responseData.message.name }));
+          errorMessage = 'Please fix the errors above.';
         }
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       setErrors((prev) => ({ ...prev, server: errorMessage }));
-    } finally {
-      setLoading(false);
     }
   };
 
-  const isFormValid = data.name.trim().length > 0 && data.url.trim().length > 0;
+  const isFormValid =
+    data.name.trim().length > 0 &&
+    data.prefix.trim().length > 0 &&
+    data.description.trim().length > 0;
 
   return (
     <SafeAreaWrapper>
@@ -139,25 +153,35 @@ const CommunityInfo = () => {
 
         <View style={styles.form}>
           <Input
-            label="Name your cohort"
+            label="Name your community"
             placeholder="Model Children Coding Academy"
             value={data.name}
             onChangeText={(value: string) => handleUpdate('name', value)}
             error={errors.name}
           />
 
-          <View style={styles.urlSection}>
+          <View style={styles.prefixSection}>
             <Input
-              label="Community URL"
+              label="Community prefix"
               placeholder="modelacademy"
-              value={data.url}
-              onChangeText={(value: string) => handleUpdate('url', value)}
-              error={errors.url}
+              value={data.prefix}
+              onChangeText={(value: string) => handleUpdate('prefix', value)}
+              error={errors.prefix}
             />
-            <Text style={styles.urlHint}>
-              We will add a code to it e.g. {data.url || 'modelacademy'}-abd
+            <Text style={styles.prefixHint}>
+              We will add a code to it e.g. {data.prefix || 'modelacademy'}-abd
             </Text>
           </View>
+
+          <Input
+            label="Description"
+            placeholder="Tell us about your community..."
+            value={data.description}
+            onChangeText={(value: string) => handleUpdate('description', value)}
+            error={errors.description}
+            multiline
+            numberOfLines={3}
+          />
 
           {/* Server-wide error message */}
           {errors.server && (
@@ -167,28 +191,19 @@ const CommunityInfo = () => {
 
         {/* Next Button */}
         <Pressable
-          onPress={handleCohortCreate}
-          disabled={!isFormValid || loading}
+          onPress={handleCommunityCreate}
+          disabled={!isFormValid || isPending}
           style={[
             styles.nextButton,
-            (!isFormValid || loading) && styles.nextButtonDisabled,
+            (!isFormValid || isPending) && styles.nextButtonDisabled,
           ]}
         >
-          {loading ? (
+          {isPending ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.nextButtonText}>Next</Text>
           )}
         </Pressable>
-
-        {/* Back Button (Uncomment if needed) */}
-        {/* <Pressable
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <BackArrowIcon />
-          <Text style={styles.backText}>Back</Text>
-        </Pressable> */}
       </View>
     </SafeAreaWrapper>
   );
@@ -223,10 +238,10 @@ const styles = StyleSheet.create({
     gap: 24,
     marginBottom: 20,
   },
-  urlSection: {
+  prefixSection: {
     gap: 8,
   },
-  urlHint: {
+  prefixHint: {
     fontSize: 12,
     color: '#999',
     paddingLeft: 4,
@@ -250,18 +265,6 @@ const styles = StyleSheet.create({
   nextButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontFamily: 'DMSansMedium',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    marginTop: 20,
-  },
-  backText: {
-    color: '#391D65',
     fontFamily: 'DMSansMedium',
   },
 });

@@ -4,6 +4,7 @@ import React from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
 import {
   SafeAreaView,
+  SafeAreaView,
   // StyleProp,
   // ViewStyle,
 } from 'react-native-safe-area-context';

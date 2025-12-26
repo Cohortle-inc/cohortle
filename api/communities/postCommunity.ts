@@ -6,9 +6,11 @@ import { showMessage } from 'react-native-flash-message';
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
 
 export interface CommunityType {
+  id?: string | number;
   name: string;
   description: string;
   type: string;
+  unique_code?: string;
   codePrefix?: string;
   thumbnail?: string;
 }

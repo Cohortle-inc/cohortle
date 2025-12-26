@@ -157,7 +157,10 @@ const Course = (community: CommunityData) => {
       'description',
       String(community.description),
     );
-    router.navigate('/student-screens/cohorts/course');
+    router.push({
+      pathname: '/student-screens/cohorts/programmes',
+      params: { communityID: community.id },
+    });
     // await AsyncStorage.setItem()
   };
   return (

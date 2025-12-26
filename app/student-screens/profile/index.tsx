@@ -179,9 +179,9 @@ const Profile = () => {
               </Text>
             </View>
           </Pressable>
-          {profile.bio && 
-          <Text style={{fontFamily: 'normal', fontSize: 13, textAlign: 'center'}}>{profile.bio}</Text>          
-}
+          {profile.bio &&
+            <Text style={{ fontFamily: 'normal', fontSize: 13, textAlign: 'center' }}>{profile.bio}</Text>
+          }
           <View style={styles.infoRow}>
             <Calender />
             <Text style={styles.infoText}>

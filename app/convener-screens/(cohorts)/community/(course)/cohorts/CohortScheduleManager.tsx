@@ -8,14 +8,16 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useGetSchedule, useCreateSchedule, SchedulePayload } from '@/api/cohorts/schedule';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/utils/color';
 
+
 interface CohortScheduleManagerProps {
   cohortId: number;
-} 
+}
 
 export const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ cohortId }) => {
   const { data: scheduleData = [], isLoading } = useGetSchedule(cohortId.toString());
@@ -84,84 +86,87 @@ export const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ co
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.header}>Live Sessions</Text>
-        <TouchableOpacity 
-          style={styles.addButton} 
-          onPress={() => setFormVisible(!isFormVisible)}
-        >
-          <Ionicons name={isFormVisible ? "close" : "add"} size={20} color="#fff" />
-          <Text style={styles.addButtonText}>{isFormVisible ? "Cancel" : "Add Session"}</Text>
-        </TouchableOpacity>
-      </View>
-      
-      {isFormVisible && (
-      <View style={styles.form}>
-        <Text style={styles.formTitle}>New Session Details</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Session Title"
-          value={title}
-          onChangeText={setTitle}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Date (YYYY-MM-DD)"
-          value={date}
-          onChangeText={setDate}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Time (HH:MM)"
-          value={time}
-          onChangeText={setTime}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Meeting Link"
-          value={link}
-          onChangeText={setLink}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Duration (minutes)"
-          value={duration}
-          onChangeText={setDuration}
-          keyboardType="numeric"
-        />
-        
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleCreateSchedule}
-          disabled={createScheduleMutation.isPending}
-        >
-          {createScheduleMutation.isPending ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Add Schedule</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-      )}
+    <ScrollView>
 
-      <Text style={styles.subHeader}>Upcoming</Text>
-      {isLoading ? (
-        <ActivityIndicator style={{ marginTop: 20 }} />
-      ) : (
-        scheduleData.length === 0 ? (
-          <Text style={styles.emptyText}>No scheduled sessions.</Text>
+      <View style={styles.container}>
+        <View style={styles.headerRow}>
+          <Text style={styles.header}>Live Sessions</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setFormVisible(!isFormVisible)}
+          >
+            <Ionicons name={isFormVisible ? "close" : "add"} size={20} color="#fff" />
+            <Text style={styles.addButtonText}>{isFormVisible ? "Cancel" : "Add Session"}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {isFormVisible && (
+          <View style={styles.form}>
+            <Text style={styles.formTitle}>New Session Details</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Session Title"
+              value={title}
+              onChangeText={setTitle}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Date (YYYY-MM-DD)"
+              value={date}
+              onChangeText={setDate}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Time (HH:MM)"
+              value={time}
+              onChangeText={setTime}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Meeting Link"
+              value={link}
+              onChangeText={setLink}
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Duration (minutes)"
+              value={duration}
+              onChangeText={setDuration}
+              keyboardType="numeric"
+            />
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleCreateSchedule}
+              disabled={createScheduleMutation.isPending}
+            >
+              {createScheduleMutation.isPending ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Add Schedule</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <Text style={styles.subHeader}>Upcoming</Text>
+        {isLoading ? (
+          <ActivityIndicator style={{ marginTop: 20 }} />
         ) : (
-          <FlatList
-            data={scheduleData}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
-          />
-        )
-      )}
-    </View>
+          scheduleData.length === 0 ? (
+            <Text style={styles.emptyText}>No scheduled sessions.</Text>
+          ) : (
+            <FlatList
+              data={scheduleData}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={styles.listContent}
+            />
+          )
+        )}
+      </View>
+    </ScrollView>
   );
 };
 
@@ -172,35 +177,35 @@ const styles = StyleSheet.create({
   addButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary || '#4B0082', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, gap: 4 },
   addButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   subHeader: { fontSize: 16, fontWeight: '600', marginTop: 16, marginBottom: 12, color: '#666', textTransform: 'uppercase', letterSpacing: 1 },
-  
-  form: { 
-    backgroundColor: '#F8F9FA', 
-    padding: 16, 
-    borderRadius: 16, 
+
+  form: {
+    backgroundColor: '#F8F9FA',
+    padding: 16,
+    borderRadius: 16,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#E9ECEF'
   },
   formTitle: { fontSize: 16, fontWeight: '600', marginBottom: 16, color: '#333' },
-  input: { 
-    borderWidth: 1, 
-    borderColor: '#dee2e6', 
-    borderRadius: 8, 
-    padding: 12, 
-    marginBottom: 12, 
+  input: {
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
     backgroundColor: '#fff',
     fontSize: 14
   },
   button: { backgroundColor: colors.primary || '#4B0082', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
   buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  
+
   listContent: { paddingBottom: 20 },
-  scheduleItem: { 
-    backgroundColor: '#fff', 
-    padding: 16, 
-    borderRadius: 12, 
-    marginBottom: 12, 
-    borderWidth: 1, 
+  scheduleItem: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
     borderColor: '#F0F0F0',
     flexDirection: 'row',
     alignItems: 'center'
@@ -232,27 +237,27 @@ const styles = StyleSheet.create({
   },
   scheduleTitle: {
     color: '#1F1F1F',
-    fontWeight: '600', 
+    fontWeight: '600',
     fontSize: 16,
-    marginBottom: 4 
+    marginBottom: 4
   },
-  scheduleLink: { 
-    color: colors.primary || '#4B0082', 
+  scheduleLink: {
+    color: colors.primary || '#4B0082',
     fontSize: 14,
-    marginBottom: 4 
+    marginBottom: 4
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4
   },
-  scheduleTime: { 
-    color: '#666', 
-    fontSize: 14 
+  scheduleTime: {
+    color: '#666',
+    fontSize: 14
   },
-  duration: { 
-    color: '#666', 
-    fontSize: 14 
+  duration: {
+    color: '#666',
+    fontSize: 14
   },
   emptyText: { fontStyle: 'italic', color: '#adb5bd', textAlign: 'center', marginTop: 20 },
 });

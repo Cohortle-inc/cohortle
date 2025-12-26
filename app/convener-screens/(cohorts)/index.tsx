@@ -24,13 +24,14 @@ import { CohortType } from '@/types/cohortType';
 import { showMessage } from 'react-native-flash-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useGetCommunities from '@/api/communities/getCommunities';
+import { CommunityType, usePostCommunity } from '@/api/communities/postCommunity';
 
 const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
     name: '',
     description: '',
     codePrefix: '',
-    type: '',
+    type: 'course',
   });
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
@@ -38,7 +39,8 @@ const Cohorts = () => {
   // const { data: cohortsResponse, isError } = useConvenersCohorts();
   const { data: communities = [], isLoading } = useGetCommunities();
   // const cohorts = cohortsResponse || [];
-  const { mutate: createCohort, isPending } = useCreateCohort();
+  // const { mutate: createCohort, isPending } = useCreateCohort();
+  const { mutate: createCommunity, isPending: communityPending } = usePostCommunity();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
@@ -46,12 +48,13 @@ const Cohorts = () => {
     console.log(index);
     // If index is greater than -1, sheet is active
   }, []);
- 
-  const handleCreateCohort = () => {
+
+  const handleCreateCommunity = () => {
     if (
       !cohortData.name.trim() ||
       !cohortData.description.trim() ||
-      !cohortData.url.trim()
+      !cohortData.codePrefix.trim() ||
+      !cohortData.type.trim()
     ) {
       showMessage({
         message: 'Validation Error',
@@ -65,21 +68,22 @@ const Cohorts = () => {
       return;
     }
 
-    const payload: CohortType = {
+    const payload: CommunityType = {
       name: cohortData.name.trim(),
       description: cohortData.description.trim(),
-      url: cohortData.url.trim(),
+      codePrefix: cohortData.codePrefix.trim(),
+      type: cohortData.type.trim(),
     };
 
-    createCohort(payload, {
+    createCommunity(payload, {
       onSuccess: (data) => {
         // ✅ Reset form
-        setCohortData({ name: '', description: '', url: '' });
+        setCohortData({ name: '', description: '', codePrefix: '', type: '' });
 
         // ✅ Close modal
         setModalVisible(false);
 
-        console.log('Cohort created:', data);
+        console.log('Community created:', data);
       },
       // onError is handled in the hook now
     });
@@ -88,10 +92,10 @@ const Cohorts = () => {
     setCohortData((prev) => ({ ...prev, [field]: value }));
   };
   const openBottomSheet = (id: number) => {
-    const cohort = communities.find((cohort: CommunityProps) => cohort.id === id);
-    setSelectedCohort(cohort);
+    const community = communities.find((community: CommunityType) => community.id === id);
+    setSelectedCohort(community);
     // You can set the selected cohort to state if needed
-    console.log('Opening bottom sheet for cohort ID:', cohort);
+    console.log('Opening bottom sheet for cohort ID:', community);
     bottomSheetRef.current?.expand();
   };
 
@@ -254,11 +258,11 @@ const Cohorts = () => {
                 backgroundColor: '#391D65',
                 width: '70%',
               }}
-              disabled={isPending}
-              onPress={handleCreateCohort}
+              disabled={communityPending}
+              onPress={handleCreateCommunity}
             >
               <Text style={{ color: '#fff' }}>
-                {!isPending ? 'Create' : 'Creating community...'}
+                {!communityPending ? 'Create' : 'Creating community...'}
               </Text>
             </Pressable>
           </View>
@@ -288,7 +292,7 @@ const Cohorts = () => {
             </TouchableOpacity> */}
             <TouchableOpacity
               onPress={() => {
-                if (!selectedCohort?.url) {
+                if (!selectedCohort?.unique_code) {
                   showMessage({
                     message: 'Error',
                     description: 'Invite link not available',
@@ -300,7 +304,7 @@ const Cohorts = () => {
                 }
 
                 // This is React Native's native Clipboard – no expo-clipboard needed
-                Clipboard.setString(selectedCohort.url);
+                Clipboard.setString(selectedCohort.unique_code);
 
                 showMessage({
                   message: 'Copied!',

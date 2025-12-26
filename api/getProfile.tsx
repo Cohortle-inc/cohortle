@@ -11,8 +11,8 @@ export const getProfile = async () => {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log(response.data.message);
-  return response.data.message;
+  console.log(response.data);
+  return response.data; // Returning full data including user object
 };
 
 export const useGetProfile = () => {

@@ -12,6 +12,7 @@ const ManageSchedule = () => {
   return (
     <SafeAreaWrapper>
       <NavHead text="Schedule" />
+
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
         <CohortScheduleManager cohortId={cohortId} />
       </View>

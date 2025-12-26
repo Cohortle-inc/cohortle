@@ -4,17 +4,21 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Back, Check, Close, Options, RedDoor } from '@/assets/icons';
-import { router, useRouter } from 'expo-router';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheet } from '@/components/ui';
 // import { CheckBox } from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useGetModules from '@/api/communities/modules/getModules';
 import { useGetLessons } from '@/api/communities/lessons/getLessons';
 import { useGetPublishedLessons } from '@/api/communities/lessons/publishedLessons';
+import { colors } from '@/utils/color';
+import { useProgrammeMembership } from '@/hooks/useProgrammeMembership';
+import CohortSelection from '@/components/cohorts/CohortSelection';
 
 type ModuleType = {
   id: number;
@@ -27,46 +31,45 @@ type ModuleType = {
 };
 
 const Course = () => {
+  const { programmeID } = useLocalSearchParams<{ programmeID: string }>();
   const [activeTab, setActiveTab] = useState('Home');
   const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
   const [isSheetVisible, setSheetVisible] = useState(false);
   const [communityId, setCommunityId] = useState<string | null>(null);
-  const [title, setTitle] = useState<string | null>(null);
-  const [description, setDescription] = useState<string | null>(null);
-  const [convenerName, setConvenerName] = useState<string | null>(null);
-  const { data: moduleData = [] } = useGetModules(Number(communityId));
+  const { title } = useLocalSearchParams<{ title: string }>();
+  const { description } = useLocalSearchParams<{ description: string }>();
+  const { type } = useLocalSearchParams<{ type: string }>();
+
+  // Check membership
+  const {
+    data: membershipData,
+    isLoading: isLoadingMembership,
+    refetch: refetchMembership
+  } = useProgrammeMembership(Number(programmeID));
+
+  const isMember = membershipData?.isMember;
+
+  const { data: moduleData = [] } = useGetModules(isMember ? Number(programmeID) : null);
   const [module, setModule] = useState<number | null>(null);
   const { data: lessonData = [] } = useGetPublishedLessons(module);
 
   console.log(lessonData);
-  console.log(title);
-  useEffect(() => {
-    const loadId = async () => {
-      const id = await AsyncStorage.getItem('communityID');
-      setCommunityId(id);
-    };
-
-    loadId();
-  }, []);
-
-  useEffect(() => {
-    const name = async () => {
-      const name = await AsyncStorage.getItem('communityName');
-      const instructorName = await AsyncStorage.getItem('convenerName');
-      const description = await AsyncStorage.getItem('description');
-      setTitle(name);
-      setConvenerName(instructorName);
-      setDescription(description)
-    };
-    console.log(name);
-    name();
-  }, []);
 
   useEffect(() => {
     if (moduleData && moduleData.length > 0) {
       setModule(moduleData[1]?.id || moduleData[0].id);
     }
   }, [moduleData]);
+
+  if (isLoadingMembership) {
+    return (
+      <SafeAreaWrapper>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
 
   return (
     <SafeAreaWrapper>
@@ -97,7 +100,7 @@ const Course = () => {
         >
           {title}
         </Text>
-        <Text onPress={() => {}}>{convenerName}</Text>
+        <Text style={{ color: colors.primary }} onPress={() => { }}>{type}</Text>
       </View>
       <View style={{ flex: 1 }}>
         {/* Tab Bar */}
@@ -144,60 +147,67 @@ const Course = () => {
         <View>
           {activeTab === 'Home' ? (
             <View>
-              <View>
-                <Text>Modules</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {moduleData
-                    .slice()
-                    .sort((a: ModuleType, b: ModuleType) => a.id - b.id)
-                    .map((mod: ModuleType) => (
-                      <TouchableOpacity
-                        onPress={() => setModule(mod.id)}
-                        key={mod.id}
-                        style={[
-                          mod.id === module && { backgroundColor: 'purple' },
-                          {
-                            flexDirection: 'row',
-                            gap: 4,
-                            borderWidth: 1,
-                            borderColor: '#DABCFF',
-                            paddingHorizontal: 8,
-                            paddingVertical: 4,
-                            borderRadius: 12,
-                            marginRight: 8,
-                            marginTop: 8,
-                            minWidth: 32,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          },
-                        ]}
-                      >
-                        <Text
+              {!isMember ? (
+                <CohortSelection
+                  programmeId={Number(programmeID)}
+                  onJoinSuccess={refetchMembership}
+                />
+              ) : (
+                <View>
+                  <Text>Modules</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {moduleData
+                      .slice()
+                      .sort((a: ModuleType, b: ModuleType) => a.id - b.id)
+                      .map((mod: ModuleType) => (
+                        <TouchableOpacity
+                          onPress={() => setModule(mod.id)}
+                          key={mod.id}
                           style={[
-                            mod.id === module && { color: '#DABCFF' },
-                            { fontSize: 10 },
+                            mod.id === module && { backgroundColor: 'purple' },
+                            {
+                              flexDirection: 'row',
+                              gap: 4,
+                              borderWidth: 1,
+                              borderColor: '#DABCFF',
+                              paddingHorizontal: 8,
+                              paddingVertical: 4,
+                              borderRadius: 12,
+                              marginRight: 8,
+                              marginTop: 8,
+                              minWidth: 32,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            },
                           ]}
                         >
-                          {mod.title}
-                        </Text>
-                        <Check color="#DABCFF" />
-                      </TouchableOpacity>
-                    ))}
-                </ScrollView>
-                <View style={{ marginTop: 16 }}>
-                  {/* <Module />
+                          <Text
+                            style={[
+                              mod.id === module && { color: '#DABCFF' },
+                              { fontSize: 10 },
+                            ]}
+                          >
+                            {mod.title}
+                          </Text>
+                          <Check color="#DABCFF" />
+                        </TouchableOpacity>
+                      ))}
+                  </ScrollView>
+                  <View style={{ marginTop: 16 }}>
+                    {/* <Module />
                   <Module />
                   <Module /> */}
-                  {lessonData
-                    ?.filter(
-                      (lesson: LessonProp) => lesson.status === 'published',
-                    ) // Only published
-                    .sort((a: LessonProp, b: LessonProp) => a.id - b.id) // Sort by order
-                    .map((lesson: LessonProp) => (
-                      <Lesson key={lesson.id} {...lesson} />
-                    ))}
+                    {lessonData
+                      ?.filter(
+                        (lesson: LessonProp) => lesson.status === 'published',
+                      ) // Only published
+                      .sort((a: LessonProp, b: LessonProp) => a.id - b.id) // Sort by order
+                      .map((lesson: LessonProp) => (
+                        <Lesson key={lesson.id} {...lesson} />
+                      ))}
+                  </View>
                 </View>
-              </View>
+              )}
             </View>
           ) : (
             <View>
@@ -306,44 +316,44 @@ const Lesson = (lesson: LessonProp) => {
           }}
         >
           {lesson.media && lesson.text ? (
-            
-          <Text
-            style={{
-              borderWidth: 1,
-              borderColor: '#ECDCFF',
-              padding: 4,
-              borderRadius: 4,
-              fontSize: 10,
-            }}
-          >
-            Video/Text
-          </Text>
+
+            <Text
+              style={{
+                borderWidth: 1,
+                borderColor: '#ECDCFF',
+                padding: 4,
+                borderRadius: 4,
+                fontSize: 10,
+              }}
+            >
+              Video/Text
+            </Text>
           ) : lesson.media ? (
-          <Text
-            style={{
-              borderWidth: 1,
-              borderColor: '#ECDCFF',
-              padding: 4,
-              borderRadius: 4,
-              fontSize: 10,
-            }}
-          >
-            Video
-          </Text>
-            
+            <Text
+              style={{
+                borderWidth: 1,
+                borderColor: '#ECDCFF',
+                padding: 4,
+                borderRadius: 4,
+                fontSize: 10,
+              }}
+            >
+              Video
+            </Text>
+
           ) : (
-            
-          <Text
-            style={{
-              borderWidth: 1,
-              borderColor: '#ECDCFF',
-              padding: 4,
-              borderRadius: 4,
-              fontSize: 10,
-            }}
-          >
-            Text
-          </Text>
+
+            <Text
+              style={{
+                borderWidth: 1,
+                borderColor: '#ECDCFF',
+                padding: 4,
+                borderRadius: 4,
+                fontSize: 10,
+              }}
+            >
+              Text
+            </Text>
           )}
           {/* <Text
             style={{

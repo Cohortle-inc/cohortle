@@ -208,7 +208,7 @@ const About = () => {
 
         <Pressable
           onPress={handleSave}
-          disabled={loading  || !isChecked|| !data.firstName.trim() || !data.lastName.trim()}
+          disabled={loading || !isChecked || !data.firstName.trim() || !data.lastName.trim()}
           style={[styles.submitBtn, (loading || !hasChanges) && styles.disabledBtn]}
         >
           {loading ? (
@@ -216,11 +216,6 @@ const About = () => {
           ) : (
             <Text style={styles.submitText}>Next</Text>
           )}
-        </Pressable>
-
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <BackArrowIcon />
-          <Text style={styles.backText}>Back</Text>
         </Pressable>
       </View>
     </SafeAreaWrapper>

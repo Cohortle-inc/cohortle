@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const getCohortMembers = async (cohortId: number) => {
+export const getCohortMembers = async (cohortId: number) => {
     const token = await AsyncStorage.getItem('authToken');
 
     if (!API_URL) throw new Error('Missing API URL');

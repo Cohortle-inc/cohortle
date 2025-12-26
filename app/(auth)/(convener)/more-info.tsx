@@ -16,6 +16,7 @@ import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import Modal from 'react-native-modal';
 import { useUpdateCohort } from '@/api/updateCohorts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUpdateCommunity } from '@/api/communities/updateCommunity';
 
 // reusable modal dropdown
 const ModalDropdown = ({
@@ -78,17 +79,16 @@ const MoreInfo = () => {
   const [description, setDescription] = useState('');
   const [goal, setGoal] = useState('');
   const [referral, setReferral] = useState('');
-
-  const updateCohort = useUpdateCohort();
+  const { mutate: updateCommunity, isPending } = useUpdateCommunity();
+  // const { community }
   const router = useRouter();
   const { cohort_id } = useLocalSearchParams();
 
   const handleNext = async () => {
-    const token = await AsyncStorage.getItem('authToken');
+    // const token = await AsyncStorage.getItem('authToken'); // Token handled in API function
     try {
-      await updateCohort.mutateAsync({
-        cohort_id: Number(cohort_id),
-        token: String(token),
+      updateCommunity({
+        id: Number(cohort_id),
         data: {
           description,
           goal,
@@ -96,12 +96,10 @@ const MoreInfo = () => {
           revenue: '', // optional
         },
       });
-
-      Alert.alert('Success', 'Cohort info updated successfully');
-      // ✅ Navigate to next step
-      router.navigate({
-        pathname: `/community-structure`,
-        params: { cohort_id, token },
+      console.log('community updated');
+      router.push({
+        pathname: '/convener-screens/(cohorts)',
+        params: { cohort_id },
       });
     } catch (err: any) {
       Alert.alert('Error', err?.response?.data?.message || 'Update failed');
@@ -163,21 +161,17 @@ const MoreInfo = () => {
       </View>
 
       <Pressable
-        style={[styles.nextButton, updateCohort.isPending && { opacity: 0.6 }]}
+        style={[styles.nextButton, isPending && { opacity: 0.6 }]}
         onPress={handleNext}
-        disabled={updateCohort.isPending}
+        disabled={isPending}
       >
-        {updateCohort.isPending ? (
+        {isPending ? (
           <ActivityIndicator color="#fff" />
         ) : (
           <Text style={{ color: '#fff' }}>Next</Text>
         )}
       </Pressable>
 
-      <Pressable style={styles.backButton}>
-        <BackArrowIcon />
-        <Text style={{ color: '#391D65' }}>Back</Text>
-      </Pressable>
     </SafeAreaWrapper>
   );
 };

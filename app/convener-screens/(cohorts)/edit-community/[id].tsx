@@ -18,14 +18,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import Modal from 'react-native-modal';
 import { Input } from '@/components/Form';
-import { useGetCohort } from '@/api/cohorts/getCohort';
-import { useUpdateCohort } from '@/api/updateCohorts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDeleteCohort } from '@/api/cohorts/deleteCohort';
-import { useRemoveCohortLearner } from '@/api/cohorts/removeLearner';
 import useGetCommunity from '@/api/communities/getCommunity';
 import { useRemoveCommunity } from '@/api/communities/deleteCommunity';
 import { useGetCommunityMembers } from '@/api/communities/getMembers';
+import { useRemoveCommunityMember } from '@/api/communities/removeMember';
+import { useUpdateCommunity } from '@/api/communities/updateCommunity';
 
 const EditCohort = () => {
   const router = useRouter();
@@ -40,11 +38,41 @@ const EditCohort = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: community } = useGetCommunity(id as any);
   const { data: communityMembers } = useGetCommunityMembers(id);
-  const updateCohort = useUpdateCohort();
-  const deleteCohort = useDeleteCohort();
   const [loading, setLoading] = useState(false);
   const removeCommunityMutation = useRemoveCommunity();
+  const updateCommunityMutation = useUpdateCommunity();
+  const removeMemberMutation = useRemoveCommunityMember();
   // console.log(communityMembers)
+
+  const handleRemoveMember = () => {
+    if (!selectedLearner) return;
+
+    Alert.alert(
+      'Remove Member',
+      `Are you sure you want to remove ${selectedLearner.first_name} from this community?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            removeMemberMutation.mutate(
+              {
+                communityId: Number(id),
+                memberId: selectedLearner.id || selectedLearner.member_id, // Adjust based on actual data structure
+              },
+              {
+                onSuccess: () => {
+                  bottomSheetRef.current?.close();
+                  setSelectedLearner(null);
+                }
+              }
+            );
+          },
+        },
+      ],
+    );
+  };
 
   const handleRemoveCommunity = async () => {
     if (!id) return;
@@ -108,42 +136,37 @@ const EditCohort = () => {
     [],
   );
 
-  // const handleUpdateCohort = async () => {
-  //   // Validate input
-  //   if (!name.trim()) {
-  //     Alert.alert('Error', 'Please enter a cohort name');
-  //     return;
-  //   }
+  /* useEffect(() => {
+    if (community?.name) {
+      setName(community.name);
+    }
+  }, [community]); */
 
-  //   const token = await AsyncStorage.getItem('authToken');
-  //   try {
-  //     await updateCohort.mutateAsync({
-  //       cohort_id: Number(id),
-  //       token: String(token),
-  //       data: {
-  //         name,
-  //       },
-  //     });
+  const handleUpdateCommunity = async () => {
+    // Validate input
+    if (!name.trim()) {
+      Alert.alert('Error', 'Please enter a community name');
+      return;
+    }
 
-  //     Alert.alert('Success', 'Cohort info updated successfully');
-  //     console.log('Updated name:', name);
-  //   } catch (err: any) {
-  //     Alert.alert('Error', err?.response?.data?.message || 'Update failed');
-  //   }
-  // };
+    setLoading(true);
+    try {
+      await updateCommunityMutation.mutateAsync({
+        id: Number(id),
+        data: {
+          name: name.trim(),
+        },
+      });
 
-  // const handleDeleteCohort = async () => {
-  //   setLoading(true);
-  //   try {
-  //     await deleteCohort.mutateAsync(String(id));
-  //     Alert.alert('Success', 'Community deleted successfully');
-  //     router.push('/convener-screens/(cohorts)');
-  //     // Navigate back or to another screen if necessary
-  //   } catch (err: any) {
-  //     Alert.alert('Error', err?.response?.data?.message || 'Delete failed');
-  //   }
-  //   setLoading(false);
-  // };
+      Alert.alert('Success', 'Community updated successfully');
+      router.back(); // or router.replace('/convener-screens/(cohorts)')
+    } catch (err: any) {
+      console.error(err);
+      Alert.alert('Error', err?.response?.data?.message || 'Update failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<'details' | 'members'>('details');
 
@@ -192,7 +215,7 @@ const EditCohort = () => {
             <Input
               value={name}
               onChangeText={setName}
-              label="Cohort name"
+              label="Community name"
               placeholder={community?.name}
             />
           </View>
@@ -231,8 +254,10 @@ const EditCohort = () => {
                 flex: 1,
                 width: '100%',
                 borderRadius: 16,
+                opacity: (loading || !name.trim()) ? 0.7 : 1
               }}
-            // onPress={handleUpdateCohort}
+              onPress={handleUpdateCommunity}
+              disabled={loading || !name.trim()}
             >
               <Text
                 style={{
@@ -242,7 +267,7 @@ const EditCohort = () => {
                   color: '#fff',
                 }}
               >
-                Save changes
+                {loading ? 'Saving...' : 'Save changes'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -289,7 +314,7 @@ const EditCohort = () => {
 
               <TouchableOpacity
                 style={{ gap: 4 }}
-                onPress={() => { }}
+                onPress={handleRemoveMember}
               >
                 <Text style={{ color: '#EE3D3E', fontWeight: '500' }}>
                   Remove learner

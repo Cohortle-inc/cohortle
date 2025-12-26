@@ -33,7 +33,7 @@ export const CohortProgressCard: React.FC<CohortProgressCardProps> = ({ cohortId
         <Text style={styles.title}>Cohort Engagement</Text>
         <Ionicons name="stats-chart" size={20} color={colors.primary} />
       </View>
-      
+
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <View style={styles.iconBg}>

@@ -1,5 +1,6 @@
 import {
   Alert,
+  Clipboard,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -13,15 +14,12 @@ import { BackArrowIcon } from '@/assets/icons';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { colors } from '@/utils/color';
 import { useUpdateCohort } from '@/api/updateCohorts';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUpdateCommunity } from '@/api/communities/updateCommunity';
 
 const Structure = () => {
   const [selected, setSelected] = useState<string | null>(null);
-  const { cohort_id } = useLocalSearchParams<{
-    cohort_id: string;
-    token: string;
-  }>();
-  const updateCohort = useUpdateCohort();
+  const { cohort_id } = useLocalSearchParams<{ cohort_id: string }>();
+  const updateCommunity = useUpdateCommunity();
   const router = useRouter();
 
   const handleSelected = (value: string) => {
@@ -29,17 +27,14 @@ const Structure = () => {
   };
 
   const handleSave = async () => {
-    const token = await AsyncStorage.getItem('authToken');
     try {
-      await updateCohort.mutateAsync({
-        cohort_id: Number(cohort_id),
-        token: String(token),
+      await updateCommunity.mutateAsync({
+        id: Number(cohort_id),
         data: {
-          community_structure: selected ?? undefined, // will be set on next screen
+          type: selected ?? undefined, // will be set on next screen
         },
       });
       console.log('Saved community structure:', selected);
-      Alert.alert('Success', 'Cohort info updated successfully');
       // ✅ Navigate to next step
       router.push(`/convener-screens/(cohorts)`);
     } catch (err: any) {
@@ -84,22 +79,6 @@ const Structure = () => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => handleSelected('basic')}
-            style={[
-              styles.optionButton,
-              selected === 'basic' && styles.optionSelected,
-            ]}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                selected === 'basic' && { color: '#fff' },
-              ]}
-            >
-              Basic
-            </Text>
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -123,7 +102,7 @@ const Structure = () => {
           gap: 16,
         }}
       >
-        <Pressable style={styles.backButton}>
+        <Pressable style={styles.backButton} onPress={() => router.push('/convener-screens/(cohorts)')}>
           <Text style={{ color: '#391D65' }}>Skip</Text>
         </Pressable>
         <Pressable onPress={handleSave} style={styles.backButton}>
