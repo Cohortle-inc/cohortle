@@ -38,7 +38,7 @@ const Welcome = (props: Props) => {
     // If index is greater than -1, sheet is active
   }, []);
 
-  const handleBottomSheet = () => {};
+  const handleBottomSheet = () => { };
   const openBottomSheet = () => {
     bottomSheetRef.current?.expand();
   };
@@ -75,8 +75,8 @@ const Welcome = (props: Props) => {
             <OnboardFive width={320} height={320} />
           </View>
           <View style={styles.buttonContainer}>
-            
-                    <Text>V 0.0.75</Text>
+
+            <Text>V 0.0.8</Text>
             <Button onPress={openBottomSheet} text="Get Started" />
             <Text
               style={{ textAlign: 'center', marginTop: 16 }}
