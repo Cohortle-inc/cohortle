@@ -76,7 +76,7 @@ const Welcome = (props: Props) => {
           </View>
           <View style={styles.buttonContainer}>
 
-            <Text>V 0.0.8</Text>
+            <Text>V 0.0.82</Text>
             <Button onPress={openBottomSheet} text="Get Started" />
             <Text
               style={{ textAlign: 'center', marginTop: 16 }}
