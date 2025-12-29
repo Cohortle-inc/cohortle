@@ -7,13 +7,14 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 export interface CreatePostParams {
   text: string;
   can_reply: string;
+  community_ids?: string;
 }
 
-export const createPost = async ({ text, can_reply }: CreatePostParams) => {
+export const createPost = async ({ text, can_reply, community_ids }: CreatePostParams) => {
   const token = await AsyncStorage.getItem('authToken');
   const response = await axios.post(
     `${API_URL}/v1/api/posts`,
-    { text, can_reply },
+    { text, can_reply, community_ids },
     {
       headers: {
         Authorization: `Bearer ${token}`,

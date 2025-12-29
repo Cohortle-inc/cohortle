@@ -9,7 +9,7 @@ export async function createComment(
   token: string,
 ) {
   const response = await axios.post(
-    `${apiURL}/v1/post/${id}/comments`,
+    `${apiURL}/v1/api/posts/${id}/comments`,
     payload,
     {
       headers: {

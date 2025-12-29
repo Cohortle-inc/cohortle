@@ -50,9 +50,9 @@ const Community = () => {
         >
           Cohortle
         </Link>
-        <View
+        <Link
           // href={'/convener-screens/(cohorts)/upload'}
-          // href={'/convener-screens/(cohorts)/upload'}
+          href={'/convener-screens/(cohorts)/upload'}
           style={{
             position: 'absolute',
             right: 0,
@@ -63,7 +63,7 @@ const Community = () => {
           }}
         >
           <Text style={{ fontWeight: 700 }}>Create Post</Text>
-        </View>
+        </Link>
       </View>
 
       {/* Tab Switcher */}

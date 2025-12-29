@@ -6,6 +6,7 @@ import {
   Modal,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaWrapper } from '@/HOC';
@@ -17,6 +18,9 @@ import { useGetSchedule } from '@/api/cohorts/schedule';
 import { Eclipse, X } from 'lucide-react-native';
 import { NavHead } from '@/components/HeadRoute';
 import { colors } from '@/utils/color';
+import { useGetCohortAnnouncements, usePostCohortAnnouncement } from '@/api/announcements';
+import { Input } from '@/components/Form';
+import { showMessage } from 'react-native-flash-message';
 
 export default function Dashboard() {
   const name = useLocalSearchParams<{ name: string }>();
@@ -25,6 +29,10 @@ export default function Dashboard() {
   const [courseType, setCourseType] = useState('self-paced');
   const [setting, openSetting] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [isAnnounceModalVisible, setAnnounceModalVisible] = useState(false);
+  const [announceTitle, setAnnounceTitle] = useState('');
+  const [announceContent, setAnnounceContent] = useState('');
+  const [announcePriority, setAnnouncePriority] = useState<'low' | 'medium' | 'high'>('medium');
 
   const handleVisible = () => setVisible(!visible);
   const menuItems = [
@@ -75,8 +83,29 @@ export default function Dashboard() {
   const params = useLocalSearchParams<{ id?: string; cohort_id?: string }>();
   const cohortId = Number(params.id || params.cohort_id || 0);
 
-  const { data: scheduleResponse, refetch: refetchSchedule } = useGetSchedule(cohortId);
+  const { data: scheduleResponse, refetch: refetchSchedule } = useGetSchedule(cohortId.toString());
   const schedules = scheduleResponse?.schedule || scheduleResponse || [];
+
+  const { data: announcements, isLoading: isAnnouncementsLoading } = useGetCohortAnnouncements(cohortId);
+  const { mutate: createAnnouncement, isPending: isCreatingAnnouncement } = usePostCohortAnnouncement(cohortId);
+
+  const handleCreateAnnouncement = () => {
+    if (!announceTitle || !announceContent) {
+      showMessage({ message: 'Error', description: 'Please fill in all fields', type: 'danger' });
+      return;
+    }
+    createAnnouncement(
+      { title: announceTitle, content: announceContent, priority: announcePriority },
+      {
+        onSuccess: () => {
+          console.log("dd")
+          setAnnounceModalVisible(false);
+          setAnnounceTitle('');
+          setAnnounceContent('');
+        },
+      }
+    );
+  };
 
   const courseOptions = [
     {
@@ -135,13 +164,13 @@ export default function Dashboard() {
       <ScrollView style={styles.container}>
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>Cohort Dashboard</Text>
-          <TouchableOpacity onPress={toggleModal}>
+          {/* <TouchableOpacity onPress={toggleModal}>
             <MaterialIcons name="edit" size={22} color="#6B7280" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Status & Type */}
-        <View style={[styles.statusRow, { justifyContent: 'space-between' }]}>
+        {/* <View style={[styles.statusRow, { justifyContent: 'space-between' }]}>
           <MaterialIcons name="menu-book" size={16} color="#6B7280" />
           <Link
             style={{
@@ -153,7 +182,7 @@ export default function Dashboard() {
           >
             View contents
           </Link>
-        </View>
+        </View> */}
 
         {/* New Progress Card */}
         <CohortProgressCard cohortId={cohortId} />
@@ -161,11 +190,11 @@ export default function Dashboard() {
         {/* Schedule / Completion Rate */}
         <View style={styles.card}>
           <View style={{ marginTop: 0 }}>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => router.push({
                 pathname: '/convener-screens/(cohorts)/community/(course)/cohorts/manage-schedule',
                 params: { id: cohortId }
-              })} 
+              })}
               style={{ padding: 12, backgroundColor: '#EDE9FE', borderRadius: 8, alignItems: 'center' }}
             >
               <Text>Manage schedule</Text>
@@ -188,13 +217,38 @@ export default function Dashboard() {
           )}
         </View>
 
-        {/* Draft Notice */}
-        <View style={styles.draftNotice}>
+        {/* Announcements section */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardLabel}>Recent Announcements</Text>
+            <TouchableOpacity onPress={() => setAnnounceModalVisible(true)}>
+              <PlusSmall style={{ color: colors.primary }} />
+            </TouchableOpacity>
+          </View>
+          {isAnnouncementsLoading ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : announcements && announcements.length > 0 ? (
+            announcements.slice(0, 3).map((a) => (
+              <View key={a.id} style={styles.announcementItem}>
+                <View style={[styles.priorityBadge, { backgroundColor: a.priority === 'high' ? '#FEE2E2' : a.priority === 'medium' ? '#FEF3C7' : '#DCFCE7' }]}>
+                  <Text style={[styles.priorityText, { color: a.priority === 'high' ? '#991B1B' : a.priority === 'medium' ? '#92400E' : '#166534' }]}>
+                    {a.priority.toUpperCase()}
+                  </Text>
+                </View>
+                <Text style={styles.announcementTitle}>{a.title}</Text>
+                <Text style={styles.announcementDate}>{new Date(a.created_at).toLocaleDateString()}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ color: '#666', marginTop: 8 }}>No announcements yet</Text>
+          )}
+        </View>
+        {/* <View style={styles.draftNotice}>
           <Text style={styles.draftTitle}>This programme is in draft mode.</Text>
           <Text style={styles.draftDescription}>
             Engagement data will show up here once you publish your programme.
           </Text>
-        </View>
+        </View> */}
       </ScrollView>
       {isModalVisible && (
         <View style={styles.backdrop}>
@@ -241,6 +295,65 @@ export default function Dashboard() {
           </View>
         </View>
       )}
+      {/* Create Announcement Modal */}
+      <Modal visible={isAnnounceModalVisible} transparent animationType="fade">
+        <View style={styles.backdrop}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>New Announcement</Text>
+              <TouchableOpacity onPress={() => setAnnounceModalVisible(false)}>
+                <Close style={{ color: '#000' }} />
+              </TouchableOpacity>
+            </View>
+
+            <Input
+              label="Title"
+              placeholder="Announcement Title"
+              value={announceTitle}
+              onChangeText={setAnnounceTitle}
+            />
+
+            <Input
+              label="Content"
+              placeholder="What do you want to announce?"
+              value={announceContent}
+              onChangeText={setAnnounceContent}
+              multiline
+              numberOfLines={4}
+            />
+
+            <View style={styles.prioritySelector}>
+              <Text style={styles.label}>Priority</Text>
+              <View style={styles.priorityOptions}>
+                {(['low', 'medium', 'high'] as const).map((p) => (
+                  <TouchableOpacity
+                    key={p}
+                    onPress={() => setAnnouncePriority(p)}
+                    style={[
+                      styles.priorityOption,
+                      announcePriority === p && { backgroundColor: colors.primary, borderColor: colors.primary },
+                    ]}
+                  >
+                    <Text style={[styles.priorityOptionText, announcePriority === p && { color: '#fff' }]}>
+                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.submitButton, isCreatingAnnouncement && { opacity: 0.7 }]}
+              onPress={handleCreateAnnouncement}
+              disabled={isCreatingAnnouncement}
+            >
+              <Text style={styles.submitButtonText}>
+                {isCreatingAnnouncement ? 'Publishing...' : 'Publish Announcement'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <Modal
         visible={visible}
         transparent
@@ -383,6 +496,95 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
   },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  announcementItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  priorityBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  priorityText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  announcementTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F1F1F',
+  },
+  announcementDate: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 16,
+    width: '90%',
+    alignSelf: 'center',
+    gap: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F1F1F',
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 4,
+  },
+  prioritySelector: {
+    marginTop: 8,
+  },
+  priorityOptions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  priorityOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  priorityOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  submitButton: {
+    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: 32,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -403,11 +605,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     marginBottom: 16,
   },
-  openBtn: {
-    padding: 12,
-    backgroundColor: '#4B0082',
-    borderRadius: 8,
-  },
   closeBtn: {
     position: 'absolute',
     right: 16,
@@ -422,7 +619,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   rowLeft: { flexDirection: 'row', alignItems: 'center' },
-  label: { marginLeft: 12, fontSize: 16, color: '#111' },
   rightText: { fontSize: 14, color: '#555' },
   deleteText: { marginLeft: 12, fontSize: 16, color: 'red' },
 });

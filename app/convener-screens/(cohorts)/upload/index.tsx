@@ -16,6 +16,7 @@ import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 import { Ionicons } from '@expo/vector-icons';
 import { useCreatePost } from '@/api/posts/createPost';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useGetCommunities from '@/api/communities/getCommunities';
 
 const UploadPost = () => {
   const [text, setText] = useState('');
@@ -23,10 +24,11 @@ const UploadPost = () => {
   const [replyModal, setReplyModal] = useState(false);
   const [selectedReplyOption, setSelectedReplyOption] = useState('Everyone');
   const [selectedAudience, setSelectedAudience] = useState('Everyone');
+  const [selectedAudienceId, setSelectedAudienceId] = useState<string | null>(null);
   const { mutate: createPost } = useCreatePost();
 
   /// Note: Instead of calling the communities withing a cohort, its the cohort that is being called in this case. a major oversight
-  const { data: cohorts, isLoading, isError } = useConvenersCohorts();
+  const { data: myCommunities, isLoading: communitiesLoading, isError: communitiesError } = useGetCommunities();
 
   const toggleAudienceModal = () => setAudienceModal((prev) => !prev);
   const toggleReplyModal = () => setReplyModal((prev) => !prev);
@@ -45,6 +47,7 @@ const UploadPost = () => {
       {
         text,
         can_reply: selectedReplyOption.toLowerCase(),
+        community_ids: selectedAudienceId || undefined,
       },
       {
         onSuccess: (data) => {
@@ -62,8 +65,9 @@ const UploadPost = () => {
     );
   };
 
-  const handleAudienceSelect = (audience: string) => {
+  const handleAudienceSelect = (audience: string, id: string | null = null) => {
     setSelectedAudience(audience);
+    setSelectedAudienceId(id);
     toggleAudienceModal();
   };
 
@@ -126,7 +130,7 @@ const UploadPost = () => {
 
           <TouchableOpacity
             style={[styles.audienceOption]}
-            onPress={() => handleAudienceSelect('Everyone')}
+            onPress={() => handleAudienceSelect('Everyone', null)}
           >
             <Text style={styles.audienceOptionText}>Everyone</Text>
           </TouchableOpacity>
@@ -134,27 +138,30 @@ const UploadPost = () => {
           <View style={styles.communitiesSection}>
             <Text style={styles.communitiesHeader}>My Communities</Text>
 
-            {isLoading ? (
+            {communitiesLoading ? (
               <ActivityIndicator size="small" color="#B085EF" />
-            ) : isError ? (
+            ) : communitiesError ? (
               <Text style={styles.errorText}>Error loading communities</Text>
             ) : (
               <View style={styles.communitiesList}>
                 {/* Use optional chaining here since cohorts might be undefined */}
-                {cohorts?.map((cohort: any) => (
+                {myCommunities?.map((community: any) => (
                   <TouchableOpacity
-                    key={cohort.id}
+                    key={community.id}
                     style={[styles.communityItem]}
-                    onPress={() => handleAudienceSelect(cohort.id)}
+                    onPress={async () => {
+                      await AsyncStorage.setItem('selectedCommunity', community.id.toString());
+                      handleAudienceSelect(community.name, community.id.toString());
+                    }}
                   >
                     <View style={styles.profileImage} />
                     <View style={styles.communityInfo}>
-                      <Text style={styles.communityName}>{cohort?.name}</Text>
+                      <Text style={styles.communityName}>{community?.name}</Text>
                       <Text style={styles.communityMembers}>
-                        {cohort.memberCount || 0} members
+                        {community.memberCount || 0} members
                       </Text>
                     </View>
-                    {selectedAudience === cohort.id && (
+                    {selectedAudienceId === community.id && (
                       <Text style={styles.checkmark}>✓</Text>
                     )}
                   </TouchableOpacity>
@@ -193,7 +200,7 @@ const UploadPost = () => {
           </View>
         </View>
       </Modal>
-    </SafeAreaWrapper>
+    </SafeAreaWrapper >
   );
 };
 

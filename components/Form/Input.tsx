@@ -7,7 +7,7 @@ const NormalInput = ({ label, placeholder, value, onChangeText, error }: any) =>
     <View>
       {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
-        style={styles.input}
+        style={[styles.input, error && { borderColor: 'red' }]}
         placeholder={placeholder}
         placeholderTextColor="#999"
         value={value}

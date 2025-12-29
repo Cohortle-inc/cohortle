@@ -2,18 +2,26 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
 import { useGetSchedule, useCreateSchedule, SchedulePayload } from '@/api/cohorts/schedule';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/utils/color';
+import { useForm, Controller } from 'react-hook-form';
+import { Input } from '@/components/Form';
+import { showMessage } from 'react-native-flash-message';
 
+interface FormData {
+  title: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  meeting_link: string;
+  duration_minutes: string;
+}
 
 interface CohortScheduleManagerProps {
   cohortId: number;
@@ -21,44 +29,74 @@ interface CohortScheduleManagerProps {
 
 export const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ cohortId }) => {
   const { data: scheduleData = [], isLoading } = useGetSchedule(cohortId.toString());
-  console.log('scheduleData: ', scheduleData);
   const createScheduleMutation = useCreateSchedule(cohortId.toString());
 
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [link, setLink] = useState('');
-  const [duration, setDuration] = useState('');
   const [isFormVisible, setFormVisible] = useState(false);
 
-  const handleCreateSchedule = () => {
-    if (!title || !date) {
-      Alert.alert('Validation', 'Title and Date are required.');
-      return;
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+    defaultValues: {
+      title: '',
+      scheduled_date: new Date().toISOString().split('T')[0],
+      scheduled_time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      meeting_link: '',
+      duration_minutes: '60',
     }
+  });
 
-    const durationInt = parseInt(duration, 10);
+  const formatDate = (text: string) => {
+    const cleaned = text.replace(/[^0-9]/g, '');
+    let formatted = cleaned;
+    if (cleaned.length > 4) formatted = `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+    if (cleaned.length > 6) formatted = `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 8)}`;
+    return formatted.slice(0, 10);
+  };
+
+  const formatTime = (text: string) => {
+    const cleaned = text.replace(/[^0-9]/g, '');
+    let formatted = cleaned;
+    if (cleaned.length > 2) formatted = `${cleaned.slice(0, 2)}:${cleaned.slice(2, 4)}`;
+    return formatted.slice(0, 5);
+  };
+
+  const validateDate = (dateString: string) => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date.getTime());
+  };
+
+  const validateTime = (timeString: string) => {
+    const regex = /^([01]\d|2[0-3]):?([0-5]\d)$/;
+    return regex.test(timeString);
+  };
+
+  const onSubmit = (data: FormData) => {
+    const durationInt = parseInt(data.duration_minutes, 10);
 
     const payload: SchedulePayload = {
-      title,
-      scheduled_date: date,
-      meeting_link: link,
-      scheduled_time: time || undefined,
+      title: data.title,
+      scheduled_date: data.scheduled_date,
+      meeting_link: data.meeting_link,
+      scheduled_time: data.scheduled_time || undefined,
       duration_minutes: !isNaN(durationInt) ? durationInt : undefined,
     };
 
     createScheduleMutation.mutate(payload, {
       onSuccess: () => {
-        Alert.alert('Success', 'Schedule created successfully');
-        setTitle('');
-        setDate('');
-        setTime('');
-        setLink('');
-        setDuration('');
+        showMessage({
+          message: 'Success',
+          description: 'Schedule created successfully',
+          type: 'success',
+        });
+        reset();
         setFormVisible(false);
       },
       onError: (error: any) => {
-        Alert.alert('Error', error.message || 'Failed to create schedule');
+        showMessage({
+          message: 'Error',
+          description: error.message || 'Failed to create schedule',
+          type: 'danger',
+        });
       },
     });
   };
@@ -86,7 +124,7 @@ export const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ co
   );
 
   return (
-    <ScrollView>
+    <ScrollView showsVerticalScrollIndicator={false}>
 
       <View style={styles.container}>
         <View style={styles.headerRow}>
@@ -103,42 +141,111 @@ export const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ co
         {isFormVisible && (
           <View style={styles.form}>
             <Text style={styles.formTitle}>New Session Details</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Session Title"
-              value={title}
-              onChangeText={setTitle}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Date (YYYY-MM-DD)"
-              value={date}
-              onChangeText={setDate}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Time (HH:MM)"
-              value={time}
-              onChangeText={setTime}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Meeting Link"
-              value={link}
-              onChangeText={setLink}
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Duration (minutes)"
-              value={duration}
-              onChangeText={setDuration}
-              keyboardType="numeric"
-            />
+            <View style={{ gap: 6 }}>
+
+              <Controller
+                control={control}
+                name="title"
+                rules={{ required: 'Session title is required' }}
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Session Title"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="e.g. Weekly Workshop"
+                    error={errors.title?.message}
+                  />
+                )}
+              />
+
+              <View style={styles.row}>
+                <View style={{ flex: 1.2 }}>
+                  <Controller
+                    control={control}
+                    name="scheduled_date"
+                    rules={{
+                      required: 'Date is required',
+                      validate: value => validateDate(value) || 'Invalid format'
+                    }}
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Date"
+                        value={value}
+                        onChangeText={(text: string) => onChange(formatDate(text))}
+                        placeholder="YYYY-MM-DD"
+                        keyboardType="numeric"
+                        error={errors.scheduled_date?.message}
+                      />
+                    )}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Controller
+                    control={control}
+                    name="scheduled_time"
+                    rules={{
+                      required: 'Time is required',
+                      validate: value => validateTime(value) || 'Invalid format'
+                    }}
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Time"
+                        value={value}
+                        onChangeText={(text: string) => onChange(formatTime(text))}
+                        placeholder="HH:MM"
+                        keyboardType="numeric"
+                        error={errors.scheduled_time?.message}
+                      />
+                    )}
+                  />
+                </View>
+              </View>
+
+              <Controller
+                control={control}
+                name="meeting_link"
+                rules={{
+                  required: 'Meeting link is required',
+                  pattern: {
+                    value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
+                    message: 'Enter a valid URL'
+                  }
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Meeting Link"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="https://meet.google.com/j/..."
+                    autoCapitalize="none"
+                    error={errors.meeting_link?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="duration_minutes"
+                rules={{
+                  required: 'Duration is required',
+                  validate: value => Number(value) >= 1 || 'Min 1 min'
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Duration (minutes)"
+                    value={value}
+                    onChangeText={(text: string) => onChange(text.replace(/[^0-9]/g, ''))}
+                    placeholder="e.g. 60"
+                    keyboardType="numeric"
+                    error={errors.duration_minutes?.message}
+                  />
+                )}
+              />
+            </View>
 
             <TouchableOpacity
-              style={styles.button}
-              onPress={handleCreateSchedule}
+              style={[styles.button, createScheduleMutation.isPending && { opacity: 0.7 }]}
+              onPress={handleSubmit(onSubmit)}
               disabled={createScheduleMutation.isPending}
             >
               {createScheduleMutation.isPending ? (
@@ -187,14 +294,10 @@ const styles = StyleSheet.create({
     borderColor: '#E9ECEF'
   },
   formTitle: { fontSize: 16, fontWeight: '600', marginBottom: 16, color: '#333' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#dee2e6',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: '#fff',
-    fontSize: 14
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 4,
   },
   button: { backgroundColor: colors.primary || '#4B0082', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 8 },
   buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },

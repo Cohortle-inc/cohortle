@@ -18,6 +18,15 @@ import { Input } from '@/components/Form';
 import { showMessage } from 'react-native-flash-message';
 import { colors } from '@/utils/color';
 import { Ionicons } from '@expo/vector-icons';
+import { useForm, Controller } from 'react-hook-form';
+
+interface FormData {
+    name: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    max_members: string;
+}
 
 const CohortList = () => {
     const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
@@ -25,24 +34,42 @@ const CohortList = () => {
     const router = useRouter();
 
     const [isModalVisible, setModalVisible] = useState(false);
-    const [formData, setFormData] = useState({
-        name: '',
-        description: '',
-        start_date: new Date().toISOString().split('T')[0],
-        end_date: new Date().toISOString().split('T')[0],
-        max_members: '0',
+
+    const { control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
+        defaultValues: {
+            name: '',
+            description: '',
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: new Date().toISOString().split('T')[0],
+            max_members: '5',
+        }
     });
+
+    const formatDate = (text: string) => {
+        const cleaned = text.replace(/[^0-9]/g, '');
+        let formatted = cleaned;
+        if (cleaned.length > 4) formatted = `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+        if (cleaned.length > 6) formatted = `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6, 8)}`;
+        return formatted.slice(0, 10);
+    };
+
+    const validateDate = (dateString: string) => {
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(dateString)) return false;
+        const date = new Date(dateString);
+        return date instanceof Date && !isNaN(date.getTime());
+    };
 
     const { data: cohortsResponse, isLoading } = useGetCohortsByProgramme(programmeId);
     const cohorts = cohortsResponse?.cohorts || [];
 
     const { mutate: createCohort, isPending } = useCreateCohort(programmeId);
 
-    const handleCreateCohort = () => {
-        if (!formData.name.trim() || !formData.description.trim()) {
+    const onSubmit = (data: FormData) => {
+        if (new Date(data.start_date) > new Date(data.end_date)) {
             showMessage({
-                message: 'Error',
-                description: 'Please fill in required fields',
+                message: 'Validation Error',
+                description: 'End date must be after start date',
                 type: 'danger',
             });
             return;
@@ -50,19 +77,13 @@ const CohortList = () => {
 
         createCohort(
             {
-                ...formData,
-                max_members: Number(formData.max_members),
+                ...data,
+                max_members: Number(data.max_members),
             },
             {
                 onSuccess: () => {
                     setModalVisible(false);
-                    setFormData({
-                        name: '',
-                        description: '',
-                        start_date: new Date().toISOString().split('T')[0],
-                        end_date: new Date().toISOString().split('T')[0],
-                        max_members: '0',
-                    });
+                    reset();
                 },
             }
         );
@@ -126,38 +147,96 @@ const CohortList = () => {
             <Modal isVisible={isModalVisible} onBackdropPress={() => setModalVisible(false)}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>Create New Cohort</Text>
-                    <Input
-                        label="Cohort Name"
-                        value={formData.name}
-                        onChangeText={(text: string) => setFormData({ ...formData, name: text })}
-                        placeholder="e.g. Winter 2024"
+
+                    <Controller
+                        control={control}
+                        name="name"
+                        rules={{ required: 'Cohort name is required' }}
+                        render={({ field: { onChange, value } }) => (
+                            <Input
+                                label="Cohort Name"
+                                value={value}
+                                onChangeText={onChange}
+                                placeholder="e.g. Winter 2024"
+                                error={errors.name?.message}
+                            />
+                        )}
                     />
-                    <Input
-                        label="Description"
-                        value={formData.description}
-                        onChangeText={(text: string) => setFormData({ ...formData, description: text })}
-                        placeholder="Brief description"
+
+                    <Controller
+                        control={control}
+                        name="description"
+                        rules={{ required: 'Description is required' }}
+                        render={({ field: { onChange, value } }) => (
+                            <Input
+                                label="Description"
+                                value={value}
+                                onChangeText={onChange}
+                                placeholder="Brief description"
+                                error={errors.description?.message}
+                            />
+                        )}
                     />
-                    <Input
-                        label="Start Date (YYYY-MM-DD)"
-                        value={formData.start_date}
-                        onChangeText={(text: string) => setFormData({ ...formData, start_date: text })}
+
+                    <Controller
+                        control={control}
+                        name="start_date"
+                        rules={{
+                            required: 'Start date is required',
+                            validate: value => validateDate(value) || 'Invalid date format (YYYY-MM-DD)'
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <Input
+                                label="Start Date (YYYY-MM-DD)"
+                                value={value}
+                                onChangeText={(text: string) => onChange(formatDate(text))}
+                                placeholder="YYYY-MM-DD"
+                                keyboardType="numeric"
+                                error={errors.start_date?.message}
+                            />
+                        )}
                     />
-                    <Input
-                        label="End Date (YYYY-MM-DD)"
-                        value={formData.end_date}
-                        onChangeText={(text: string) => setFormData({ ...formData, end_date: text })}
+
+                    <Controller
+                        control={control}
+                        name="end_date"
+                        rules={{
+                            required: 'End date is required',
+                            validate: value => validateDate(value) || 'Invalid date format (YYYY-MM-DD)'
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <Input
+                                label="End Date (YYYY-MM-DD)"
+                                value={value}
+                                onChangeText={(text: string) => onChange(formatDate(text))}
+                                placeholder="YYYY-MM-DD"
+                                keyboardType="numeric"
+                                error={errors.end_date?.message}
+                            />
+                        )}
                     />
-                    <Input
-                        label="Max Members"
-                        value={formData.max_members}
-                        onChangeText={(text: string) => setFormData({ ...formData, max_members: text })}
-                        keyboardType="numeric"
+
+                    <Controller
+                        control={control}
+                        name="max_members"
+                        rules={{
+                            required: 'Max members is required',
+                            validate: value => (Number(value) >= 1) || 'Must be at least 1 member'
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <Input
+                                label="Max Members"
+                                value={value}
+                                onChangeText={(text: string) => onChange(text.replace(/[^0-9]/g, ''))}
+                                keyboardType="numeric"
+                                error={errors.max_members?.message}
+                            />
+                        )}
                     />
 
                     <TouchableOpacity
                         style={[styles.submitButton, isPending && { opacity: 0.7 }]}
-                        onPress={handleCreateCohort}
+                        onPress={handleSubmit(onSubmit)}
                         disabled={isPending}
                     >
                         <Text style={styles.submitButtonText}>

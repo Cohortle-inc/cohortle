@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaWrapper } from '@/HOC';
 import { NavHead } from '@/components/HeadRoute';
 import { SlideModal } from '@/components/Modal';
+import { DiscussionSection } from '@/components/cohorts/DiscussionSection';
 import { OptionModal } from '@/components/optionModal';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { colors } from '@/utils/color';
@@ -173,6 +174,7 @@ export const Module = ({
   const [lessonModalOpen, setLessonModalOpen] = useState(false);
   const [optionModal, setOptionModal] = useState(0); // 4 = rename, 5 = delete
   const [newLessonName, setNewLessonName] = useState('');
+  const [discussionModalVisible, setDiscussionModalVisible] = useState(false);
 
   const { data: lessons = [], refetch } = useGetLessons(id);
   const { mutate: editModule } = useEditModule();
@@ -263,11 +265,9 @@ export const Module = ({
           <Text style={styles.moduleTitle}>{title}</Text>
         )}
 
-        {lessons.length < 30 && (
-          <TouchableOpacity onPress={handleCreateLesson} style={styles.addNew}>
-            <Text style={styles.addNewText}>Add lesson</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity onPress={handleCreateLesson} style={styles.addNew}>
+          <Text style={styles.addNewText}>Add lesson</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={() => setMenuOpen(true)}>
           <Ionicons name="ellipsis-vertical" size={24} color="#666" />
@@ -280,7 +280,7 @@ export const Module = ({
           .slice() // safe copy — no mutation
           .sort((a: LessonProp, b: LessonProp) => a.id - b.id) // oldest first
           .map((lesson: LessonProp) => (
-            <View key={lesson.id} style={styles.lessonRow}>
+            <View key={lesson.id} style={[styles.lessonRow, { backgroundColor: lesson.status === 'published' ? '#7ded1a2d' : '#EFEFEF' }]}>
               <Ionicons name="play-circle-outline" size={18} color="#8E8E8E" />
               <Text style={styles.lessonText}>{lesson.name}</Text>
               <TouchableOpacity
@@ -363,6 +363,15 @@ export const Module = ({
                 }}
               >
                 <Text>Rename Lesson</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setDiscussionModalVisible(true);
+                  setLessonModalOpen(false);
+                }}
+              >
+                <Text>View Discussions</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -452,6 +461,27 @@ export const Module = ({
           </TouchableOpacity>
         </View>
       </SlideModal>
+      <SlideModal
+        isVisible={discussionModalVisible}
+        onBackdropPress={() => setDiscussionModalVisible(false)}
+      >
+        <View style={{ backgroundColor: 'white', borderRadius: 20, marginHorizontal: 10, maxHeight: '80%', overflow: 'hidden' }}>
+          <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '700' }}>Lesson Discussions</Text>
+            <TouchableOpacity onPress={() => setDiscussionModalVisible(false)}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView>
+            {selectedLesson && (
+              <DiscussionSection
+                programmeId={programme_id}
+                lessonId={selectedLesson.id}
+              />
+            )}
+          </ScrollView>
+        </View>
+      </SlideModal>
     </View>
   );
 };
@@ -520,6 +550,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 4
   },
   lessonText: { flex: 1, fontSize: 15, marginLeft: 8 },
   noLessons: { color: '#999', fontStyle: 'italic', marginTop: 8 },

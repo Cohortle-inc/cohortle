@@ -94,14 +94,29 @@ const CohortDetails = () => {
                     <ActivityIndicator size="large" color={colors.primary} />
                 ) : (
                     <View style={styles.cohortInfo}>
-                        <Text style={styles.sectionTitle}>Details</Text>
-                        <Text onPress={() => {
-                            router.push({
-                                pathname: '/convener-screens/(cohorts)/community/dashboard',
-                                params: { id: cohortId, name: cohortName}
-                            });
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
-                        }}>Dashboard</Text>
+                            <Text style={styles.sectionTitle}>Details</Text>
+                            <TouchableOpacity
+                                style={{
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 6,
+                                    backgroundColor: colors.primary,
+                                    alignSelf: 'flex-start',
+                                    borderRadius: 8,
+                                    marginBottom: 16
+                                }}
+                                onPress={() => {
+                                    router.push({
+                                        pathname: '/convener-screens/(cohorts)/community/dashboard',
+                                        params: { id: cohortId, name: cohortName }
+                                    });
+                                }}>
+                                <Text style={{ color: colors.white, fontWeight: '600' }}>
+                                    Dashboard
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                         <View style={styles.infoCard}>
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>Description:</Text>
@@ -197,7 +212,7 @@ const CohortDetails = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 16 },
-    cohortInfo: { marginBottom: 24 },
+    cohortInfo: { marginBottom: 24, },
     sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F1F1F', marginBottom: 12 },
     infoCard: {
         backgroundColor: '#fff',

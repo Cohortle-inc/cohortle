@@ -14,6 +14,7 @@ import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { RichEditor } from 'react-native-pell-rich-editor';
 import { LessonCompletionButton } from '@/app/convener-screens/(cohorts)/community/(course)/cohorts/LessonCompletionButton';
+import { DiscussionSection } from '@/components/cohorts/DiscussionSection';
 
 const { width } = Dimensions.get('window');
 
@@ -41,7 +42,7 @@ const Module = () => {
   }, [showControls]);
 
   const togglePlayPause = () => {
-    if (status?.isPlaying) {
+    if (status?.isLoaded && status.isPlaying) {
       videoRef.current?.pauseAsync();
     } else {
       videoRef.current?.playAsync();
@@ -51,7 +52,7 @@ const Module = () => {
   console.log('media: ', media);
 
   const skip = (seconds: number) => {
-    if (status?.positionMillis) {
+    if (status?.isLoaded) {
       videoRef.current?.setPositionAsync(
         status.positionMillis + seconds * 1000,
       );
@@ -64,8 +65,8 @@ const Module = () => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  const duration = status?.durationMillis || 0;
-  const position = status?.positionMillis || 0;
+  const duration = (status?.isLoaded && status.durationMillis) ? status.durationMillis : 0;
+  const position = (status?.isLoaded && status.positionMillis) ? status.positionMillis : 0;
 
   const [lessonId, setLessonId] = useState<number | null>(null);
   const [cohortId, setCohortId] = useState<number | null>(null);
@@ -98,7 +99,7 @@ const Module = () => {
 
         if (savedLessonId) setLessonId(Number(savedLessonId));
         if (savedCohortId) setCohortId(Number(savedCohortId));
-        
+
         // ✅ Update RichEditor content after a short delay
         setTimeout(() => {
           if (richEditorRef.current && savedText) {
@@ -148,38 +149,38 @@ const Module = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Video Player */}
-        {media ? (
-          <View style={styles.videoWrapper}>
-            <Video
-              ref={videoRef}
-              style={styles.video}
-              source={{ uri: media }}
-              useNativeControls
-              resizeMode={ResizeMode.CONTAIN}
-              isLooping={false}
-              onPlaybackStatusUpdate={setStatus}
-              onLoad={() => {
-                console.log('✅ Video loaded successfully');
-                setShowControls(true);
-              }}
-              onError={(e) => {
-                console.log('❌ Video Error:', e);
-                setMedia(null); // Fallback to no video state
-              }}
-            />
-          </View>
-        ) : (
-          <View>
-          </View>
-        )}
+      {media ? (
+        <View style={styles.videoWrapper}>
+          <Video
+            ref={videoRef}
+            style={styles.video}
+            source={{ uri: media }}
+            useNativeControls
+            resizeMode={ResizeMode.CONTAIN}
+            isLooping={false}
+            onPlaybackStatusUpdate={setStatus}
+            onLoad={() => {
+              console.log('✅ Video loaded successfully');
+              setShowControls(true);
+            }}
+            onError={(e) => {
+              console.log('❌ Video Error:', e);
+              setMedia(null); // Fallback to no video state
+            }}
+          />
+        </View>
+      ) : (
+        <View>
+        </View>
+      )}
 
       {/* Content */}
-      <ScrollView 
+      <ScrollView
         style={styles.contentSection}
         contentContainerStyle={styles.scrollContent}
       >
         <Text style={styles.title}>{title}</Text>
-        
+
         {/* ✅ Fixed RichEditor with proper ref handling */}
         <View style={styles.editorContainer}>
           <RichEditor
@@ -190,15 +191,23 @@ const Module = () => {
             useContainer={true}
           />
         </View>
+
+        {/* Discussions Section */}
+        {lessonId && cohortId && (
+          <DiscussionSection
+            cohortId={cohortId}
+            lessonId={lessonId}
+          />
+        )}
       </ScrollView>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
         {lessonId && cohortId ? (
           <View style={{ flex: 1 }}>
-            <LessonCompletionButton 
-              lessonId={lessonId} 
-              cohortId={cohortId} 
+            <LessonCompletionButton
+              lessonId={lessonId}
+              cohortId={cohortId}
             />
           </View>
         ) : null}
