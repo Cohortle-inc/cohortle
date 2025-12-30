@@ -149,7 +149,7 @@ const CohortDetails = () => {
                 >
                     <View style={{ backgroundColor: 'white', borderRadius: 20, marginHorizontal: 10, maxHeight: '80%', overflow: 'hidden' }}>
                         <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 18, fontWeight: '700' }}>Lesson Discussions</Text>
+                            <Text style={{ fontSize: 18, fontWeight: '700' }}>Cohort Discussions</Text>
                             <TouchableOpacity onPress={() => setDiscussionModalVisible(false)}>
                                 <Ionicons name="close" size={24} color="#666" />
                             </TouchableOpacity>

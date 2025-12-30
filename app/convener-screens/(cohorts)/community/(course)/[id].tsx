@@ -367,15 +367,6 @@ export const Module = ({
 
               <TouchableOpacity
                 onPress={() => {
-                  setDiscussionModalVisible(true);
-                  setLessonModalOpen(false);
-                }}
-              >
-                <Text>View Discussions</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
                   setOptionModal(5);
                   setLessonModalOpen(false);
                 }}
