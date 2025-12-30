@@ -123,7 +123,7 @@ const CohortList = () => {
                         style={styles.addButton}
                         onPress={() => setModalVisible(true)}
                     >
-                        <PlusSmall style={{ color: '#fff' }} />
+                        <Ionicons name="add-circle-outline" color='white' size={18} />
                         <Text style={styles.addButtonText}>New Cohort</Text>
                     </TouchableOpacity>
                 </View>

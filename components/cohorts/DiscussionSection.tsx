@@ -14,15 +14,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/utils/color';
 import { useGetDiscussions, usePostDiscussion, useGetDiscussionComments, usePostDiscussionComment } from '@/api/discussions';
 import { showMessage } from 'react-native-flash-message';
+import { ScrollView } from 'react-native';
 
 interface DiscussionSectionProps {
     programmeId?: number;
     cohortId?: number;
-    lessonId?: number;
 }
 
-export const DiscussionSection: React.FC<DiscussionSectionProps> = ({ programmeId, cohortId, lessonId }) => {
-    const { data: discussions, isLoading: discussionsLoading } = useGetDiscussions({ programme_id: programmeId, cohort_id: cohortId, lesson_id: lessonId });
+export const DiscussionSection: React.FC<DiscussionSectionProps> = ({ cohortId }) => {
+    const { data: discussions, isLoading: discussionsLoading } = useGetDiscussions({ cohort_id: cohortId });
     const { mutate: createDiscussion, isPending: isCreatingDiscussion } = usePostDiscussion();
 
     const [newDiscussionTitle, setNewDiscussionTitle] = useState('');
@@ -32,7 +32,7 @@ export const DiscussionSection: React.FC<DiscussionSectionProps> = ({ programmeI
     const handleCreateDiscussion = () => {
         if (!newDiscussionTitle.trim()) return;
         createDiscussion(
-            { programme_id: programmeId, cohort_id: cohortId, lesson_id: lessonId, title: newDiscussionTitle, description: '' },
+            { cohort_id: cohortId, title: newDiscussionTitle, description: '' },
             {
                 onSuccess: () => {
                     setNewDiscussionTitle('');
@@ -94,7 +94,15 @@ export const DiscussionSection: React.FC<DiscussionSectionProps> = ({ programmeI
                             </View>
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.topicTitle}>{item.title}</Text>
-                                <Text style={styles.topicMeta}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                                    <Text style={styles.topicMeta}>
+                                        {item.user?.first_name || item.user?.last_name
+                                            ? `${item.user?.first_name || ''} ${item.user?.last_name || ''}`.trim()
+                                            : 'Unknown Author'}
+                                    </Text>
+                                    <View style={{ width: 3, height: 3, borderRadius: 1.5, backgroundColor: '#9CA3AF', marginHorizontal: 6 }} />
+                                    <Text style={styles.topicMeta}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                                </View>
                             </View>
                             <Ionicons name="chevron-forward" size={20} color="#999" />
                         </TouchableOpacity>
@@ -107,7 +115,7 @@ export const DiscussionSection: React.FC<DiscussionSectionProps> = ({ programmeI
 };
 
 const CommentSection = ({ discussionId, onBack, discussionTitle }: { discussionId: number, onBack: () => void, discussionTitle: string }) => {
-    const { data: comments, isLoading: commentsLoading } = useGetDiscussionComments(discussionId);
+    const { data: comments, isLoading: commentsLoading, isError: commentsError } = useGetDiscussionComments(discussionId);
     const { mutate: postComment, isPending: isPostingComment } = usePostDiscussionComment(discussionId);
     const [newComment, setNewComment] = useState('');
 
@@ -129,11 +137,11 @@ const CommentSection = ({ discussionId, onBack, discussionTitle }: { discussionI
             </TouchableOpacity>
 
             <Text style={styles.activeTopicTitle}>{discussionTitle}</Text>
-
+            {commentsError && <Text style={styles.errorText}>Failed to load comments</Text>}
             {commentsLoading ? (
                 <ActivityIndicator size="small" color={colors.primary} />
             ) : (
-                <View style={{ flex: 1 }}>
+                <ScrollView style={{ height: '100%' }}>
                     <FlatList
                         data={comments}
                         keyExtractor={(item) => item.id.toString()}
@@ -141,10 +149,14 @@ const CommentSection = ({ discussionId, onBack, discussionTitle }: { discussionI
                         renderItem={({ item }) => (
                             <View style={styles.commentItem}>
                                 <View style={styles.avatarPlaceholder}>
-                                    <Text style={styles.avatarText}>{item.first_name?.[0]}{item.last_name?.[0]}</Text>
+                                    <Text style={styles.avatarText}>{item?.user?.first_name?.[0]}{item.user?.last_name?.[0]}</Text>
                                 </View>
                                 <View style={styles.commentContent}>
-                                    <Text style={styles.commentAuthor}>{item.first_name} {item.last_name}</Text>
+                                    <Text style={styles.commentAuthor}>
+                                        {item.user?.first_name || item.user?.last_name
+                                            ? `${item.user?.first_name || ''} ${item.user?.last_name || ''}`.trim()
+                                            : 'Unknown User'}
+                                    </Text>
                                     <Text style={styles.commentText}>{item.comment_text}</Text>
                                     <Text style={styles.commentDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                                 </View>
@@ -153,34 +165,39 @@ const CommentSection = ({ discussionId, onBack, discussionTitle }: { discussionI
                         ListEmptyComponent={<Text style={styles.emptyText}>No replies yet.</Text>}
                     />
 
-                    <View style={styles.replyBox}>
-                        <TextInput
-                            style={styles.replyInput}
-                            placeholder="Write a reply..."
-                            value={newComment}
-                            onChangeText={setNewComment}
-                            multiline
-                        />
-                        <TouchableOpacity
-                            onPress={handlePostComment}
-                            disabled={!newComment.trim() || isPostingComment}
-                            style={[styles.sendButton, (!newComment.trim() || isPostingComment) && { opacity: 0.5 }]}
-                        >
-                            <Ionicons name="send" size={20} color={colors.white || '#fff'} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                </ScrollView>
             )}
+            <View style={styles.replyBox}>
+                <TextInput
+                    style={styles.replyInput}
+                    placeholder="Write a reply..."
+                    value={newComment}
+                    onChangeText={setNewComment}
+                    multiline
+                />
+                <TouchableOpacity
+                    onPress={handlePostComment}
+                    disabled={!newComment.trim() || isPostingComment}
+                    style={[styles.sendButton, (!newComment.trim() || isPostingComment) && { opacity: 0.5 }]}
+                >
+                    <Ionicons name="send" size={20} color={colors.white || '#fff'} />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    errorText: {
+        color: 'red',
+        marginBottom: 16,
+    },
     container: {
         padding: 16,
         backgroundColor: '#fff',
         borderTopWidth: 1,
         borderTopColor: '#F3F4F6',
+        height: '100%',
     },
     header: {
         flexDirection: 'row',

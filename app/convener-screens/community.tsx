@@ -16,30 +16,13 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Posts } from '@/types/postTypes';
 import Message from '@/components/Post/post';
+import { useGetPosts } from '@/api/posts/getPosts';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState<'convener' | 'foryou'>('convener');
-  const [posts, setPosts] = useState<Posts[]>([]);
+  // const [posts, setPosts] = useState<Posts[]>([]);
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
-
-  const fetchPosts = async () => {
-    const token = await AsyncStorage.getItem('authToken');
-    const response = await axios.get(`${apiURL}/v1/api/posts`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (Array.isArray(response.data.posts)) {
-      setPosts(response.data.posts); // ✅ correct
-    } else {
-      console.warn('Unexpected posts response:', response.data);
-      setPosts([]); // fallback
-    }
-    return response.data.posts;
-  };
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  const { data: posts = [], isLoading, isError } = useGetPosts()
 
   return (
     <SafeAreaWrapper>
@@ -82,31 +65,22 @@ const Community = () => {
 
       {/* Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View
-          style={{
-            width: '100%',
-            height: 400,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Text>Comming Soon...</Text>
-        </View>
-        {/* {activeTab === 'convener' ? (
+        {activeTab === 'convener' ? (
           <>
-            {posts.map((post) => (
+            {posts.map((post: Posts) => (
               <Message
                 postMessage={{
                   id: post.id,
                   posted_by: post.posted_by,
                   text: post.text,
+                  updated_at: post.updated_at,
                 }}
               />
             ))}
           </>
         ) : (
           <></>
-        )} */}
+        )}
       </ScrollView>
     </SafeAreaWrapper>
   );

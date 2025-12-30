@@ -150,7 +150,7 @@ const UploadPost = () => {
                     key={community.id}
                     style={[styles.communityItem]}
                     onPress={async () => {
-                      await AsyncStorage.setItem('selectedCommunity', community.id.toString());
+                      await AsyncStorage.setItem('selectedCommunity', community.name.toString());
                       handleAudienceSelect(community.name, community.id.toString());
                     }}
                   >

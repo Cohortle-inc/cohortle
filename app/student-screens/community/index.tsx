@@ -113,6 +113,7 @@ const Community = () => {
                     id: post.id,
                     posted_by: post.posted_by,
                     text: post.text,
+                    updated_at: post.updated_at,
                   }}
                 />
               ))

@@ -7,4 +7,5 @@ export interface CommentProp {
     first_name: string;
     last_name: string;
   };
+  updated_at?: string;
 }

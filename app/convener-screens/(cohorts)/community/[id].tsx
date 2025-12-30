@@ -106,7 +106,7 @@ const Index = (props: Props) => {
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
 
   // console.log(apiURL);
-  const { mutate: createCommunity, isPending } = usePostCommunity(numericId);
+  // const { mutate: createCommunity, isPending } = usePostCommunity(numericId);
   const { mutate: createProgramme, isPending: createProgrammePending } = usePostProgramme(numericId);
   // const { data: communities = [], isLoading } = useGetCommunities(numericId);
   const { data: programmes = [], isLoading: programmesLoading } = useGetProgrammes(id);

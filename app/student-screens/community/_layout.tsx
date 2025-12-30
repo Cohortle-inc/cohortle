@@ -5,6 +5,7 @@ const Profile = () => {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="(post)/[id]" />
     </Stack>
   );
 };

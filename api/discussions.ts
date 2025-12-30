@@ -5,6 +5,12 @@ import { showMessage } from 'react-native-flash-message';
 
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
 
+export interface User {
+    first_name: string;
+    last_name: string;
+    profile_image?: string;
+}
+
 export interface Discussion {
     id: number;
     programme_id?: number;
@@ -14,6 +20,7 @@ export interface Discussion {
     description: string;
     created_by: number;
     created_at: string;
+    user?: User;
 }
 
 export interface DiscussionComment {
@@ -22,9 +29,7 @@ export interface DiscussionComment {
     user_id: number;
     comment_text: string;
     parent_comment_id?: number;
-    first_name: string;
-    last_name: string;
-    profile_image?: string;
+    user?: User;
     created_at: string;
 }
 
@@ -35,6 +40,7 @@ const getDiscussions = async (params: { programme_id?: number; cohort_id?: numbe
         headers: { Authorization: `Bearer ${token}` },
         params,
     });
+    console.log(response.data)
     return response.data.discussions as Discussion[];
 };
 
@@ -42,6 +48,7 @@ export const useGetDiscussions = (params: { programme_id?: number; cohort_id?: n
     return useQuery({
         queryKey: ['discussions', params],
         queryFn: () => getDiscussions(params),
+        refetchInterval: 10000
     });
 };
 
@@ -79,6 +86,7 @@ export const useGetDiscussionComments = (discussionId: number) => {
         queryKey: ['discussion_comments', discussionId],
         queryFn: () => getDiscussionComments(discussionId),
         enabled: !!discussionId,
+        refetchInterval: 3000
     });
 };
 

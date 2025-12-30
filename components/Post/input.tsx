@@ -1,8 +1,8 @@
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Clipboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button } from '../ui';
 import { useState } from 'react';
 import { CommentProp } from '@/types/commentType';
-import { createComment } from '@/api/comment';
+import { createComment, usePostComment } from '@/api/comment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,32 +16,32 @@ export const CommentInput = ({ postId }: FormProp) => {
   const [error, setError] = useState('');
   const router = useRouter();
   const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: async (commentData: CommentProp) => {
-      const token = await AsyncStorage.getItem('authToken');
-      return createComment(commentData, postId, token!);
-    },
-    onSuccess: () => {
-      setText('');
-      // Invalidate and refetch comments
-      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
-    },
-  });
+  const { mutate: postComment, isPending } = usePostComment(postId);
 
   const handleSubmit = () => {
-    if (text.trim()) {
-      mutation.mutate({
-        text: text.trim(),
-        post_id: postId,
-      });
-    }
+    console.log(text);
+    postComment({
+      text,
+      post_id: postId,
+    }, {
+      onSuccess: () => {
+        Clipboard.setString('Comment created successfully');
+        setText('');
+      },
+      onError: () => {
+        Clipboard.setString('Failed to create comment');
+      }
+    });
+    console.log(postComment);
+
   };
   return (
     <View
       style={{
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        gap: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
         paddingVertical: 20,
         paddingHorizontal: 5,
       }}
@@ -63,12 +63,16 @@ export const CommentInput = ({ postId }: FormProp) => {
           justifyContent: 'center',
         }}
       >
-        <Ionicons
-          onPress={handleSubmit}
-          size={30}
-          color={colors.primary}
-          name="paper-plane-outline"
-        />
+        {isPending ? (
+          <ActivityIndicator size={20} color={colors.primary} />
+        ) : (
+          <Ionicons
+            onPress={handleSubmit}
+            size={20}
+            color={colors.primary}
+            name="paper-plane-outline"
+          />
+        )}
       </TouchableOpacity>
     </View>
   );

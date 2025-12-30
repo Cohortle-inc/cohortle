@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     View,
     Alert,
+    ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaWrapper } from '@/HOC';
@@ -20,6 +21,8 @@ import Modal from 'react-native-modal';
 import { Input } from '@/components/Form';
 import { colors } from '@/utils/color';
 import { Ionicons } from '@expo/vector-icons';
+import { SlideModal } from '@/components/Modal';
+import { DiscussionSection } from '@/components/cohorts/DiscussionSection';
 
 const CohortDetails = () => {
     const router = useRouter()
@@ -35,6 +38,8 @@ const CohortDetails = () => {
 
     const { mutate: addMember, isPending: addingMember } = useAddCohortMember(cohortId);
     const { mutate: removeMember } = useRemoveCohortMember();
+
+    const [discussionModalVisible, setDiscussionModalVisible] = useState(false);
 
     const handleAddMember = () => {
         if (!newMember.email.trim()) {
@@ -138,12 +143,31 @@ const CohortDetails = () => {
                     </View>
                 )}
 
+                <SlideModal
+                    isVisible={discussionModalVisible}
+                    onBackdropPress={() => setDiscussionModalVisible(false)}
+                >
+                    <View style={{ backgroundColor: 'white', borderRadius: 20, marginHorizontal: 10, maxHeight: '80%', overflow: 'hidden' }}>
+                        <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, fontWeight: '700' }}>Lesson Discussions</Text>
+                            <TouchableOpacity onPress={() => setDiscussionModalVisible(false)}>
+                                <Ionicons name="close" size={24} color="#666" />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={{ height: '100%' }}>
+                            <DiscussionSection
+                                cohortId={cohortId}
+                            />
+                        </ScrollView>
+                    </View>
+                </SlideModal>
+
                 <View style={styles.membersSection}>
                     <View style={styles.header}>
                         <Text style={styles.sectionTitle}>Members ({members.length})</Text>
                         <TouchableOpacity
                             style={styles.addButton}
-                            onPress={() => setModalVisible(true)}
+                            onPress={() => setDiscussionModalVisible(true)}
                         >
                             <PlusSmall color="#fff" />
                             <Text style={styles.addButtonText}>Add Member</Text>

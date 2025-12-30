@@ -10,6 +10,7 @@ import {
 import { Placeholder } from '@/assets/images';
 import { useRouter } from 'expo-router';
 import { Posts } from '@/types/postTypes';
+import { formatPostDate } from '@/utils/date';
 
 interface PostMessageProps {
   withImg?: boolean;
@@ -30,7 +31,7 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
       key={postMessage.id}
       onPress={() =>
         router.push({
-          pathname: `/student-screens/community/post/[id]` as any,
+          pathname: `/convener-screens/upload/postView`,
           params: { id: postMessage.id.toString() },
         })
       }
@@ -49,7 +50,7 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
             {postMessage.posted_by?.first_name}{' '}
             {postMessage.posted_by?.last_name}
           </Text>
-          <Text
+          {/* <Text
             style={{
               color: '#fff',
               backgroundColor: '#391D65',
@@ -60,7 +61,7 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
             }}
           >
             Convener
-          </Text>
+          </Text> */}
         </View>
       </View>
       <View style={{ marginTop: 8 }}>
@@ -71,10 +72,10 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
             alignItems: 'center',
           }}
         >
-          <Image source={Placeholder} />
+          {/* <Image source={Placeholder} /> */}
         </View>
         <Text style={{ fontSize: 10, marginTop: 16 }}>
-          4:38 PM • Sep 18, 2024
+          {formatPostDate(postMessage.updated_at)}
         </Text>
       </View>
     </TouchableOpacity>

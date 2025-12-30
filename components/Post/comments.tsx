@@ -1,5 +1,6 @@
 import { CommentProp } from '@/types/commentType';
 import { colors } from '@/utils/color';
+import { formatPostDate } from '@/utils/date';
 import { backgroundColor } from '@shopify/restyle';
 import { View, StyleSheet, Text } from 'react-native';
 
@@ -24,6 +25,7 @@ export const Comment: React.FC<CommentType> = ({ prop }) => {
         </Text>
       </View>
       <Text>{prop.text}</Text>
+      <Text>{formatPostDate(prop.updated_at)}</Text>
     </View>
   );
 };
@@ -33,7 +35,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderColor: colors.purpleShade,
-    borderWidth: 1,
+    borderTopWidth: 1,
     borderRadius: 8,
   },
 });

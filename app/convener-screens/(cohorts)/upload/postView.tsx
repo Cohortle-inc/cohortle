@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ScrollView,
   StyleSheet,
@@ -18,6 +18,7 @@ import { CommentProp } from '@/types/commentType';
 import { Ionicons } from '@expo/vector-icons';
 import { Scale } from 'lucide-react-native';
 import { colors } from '@/utils/color';
+import { useGetComments, usePostComment } from '@/api/comment';
 
 // Update the interface to match potential backend response
 export interface Post {
@@ -35,13 +36,15 @@ export interface Post {
 
 export default function PostScreen() {
   const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<CommentProp[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
-
+  const { mutate: postComment } = usePostComment(id);
+  const { data: comments = [], isLoading, isError } = useGetComments(id);
+  console.log(comments);
   const getPost = async () => {
     if (!id) {
       setError('Post ID is required');
@@ -86,30 +89,11 @@ export default function PostScreen() {
     getPost();
   }, [id]);
 
-  const fetchComment = async () => {
-    const token = await AsyncStorage.getItem('authToken');
-    try {
-      const response = await axios.get(`${apiURL}/v1/post/${id}/comments`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (Array.isArray(response.data.comments)) {
-        setComments(response.data.comments);
-      } else {
-        console.warn('Unexpected result', response.data);
-        setComments([]);
-      }
-      console.log(response.data.comments);
-    } catch (error) {
-      console.error(error);
-      console.log('fail');
-    }
+  const handlePostComment = (comment: CommentProp) => {
+    postComment(comment);
   };
 
-  useEffect(() => {
-    fetchComment();
-  }, [id]);
+
 
   if (loading) {
     return (
@@ -137,12 +121,11 @@ export default function PostScreen() {
   return (
     <SafeAreaWrapper>
       <View style={{ marginVertical: 16 }}>
-        <Link
-          href="/(auth)/login"
-          style={{ color: '#B085EF', fontSize: 18, fontWeight: '600' }}
-        >
-          Cohortle
-        </Link>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={{ color: '#B085EF', fontSize: 18, fontWeight: '600' }}>
+            Cohortle
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -152,36 +135,48 @@ export default function PostScreen() {
               id: post.id?.toString() || id || '',
               posted_by: post.posted_by as any,
               text: post.text || 'No content available',
+              updated_at: post.updated_at || '',
             }}
           />
         ) : (
           <Text>Post not found</Text>
         )}
         <>
-          {comments.length !== 0 ? (
-            comments.map((comment) => (
-              <Comment
-                key={comment.id} // Don't forget the key prop!
-                prop={{
-                  id: comment.id,
-                  text: comment.text,
-                  post_id: comment.post_id,
-                  user: comment.user,
-                }}
-              />
-            ))
-          ) : (
-            <View style={{ alignItems: 'center' }}>
-              <Ionicons
-                name="chatbubble-ellipses"
-                size={30}
-                color={colors.purpleShade}
-              />
-              <Text style={{ fontWeight: 600, fontSize: 16 }}>
-                Be the first to comment
-              </Text>
+          {isLoading && (
+            <View style={styles.centerContainer}>
+              <ActivityIndicator size="large" color="#391D65" />
             </View>
           )}
+          {isError && (
+            <View style={styles.centerContainer}>
+              <Text style={styles.errorText}>Failed to load comments</Text>
+            </View>
+          )}
+          {comments.length === 0 && (
+            <View style={styles.centerContainer}>
+              <Ionicons
+                name="chatbubble-ellipses-outline"
+                size={24}
+                color={colors.purpleShade}
+                style={{
+                  marginBottom: 8,
+                }}
+              />
+              <Text style={{ color: colors.primary }}>Be the first to comment</Text>
+            </View>
+          )}
+          {comments.map((comment: CommentProp) => (
+            <Comment
+              key={comment.id}
+              prop={{
+                id: comment.id,
+                text: comment.text,
+                post_id: comment.post_id,
+                user: comment.user,
+                updated_at: comment.updated_at,
+              }}
+            />
+          ))}
         </>
         <CommentInput postId={id} />
       </ScrollView>
@@ -194,7 +189,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
   },
   errorText: {
     color: 'red',
