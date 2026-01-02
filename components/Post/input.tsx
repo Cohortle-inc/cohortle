@@ -25,12 +25,8 @@ export const CommentInput = ({ postId }: FormProp) => {
       post_id: postId,
     }, {
       onSuccess: () => {
-        Clipboard.setString('Comment created successfully');
         setText('');
       },
-      onError: () => {
-        Clipboard.setString('Failed to create comment');
-      }
     });
     console.log(postComment);
 
@@ -44,6 +40,7 @@ export const CommentInput = ({ postId }: FormProp) => {
         justifyContent: 'center',
         paddingVertical: 20,
         paddingHorizontal: 5,
+        width: '100%',
       }}
     >
       <TextInput
@@ -53,7 +50,7 @@ export const CommentInput = ({ postId }: FormProp) => {
           borderWidth: 1,
           borderRadius: 5,
           borderColor: '#B085EF',
-          width: 275,
+          width: '90%',
           padding: 5,
         }}
       />

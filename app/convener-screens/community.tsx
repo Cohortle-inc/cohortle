@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   ScrollView,
@@ -17,12 +18,37 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Posts } from '@/types/postTypes';
 import Message from '@/components/Post/post';
 import { useGetPosts } from '@/api/posts/getPosts';
+import { colors } from '@/utils/color';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState<'convener' | 'foryou'>('convener');
   // const [posts, setPosts] = useState<Posts[]>([]);
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
-  const { data: posts = [], isLoading, isError } = useGetPosts()
+  const { data: posts = [], isLoading, isError, refetch } = useGetPosts()
+
+  if (isLoading) {
+    return (
+      <SafeAreaWrapper>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaWrapper>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'red', textAlign: 'center' }}>Failed to load posts. Please try again later.</Text>
+          <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 10 }}>
+            <Text style={{ color: colors.primary, fontFamily: 'DMSansSemiBold' }}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
+
 
   return (
     <SafeAreaWrapper>
@@ -74,6 +100,8 @@ const Community = () => {
                   posted_by: post.posted_by,
                   text: post.text,
                   updated_at: post.updated_at,
+                  community_names: post.community_names,
+
                 }}
               />
             ))}

@@ -11,6 +11,7 @@ const getPosts = async () => {
                 Authorization: `Bearer ${token}`,
             },
         });
+        
         return response.data.posts;
     } catch (error) {
         console.error('Error fetching posts:', error);
@@ -21,6 +22,7 @@ const getPosts = async () => {
 export const useGetPosts = () => {
     return useQuery({
         queryKey: ["posts"],
-        queryFn: getPosts
+        queryFn: getPosts,
+        refetchInterval: 3000
     })
 }

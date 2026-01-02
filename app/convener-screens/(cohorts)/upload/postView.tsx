@@ -19,23 +19,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Scale } from 'lucide-react-native';
 import { colors } from '@/utils/color';
 import { useGetComments, usePostComment } from '@/api/comment';
+import { Posts } from '@/types/postTypes';
 
 // Update the interface to match potential backend response
-export interface Post {
-  id: number;
-  posted_by?: {
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-  } | null;
-  text?: string;
-  // Add other fields that might come from backend
-  created_at?: string;
-  updated_at?: string;
-}
 
 export default function PostScreen() {
-  const [post, setPost] = useState<Post | null>(null);
+  const [post, setPost] = useState<Posts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,9 +122,10 @@ export default function PostScreen() {
           <Message
             postMessage={{
               id: post.id?.toString() || id || '',
-              posted_by: post.posted_by as any,
+              posted_by: post.posted_by,
               text: post.text || 'No content available',
               updated_at: post.updated_at || '',
+              community_names: post.community_names || [],
             }}
           />
         ) : (

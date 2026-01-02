@@ -50,21 +50,24 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
             {postMessage.posted_by?.first_name}{' '}
             {postMessage.posted_by?.last_name}
           </Text>
-          {/* <Text
+          <Text
             style={{
               color: '#fff',
               backgroundColor: '#391D65',
               borderRadius: 999,
-              padding: 2,
+              padding: 4,
               fontSize: 6,
-              height: 12,
+              // height: 12,
             }}
           >
-            Convener
-          </Text> */}
+            {postMessage.posted_by?.role}
+          </Text>
         </View>
       </View>
       <View style={{ marginTop: 8 }}>
+        <Text style={{ fontSize: 14, marginTop: 16 }}>
+  Communities: {postMessage.community_names?.join(', ') || 'None'}
+</Text>
         <Text style={{ fontSize: 14, marginTop: 16 }}>{postMessage.text}</Text>
         <View
           style={{
