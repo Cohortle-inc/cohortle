@@ -61,7 +61,7 @@ const Community = () => {
         </Link>
         <Link
           // href={'/convener-screens/(cohorts)/upload'}
-          href={'/convener-screens/(cohorts)/upload'}
+          href={'/convener-screens/community/upload'}
           style={{
             position: 'absolute',
             right: 0,
@@ -101,7 +101,6 @@ const Community = () => {
                   text: post.text,
                   updated_at: post.updated_at,
                   community_names: post.community_names,
-
                 }}
               />
             ))}

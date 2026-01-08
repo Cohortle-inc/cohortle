@@ -45,7 +45,7 @@ const Structure = () => {
   return (
     <SafeAreaWrapper>
       <View style={{ marginTop: 24 }}>
-        <Header number={4} />
+        <Header number={1} total={2} />
 
         <View>
           <Text

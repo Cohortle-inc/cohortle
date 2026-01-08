@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation, useFocusEffect } from 'expo-router';
 import {
   ScrollView,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaWrapper } from '@/HOC';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Message from '@/components/Post/post';
 import { Comment } from '@/components/Post/comments';
 import { CommentInput } from '@/components/Post/input';
@@ -23,13 +23,39 @@ import { Posts } from '@/types/postTypes';
 
 // Update the interface to match potential backend response
 
-export default function PostScreen() {
+export default function PostScreen(): React.JSX.Element {
   const [post, setPost] = useState<Posts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const navigation = useNavigation();
+
+  useFocusEffect(
+    useCallback(() => {
+      const parentNavigator = navigation.getParent();
+      if (parentNavigator) {
+        parentNavigator.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+      }
+
+      return () => {
+        if (parentNavigator) {
+          parentNavigator.setOptions({
+            tabBarStyle: {
+              paddingTop: 12,
+              paddingBottom: 12,
+              height: 68,
+              backgroundColor: '#ffffff',
+              display: 'flex',
+            },
+          });
+        }
+      };
+    }, [navigation])
+  );
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
   const { mutate: postComment } = usePostComment(id);
   const { data: comments = [], isLoading, isError } = useGetComments(id);
@@ -110,7 +136,8 @@ export default function PostScreen() {
   return (
     <SafeAreaWrapper>
       <View style={{ marginVertical: 16 }}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color="#B085EF" />
           <Text style={{ color: '#B085EF', fontSize: 18, fontWeight: '600' }}>
             Cohortle
           </Text>
@@ -119,15 +146,15 @@ export default function PostScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {post ? (
-          <Message
-            postMessage={{
-              id: post.id?.toString() || id || '',
-              posted_by: post.posted_by,
-              text: post.text || 'No content available',
-              updated_at: post.updated_at || '',
-              community_names: post.community_names || [],
-            }}
-          />
+              <Message
+                postMessage={{
+                  id: post.id,
+                  posted_by: post.posted_by,
+                  text: post.text,
+                  updated_at: post.updated_at,
+                  community_names: post.community_names,
+                }}
+              />
         ) : (
           <Text>Post not found</Text>
         )}

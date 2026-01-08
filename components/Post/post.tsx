@@ -31,7 +31,7 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
       key={postMessage.id}
       onPress={() =>
         router.push({
-          pathname: `/convener-screens/upload/postView`,
+          pathname: `/convener-screens/community/postView`,
           params: { id: postMessage.id.toString() },
         })
       }
@@ -66,9 +66,9 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
       </View>
       <View style={{ marginTop: 8 }}>
         <Text style={{ fontSize: 14, marginTop: 16 }}>
-  Communities: {postMessage.community_names?.join(', ') || 'None'}
-</Text>
-        <Text style={{ fontSize: 14, marginTop: 16 }}>{postMessage.text}</Text>
+          {postMessage.community_names?.join(', ') || 'None'}
+        </Text>
+        <Text style={{ fontSize: 12, marginTop: 16 }}>{postMessage.text}</Text>
         <View
           style={{
             marginTop: 16,

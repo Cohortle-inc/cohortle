@@ -22,11 +22,13 @@ import { useGetCohortAnnouncements } from '@/api/announcements';
 import { useGetDiscussions } from '@/api/discussions';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/utils/color';
+import Modal from 'react-native-modal';
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState<'convener' | 'foryou'>('convener');
   const [posts, setPosts] = useState<Posts[]>([]);
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
+  const router = useRouter();
 
   const { data: joinedCohorts, isLoading: cohortsLoading } = useGetLearnerCohorts();
 
@@ -45,6 +47,10 @@ const Community = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  const openDiscussions = () => {
+    router.push('/student-screens/community/discussions');
+  }
 
   return (
     <SafeAreaWrapper>
@@ -126,6 +132,7 @@ const Community = () => {
           </View>
         )}
       </ScrollView>
+
     </SafeAreaWrapper>
   );
 };
@@ -155,14 +162,14 @@ const CohortAnnouncements = ({ cohortId, cohortName }: { cohortId: number, cohor
   );
 };
 
-const CohortDiscussions = ({ cohortId, cohortName }: { cohortId: number, cohortName: string }) => {
+const CohortDiscussions = ({ onPress, cohortId, cohortName }: { onPress: () => void, cohortId: number, cohortName: string }) => {
   const { data: discussions, isLoading } = useGetDiscussions({ cohort_id: cohortId });
 
   if (isLoading) return null;
   if (!discussions || discussions.length === 0) return null;
 
   return (
-    <View style={styles.cohortSection}>
+    <TouchableOpacity style={styles.cohortSection} onPress={onPress}>
       <Text style={[styles.cohortLabel, { color: '#391D65', opacity: 0.7 }]}>{cohortName} Discussions</Text>
       {discussions.slice(0, 3).map((discussion) => (
         <TouchableOpacity key={discussion.id} style={styles.discussionItem}>
@@ -171,7 +178,7 @@ const CohortDiscussions = ({ cohortId, cohortName }: { cohortId: number, cohortN
           <Ionicons name="chevron-forward" size={14} color="#D1D5DB" />
         </TouchableOpacity>
       ))}
-    </View>
+    </TouchableOpacity>
   );
 };
 

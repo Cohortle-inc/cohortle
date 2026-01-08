@@ -152,8 +152,8 @@ const About = () => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Header number={1} total={4} />
-        <Text style={styles.title}>Tell us about yourself 😄</Text>
+        <Header number={1} total={3} />
+        <Text style={styles.title}>Tell us about yourself</Text>
         <View style={{ gap: 24 }}>
           <Input
             label="First Name"

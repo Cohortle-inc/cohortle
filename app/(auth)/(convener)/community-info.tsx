@@ -140,7 +140,7 @@ const CommunityInfo = () => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Header number={2} total={4} />
+        <Header number={1} total={2} />
 
         <View style={styles.headerText}>
           <Text style={styles.title}>

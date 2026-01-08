@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
 import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
@@ -17,16 +17,44 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCreatePost } from '@/api/posts/createPost';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useGetCommunities from '@/api/communities/getCommunities';
+import { useFocusEffect } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { colors } from '@/utils/color';
 
 const UploadPost = () => {
   const [text, setText] = useState('');
+  const router = useRouter()
   const [audienceModal, setAudienceModal] = useState(false);
   const [replyModal, setReplyModal] = useState(false);
   const [selectedReplyOption, setSelectedReplyOption] = useState('Everyone');
   const [selectedAudience, setSelectedAudience] = useState('Everyone');
   const [selectedAudienceId, setSelectedAudienceId] = useState<string | null>(null);
   const { mutate: createPost } = useCreatePost();
+  const navigation = useNavigation()
+  useFocusEffect(
+    useCallback(() => {
+      const parentNavigator = navigation.getParent();
+      if (parentNavigator) {
+        parentNavigator.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+      }
 
+      return () => {
+        if (parentNavigator) {
+          parentNavigator.setOptions({
+            tabBarStyle: {
+              paddingTop: 12,
+              paddingBottom: 12,
+              height: 68,
+              backgroundColor: '#ffffff',
+              display: 'flex',
+            },
+          });
+        }
+      };
+    }, [navigation])
+  );
   /// Note: Instead of calling the communities withing a cohort, its the cohort that is being called in this case. a major oversight
   const { data: myCommunities, isLoading: communitiesLoading, isError: communitiesError } = useGetCommunities();
 
@@ -75,7 +103,9 @@ const UploadPost = () => {
     <SafeAreaWrapper>
       {/* Header */}
       <View style={styles.header}>
-        <Link href="/(auth)/login" style={styles.headerLink}></Link>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerLink}>
+          <Ionicons name="chevron-back" size={24} color="#391D65" />
+        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -112,7 +142,7 @@ const UploadPost = () => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleUpload} style={styles.uploadButton}>
-          <Text style={styles.uploadButtonText}>Upload</Text>
+          <Text style={styles.uploadButtonText}>Post</Text>
         </TouchableOpacity>
       </View>
 
@@ -232,7 +262,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 50,
     borderWidth: 1,
-    borderColor: '#B085EF',
+    borderColor: colors.primary,
     alignSelf: 'flex-start',
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -261,8 +291,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: '#ECDCFF',
@@ -274,8 +303,8 @@ const styles = StyleSheet.create({
   uploadButton: {
     backgroundColor: '#E9D7FE',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingHorizontal: 25,
+    borderRadius: 20,
   },
   uploadButtonText: {
     fontWeight: '700',

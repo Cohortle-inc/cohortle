@@ -18,6 +18,8 @@ type EmailResponse = {
 };
 const EmailConfirmation = (props: Props) => {
   const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,6 +40,10 @@ const EmailConfirmation = (props: Props) => {
       setError('Please enter a valid email address.');
       return;
     }
+    if (!firstName || !lastName) {
+      setError('First name and last name are required.');
+      return;
+    }
     if (!password || !confirmPassword) {
       setError('Password and confirm password are required.');
       return;
@@ -52,7 +58,7 @@ const EmailConfirmation = (props: Props) => {
     try {
       const response = await axios.post(
         `${apiURL}/v1/api/auth/register-email`,
-        { email, password },
+        { email, password, firstName, lastName },
       );
       if (!response.data.error) {
         router.navigate({
@@ -83,6 +89,32 @@ const EmailConfirmation = (props: Props) => {
         {/* <Text>We'll send you a quick email to confirm your address.</Text> */}
 
         <View style={{ gap: 5, marginTop: 15 }}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>First Name</Text>
+            <TextInput
+              style={styles.input}
+              value={firstName}
+              placeholder="Enter your first name"
+              placeholderTextColor="#999"
+              editable={!loading}
+              onChangeText={setFirstName}
+              autoCapitalize="none"
+              keyboardType='default'
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Last Name</Text>
+            <TextInput
+              style={styles.input}
+              value={lastName}
+              placeholder="Enter your last name"
+              placeholderTextColor="#999"
+              editable={!loading}
+              onChangeText={setLastName}
+              // autoCapitalize="none"
+              keyboardType="default"
+            />
+          </View>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
