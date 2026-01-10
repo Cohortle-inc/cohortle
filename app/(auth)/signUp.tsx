@@ -10,11 +10,13 @@ import {
 import { SafeAreaWrapper } from '@/HOC';
 import { Text, Theme } from '@/theme/theme';
 import { Button } from '@/components/ui';
+import { RadioButton } from '@/components/Form';
 import { router } from 'expo-router';
 import { useTheme } from '@shopify/restyle';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { useLocalSearchParams, useSearchParams } from 'expo-router/build/hooks';
+import { setItem } from '@/utils/asyncStorage';
 
 const { width } = Dimensions.get('window');
 
@@ -38,8 +40,9 @@ const SignUp = () => {
   const [error, setError] = useState('');
 
   const [selectedRole, setSelectedRole] = useState<
-    'convener' | 'learner' | null
+    'convener' | 'learner' | 'instructor' | null
   >(null);
+  const [mainRole, setMainRole] = useState<'convener' | 'learner' | null>(null);
   const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
   const [showDefinition, setShowDefinition] = useState(false);
   // Resolve API URL with fallback (handles preview builds where env may not be injected)
@@ -53,11 +56,24 @@ const SignUp = () => {
   const handleRoleSelection = (role: 'convener' | 'learner') => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
-    if (selectedRole !== role) {
-      setSelectedRole(role);
+    if (mainRole !== role) {
+      setMainRole(role);
       setShowDefinition(true);
-      setIsNextButtonDisabled(false);
+
+      if (role === 'learner') {
+        setSelectedRole('learner');
+        setIsNextButtonDisabled(false);
+      } else {
+        setSelectedRole(null);
+        setIsNextButtonDisabled(true);
+      }
     }
+  };
+
+  const handleSubRoleSelection = (role: 'convener' | 'instructor') => {
+    setSelectedRole(role);
+    console.log(role);
+    setIsNextButtonDisabled(false);
   };
 
   const renderDefinition = (definition: string[]) => (
@@ -90,11 +106,19 @@ const SignUp = () => {
       );
       console.log(response.data);
       if (!response.data.error) {
+        if (response.data.token) {
+          await setItem('authToken', response.data.token);
+        }
         setError('role set!');
         setLoading(false);
         if (selectedRole === 'convener') {
           router.navigate({
             pathname: '/(convener)/community-info',
+            params: { token: response.data.token },
+          });
+        } else if (selectedRole === 'instructor') {
+          router.navigate({
+            pathname: '/convener-screens/community',
             params: { token: response.data.token },
           });
         } else if (selectedRole === 'learner') {
@@ -124,10 +148,10 @@ const SignUp = () => {
       <View style={styles.container}>
         <Text variant={'headerTwo'} style={{ paddingBottom: 57 }}>
           Create an account as a{' '}
-          {selectedRole ? (
+          {selectedRole || mainRole ? (
             <View>
               <Text variant={'headerTwo'} style={styles.selectedRoleText}>
-                {selectedRole}
+                {selectedRole || mainRole}
               </Text>
               <View
                 style={{
@@ -147,28 +171,47 @@ const SignUp = () => {
             style={{ marginBottom: 24 }}
             textStyle={styles.buttonText}
             variant={
-              selectedRole === 'convener' && showDefinition
-                ? 'primary'
-                : 'outline'
+              mainRole === 'convener' && showDefinition ? 'primary' : 'outline'
             }
             text="Convener"
             onPress={() => handleRoleSelection('convener')}
           />
-          {selectedRole === 'convener' &&
-            showDefinition &&
-            renderDefinition(convenerDefinition)}
+          {mainRole === 'convener' && showDefinition && (
+            <View style={{ paddingHorizontal: 8, marginBottom: 24 }}>
+              {renderDefinition(convenerDefinition)}
+
+              <Text
+                style={{
+                  marginTop: 16,
+                  marginBottom: 12,
+                  fontFamily: 'DMSansMedium',
+                }}
+              >
+                How will you use Cohortle?
+              </Text>
+
+              <RadioButton
+                label="I run learning programmes"
+                selected={selectedRole === 'convener'}
+                onSelect={() => handleSubRoleSelection('convener')}
+              />
+              <RadioButton
+                label="I support programmes (admin / ops)"
+                selected={selectedRole === 'instructor'}
+                onSelect={() => handleSubRoleSelection('instructor')}
+              />
+            </View>
+          )}
 
           <Button
             textStyle={styles.buttonText}
             variant={
-              selectedRole === 'learner' && showDefinition
-                ? 'primary'
-                : 'outline'
+              mainRole === 'learner' && showDefinition ? 'primary' : 'outline'
             }
             text="Learner"
             onPress={() => handleRoleSelection('learner')}
           />
-          {selectedRole === 'learner' &&
+          {mainRole === 'learner' &&
             showDefinition &&
             renderDefinition(learnerDefinition)}
         </View>
