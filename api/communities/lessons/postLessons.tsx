@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 export interface LessonProp {
   id?: number;
@@ -30,7 +30,11 @@ const postLesson = async (LessonData: LessonProp, id: number) => {
 };
 
 export const usePostLesson = (id: number) => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: LessonProp) => postLesson(data, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['modules'] });
+    },
   });
 };

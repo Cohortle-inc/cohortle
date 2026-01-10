@@ -1,6 +1,6 @@
 // api/posts/createPost.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -27,7 +27,11 @@ export const createPost = async ({ text, can_reply, community_ids }: CreatePostP
 };
 
 export const useCreatePost = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreatePostParams) => createPost(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
   });
 };

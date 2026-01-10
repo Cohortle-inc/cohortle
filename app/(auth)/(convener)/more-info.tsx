@@ -11,7 +11,7 @@ import {
 import { SafeAreaWrapper } from '@/HOC';
 import { Header } from '@/ui';
 import { Text } from '@/theme/theme';
-import { BackArrowIcon } from '@/assets/icons';
+import { BackArrowIcon, Back } from '@/assets/icons';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import Modal from 'react-native-modal';
 import { useUpdateCohort } from '@/api/updateCohorts';
@@ -109,7 +109,7 @@ const MoreInfo = () => {
   return (
     <SafeAreaWrapper>
       <View style={{ marginTop: 24 }}>
-        <Header number={3} />
+        <Header number={4} total={4} />
 
         <View>
           <Text style={styles.title}>We want to know more...</Text>
@@ -172,6 +172,10 @@ const MoreInfo = () => {
         )}
       </Pressable>
 
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Back />
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
     </SafeAreaWrapper>
   );
 };
@@ -236,5 +240,10 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSansMedium',
     marginBottom: 32,
     color: '#B085EF',
+  },
+  backText: {
+    color: '#391D65',
+    fontSize: 14,
+    fontFamily: 'DMSansMedium',
   },
 });

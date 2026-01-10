@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
 interface UpdateCohortParams {
@@ -21,6 +21,8 @@ interface UpdateCohortResponse {
 }
 
 export const useUpdateCohort = () => {
+  const queryClient = useQueryClient();
+
   return useMutation<UpdateCohortResponse, Error, UpdateCohortParams>({
     mutationFn: async ({ cohort_id, data, token }) => {
       const res = await axios.put(
@@ -34,6 +36,11 @@ export const useUpdateCohort = () => {
         },
       );
       return res.data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate the specific cohort and the list of cohorts
+      queryClient.invalidateQueries({ queryKey: ['cohort', variables.cohort_id.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['convenersCohorts'] });
     },
   });
 };

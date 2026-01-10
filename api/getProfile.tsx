@@ -19,8 +19,7 @@ export const useGetProfile = () => {
   return useQuery({
     queryKey: ['profile'],
     queryFn: getProfile,
-    // refetchOnReconnect: true,
-    refetchInterval: 5000,
-    staleTime: 1,
+    refetchOnReconnect: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

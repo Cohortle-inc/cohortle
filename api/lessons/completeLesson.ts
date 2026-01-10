@@ -1,7 +1,7 @@
 import axios from "axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || process.env.EXPO_PUBLIC_API_BASE_URL;
 
 export const completeLesson = async (
   lessonId: number,
@@ -14,8 +14,9 @@ export const completeLesson = async (
   return res.data;
 };
 
-export const useCompleteLesson = () =>
-  useMutation({
+export const useCompleteLesson = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: ({
       lessonId,
       cohort_id,
@@ -23,7 +24,11 @@ export const useCompleteLesson = () =>
       lessonId: number;
       cohort_id: number;
     }) => completeLesson(lessonId, { cohort_id }),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["cohort-progress", variables.cohort_id] });
+    },
   });
+};
 
 export default {
   completeLesson,

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -16,23 +16,25 @@ export const createCohortSchedule = async (
   cohortId: string,
   payload: SchedulePayload,
 ) => {
-    const token = await AsyncStorage.getItem('authToken');
-    try {
-        
-  const res = await axios.post(
-    `${API_BASE_URL}/v1/api/cohorts/${cohortId}/schedule`,
-    payload,
-    { headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    } }
-  );
-  return res.data;
-}   catch (error: any) {
-  console.error(error?.message || error.message);
-  throw error;
-    }
+  const token = await AsyncStorage.getItem('authToken');
+  try {
+
+    const res = await axios.post(
+      `${API_BASE_URL}/v1/api/cohorts/${cohortId}/schedule`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error(error?.message || error.message);
+    throw error;
+  }
 };
 
 export const getCohortSchedule = async (
@@ -42,22 +44,28 @@ export const getCohortSchedule = async (
   const token = await AsyncStorage.getItem('authToken');
   const res = await axios.get(
     `${API_BASE_URL}/v1/api/cohorts/${cohortId}/schedule`,
-    { params,
+    {
+      params,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
       }
-     },
-    
+    },
+
   );
   return res.data.schedule;
 };
 
-export const useCreateSchedule = (cohortId?: string) =>
-  useMutation({
+export const useCreateSchedule = (cohortId?: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: (payload: SchedulePayload) =>
       createCohortSchedule(cohortId as string, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cohort-schedule", cohortId] });
+    },
   });
+};
 
 export const useGetSchedule = (
   cohortId?: string,

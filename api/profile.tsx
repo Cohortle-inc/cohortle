@@ -1,7 +1,8 @@
-// api/profile.ts
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfileProp from '@/types/profileType';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getProfile } from './getProfile';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -10,7 +11,7 @@ const api = axios.create({
 });
 
 // Token Interceptor (keeps working the same)
-api.interceptors.request.use(async (config) => {
+api.interceptors.request.use(async (config: any) => {
   const authToken = await AsyncStorage.getItem('authToken');
   const initialToken = await AsyncStorage.getItem('initialToken');
   let tokenToUse = authToken || initialToken;
@@ -74,4 +75,31 @@ export const updateProfile = async (
 
   const response = await api.put('/v1/api/profile', formData, { headers });
   return response.data;
+};
+
+export interface UpdateProfileVariables {
+  data: ProfileProp;
+  tokenType?: 'authToken' | 'initialToken';
+}
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<UpdateProfileResponse, Error, UpdateProfileVariables>({
+    mutationFn: async ({ data, tokenType }: UpdateProfileVariables) =>
+      updateProfile(data, tokenType),
+
+    onSuccess: () => {
+      // ✅ Automatically refetch profile after successful update
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+};
+
+export const useProfile = () => {
+  return useQuery({
+    queryKey: ['profile'],
+    queryFn: getProfile,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 };

@@ -1,9 +1,10 @@
-// hooks/useEditLesson.ts
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useEditLesson = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       lesson_id,
@@ -22,6 +23,11 @@ export const useEditLesson = () => {
         },
       );
       return response.data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate modules list and specifically the modified lesson if it has its own query key
+      queryClient.invalidateQueries({ queryKey: ['modules'] });
+      queryClient.invalidateQueries({ queryKey: ['lesson', variables.lesson_id] });
     },
   });
 };

@@ -5,12 +5,13 @@ import {
   View,
   Alert,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaWrapper } from '@/HOC';
 import { CustomCheckbox, Input } from '@/components/Form';
 import { Header } from '@/ui';
 import { Text } from '@/theme/theme';
-import { BackArrowIcon } from '@/assets/icons';
+import { BackArrowIcon, Back } from '@/assets/icons';
 import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import axios, { AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -152,7 +153,7 @@ const About = () => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Header number={1} total={3} />
+        <Header number={2} total={4} />
         <Text style={styles.title}>Tell us about yourself</Text>
         <View style={{ gap: 24 }}>
           <Input
@@ -217,6 +218,11 @@ const About = () => {
             <Text style={styles.submitText}>Next</Text>
           )}
         </Pressable>
+
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Back />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaWrapper>
   );

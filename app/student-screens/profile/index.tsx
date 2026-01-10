@@ -21,7 +21,7 @@ import BottomSheet, {
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import { router } from 'expo-router';
 import { Image, ActivityIndicator, Linking } from 'react-native';
-import { useProfile } from '@/hooks/api/useProfileHook';
+import { useProfile } from '@/api/profile';
 import { useGetCohort } from '@/api/cohorts/getCohort';
 import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 import { useQueryClient } from '@tanstack/react-query';

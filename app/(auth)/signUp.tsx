@@ -17,6 +17,7 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 import { useLocalSearchParams, useSearchParams } from 'expo-router/build/hooks';
 import { setItem } from '@/utils/asyncStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -107,13 +108,13 @@ const SignUp = () => {
       console.log(response.data);
       if (!response.data.error) {
         if (response.data.token) {
-          await setItem('authToken', response.data.token);
+          await AsyncStorage.setItem('authToken', response.data.token);
         }
         setError('role set!');
         setLoading(false);
         if (selectedRole === 'convener') {
           router.navigate({
-            pathname: '/(convener)/community-info',
+            pathname: '/(auth)/(convener)/programme-intent',
             params: { token: response.data.token },
           });
         } else if (selectedRole === 'instructor') {

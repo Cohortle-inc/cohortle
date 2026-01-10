@@ -58,16 +58,13 @@ export const useRemoveCommunity = () => {
 
         // Optional: Optimistic update + refetch
         onSuccess: (_, variables) => {
-            // Invalidate the learners list so it refetches
+            // Invalidate the specific community and the communities list
             queryClient.invalidateQueries({
                 queryKey: ['community', variables.id],
             });
-
-            // Or if you're using a cohort details query
             queryClient.invalidateQueries({
-                queryKey: ['community', variables.id],
+                queryKey: ['communities'],
             });
-
 
             Alert.alert('Success', 'Community removed successfully');
         },

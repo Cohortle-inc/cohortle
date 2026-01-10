@@ -48,7 +48,7 @@ export const useGetDiscussions = (params: { programme_id?: number; cohort_id?: n
     return useQuery({
         queryKey: ['discussions', params],
         queryFn: () => getDiscussions(params),
-        refetchInterval: 10000
+        staleTime: 5 * 60 * 1000, // 5 minutes
     });
 };
 
@@ -86,7 +86,7 @@ export const useGetDiscussionComments = (discussionId: number) => {
         queryKey: ['discussion_comments', discussionId],
         queryFn: () => getDiscussionComments(discussionId),
         enabled: !!discussionId,
-        refetchInterval: 3000
+        staleTime: 5 * 60 * 1000, // 5 minutes
     });
 };
 

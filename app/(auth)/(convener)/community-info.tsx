@@ -1,10 +1,11 @@
-import { Alert, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Alert, Pressable, StyleSheet, View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Input } from '@/components/Form';
 import { Header } from '@/ui';
 import { Text } from '@/theme/theme';
 import { useRouter } from 'expo-router';
+import { Back } from '@/assets/icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePostCommunity, CommunityType } from '@/api/communities/postCommunity';
 
@@ -140,7 +141,7 @@ const CommunityInfo = () => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Header number={1} total={2} />
+        <Header number={3} total={4} />
 
         <View style={styles.headerText}>
           <Text style={styles.title}>
@@ -204,6 +205,20 @@ const CommunityInfo = () => {
             <Text style={styles.nextButtonText}>Next</Text>
           )}
         </Pressable>
+
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 24,
+            gap: 8,
+          }}
+          onPress={() => router.back()}
+        >
+          <Back />
+          <Text style={{ color: '#391D65', fontSize: 14, fontFamily: 'DMSansMedium' }}>Back</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaWrapper>
   );
