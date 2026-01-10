@@ -58,7 +58,7 @@ const EmailConfirmation = (props: Props) => {
     try {
       const response = await axios.post(
         `${apiURL}/v1/api/auth/register-email`,
-        { email, password, firstName, lastName },
+        { email, password, first_name: firstName, last_name: lastName },
       );
       if (!response.data.error) {
         router.navigate({

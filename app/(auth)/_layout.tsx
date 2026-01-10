@@ -16,6 +16,8 @@ const Layout = (props: Props) => {
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="signUp" />
       <Stack.Screen name="(convener)/programme-intent" />
+      <Stack.Screen name="(convener)/partner-context" />
+      <Stack.Screen name="(convener)/welcome" />
     </Stack>
   );
 };

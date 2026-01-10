@@ -102,7 +102,7 @@ const CommunityInfo = () => {
       // Navigate to next screen with community_id
       // Assuming response contains the created community object which has an id
       router.navigate({
-        pathname: '/(auth)/(convener)/more-info',
+        pathname: '/(auth)/(convener)/partner-context',
         params: { cohort_id: response.id || response.data?.id || response.community_id },
       });
 
@@ -233,14 +233,13 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   headerText: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 40,
   },
   title: {
-    textAlign: 'center',
-    fontSize: 18,
-    fontFamily: 'DMSansMedium',
-    color: '#B085EF',
+    fontSize: 22,
+    fontFamily: 'DMSansBold',
+    color: '#1F1F1F',
     marginBottom: 8,
   },
   subtitle: {

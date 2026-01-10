@@ -236,9 +236,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    textAlign: 'center',
-    fontSize: 18,
-    fontFamily: 'DMSansMedium',
+    fontSize: 22,
+    fontFamily: 'DMSansBold',
+    color: '#1F1F1F',
     marginBottom: 80,
   },
   checkboxContainer: {

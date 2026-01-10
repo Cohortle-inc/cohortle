@@ -55,7 +55,7 @@ const ProgrammeIntent = () => {
         postIntent(formData, {
             onSuccess: () => {
                 router.push({
-                    pathname: '/(auth)/(convener)/about',
+                    pathname: '/(auth)/(convener)/partner-context',
                     params: { token },
                 });
             },
@@ -89,7 +89,7 @@ const ProgrammeIntent = () => {
         <SafeAreaWrapper>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.container}>
-                    <Header number={1} total={4} />
+                    <Header number={1} total={2} />
                     <Text style={styles.title}>Tell us about the programme you want to run</Text>
 
                     <View style={styles.section}>
