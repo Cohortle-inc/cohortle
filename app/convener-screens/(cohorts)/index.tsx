@@ -25,6 +25,8 @@ import { showMessage } from 'react-native-flash-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useGetCommunities from '@/api/communities/getCommunities';
 import { CommunityType, usePostCommunity } from '@/api/communities/postCommunity';
+import { useGetProfile } from '@/api/getProfile';
+import useJoinCommunity from '@/api/communities/joinCommunity';
 
 const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
@@ -41,6 +43,11 @@ const Cohorts = () => {
   // const cohorts = cohortsResponse || [];
   // const { mutate: createCohort, isPending } = useCreateCohort();
   const { mutate: createCommunity, isPending: communityPending } = usePostCommunity();
+  const { data: profile } = useGetProfile();
+  const { mutate: joinCommunity, isPending: joinPending } = useJoinCommunity();
+
+  const userRole = profile?.role || profile?.user?.role;
+  const [joinCode, setJoinCode] = useState('');
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
@@ -48,6 +55,7 @@ const Cohorts = () => {
     console.log(index);
     // If index is greater than -1, sheet is active
   }, []);
+  console.log(profile)
 
   const handleCreateCommunity = () => {
     if (
@@ -87,6 +95,45 @@ const Cohorts = () => {
       },
       // onError is handled in the hook now
     });
+  };
+
+  const handleJoinCommunity = () => {
+    if (!joinCode.trim()) {
+      showMessage({
+        message: 'Validation Error',
+        description: 'Please enter a join code',
+        type: 'warning',
+        backgroundColor: '#FF9500',
+        color: '#fff',
+        icon: 'warning',
+        duration: 3000,
+      });
+      return;
+    }
+
+    joinCommunity(
+      { code: joinCode.trim() },
+      {
+        onSuccess: () => {
+          setJoinCode('');
+          setModalVisible(false);
+          showMessage({
+            message: 'Success',
+            description: 'Joined community successfully',
+            type: 'success',
+            icon: 'success',
+          });
+        },
+        onError: (error: any) => {
+          showMessage({
+            message: 'Error',
+            description: error.message || 'Failed to join community',
+            type: 'danger',
+            icon: 'danger',
+          });
+        },
+      }
+    );
   };
   const updateCohortData = (field: string, value: string) => {
     setCohortData((prev) => ({ ...prev, [field]: value }));
@@ -179,7 +226,7 @@ const Cohorts = () => {
             }}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-              Create a community
+              {userRole !== 'instructor' ? 'Join a community' : 'Create a community'}
             </Text>
           </Pressable>
         </View>
@@ -208,7 +255,7 @@ const Cohorts = () => {
           <Pressable onPress={toggleModal} style={{ alignItems: 'flex-end' }}>
             <Close />
           </Pressable>
-          <Text
+          <View
             style={{
               color: '#1F1F1F',
               fontFamily: 'DMSansSemiBold',
@@ -216,55 +263,111 @@ const Cohorts = () => {
               textAlign: 'center',
             }}
           >
-            Create Community
-          </Text>
-          <View style={{ gap: 16, marginTop: 26 }}>
-            <Input
-              value={cohortData.name}
-              onChangeText={(text: string) => updateCohortData('name', text)}
-              label="Community Name"
-              placeholder="Digital Marketing Simplified"
-            />
-            <Input
-              value={cohortData.description}
-              onChangeText={(text: string) =>
-                updateCohortData('description', text)
-              }
-              label="Description"
-              placeholder="Self-paced learning program"
-            />
-            <Input
-              value={cohortData.type}
-              onChangeText={(text: string) => updateCohortData('type', text)}
-              label="Community Type"
-              placeholder="e.g., 'tech', 'marketing'"
-            />
-            <Input
-              value={cohortData.codePrefix}
-              onChangeText={(text: string) => updateCohortData('codePrefix', text)}
-              label="Community code (prefix)"
-              placeholder="Sal-Cohort"
-            />
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <Pressable
-              style={{
-                borderWidth: 1,
-                borderColor: '#F8F1FF',
-                paddingVertical: 14,
-                alignItems: 'center',
-                borderRadius: 32,
-                marginTop: 32,
-                backgroundColor: '#391D65',
-                width: '70%',
-              }}
-              disabled={communityPending}
-              onPress={handleCreateCommunity}
-            >
-              <Text style={{ color: '#fff' }}>
-                {!communityPending ? 'Create' : 'Creating community...'}
-              </Text>
-            </Pressable>
+            {userRole !== 'instructor' ? (
+              <View>
+                <Text
+                  style={{
+                    color: '#1F1F1F',
+                    fontFamily: 'DMSansSemiBold',
+                    fontSize: 20,
+                    textAlign: 'center',
+                  }}
+                >
+                  Join Community
+                </Text>
+                <View style={{ gap: 16, marginTop: 26 }}>
+                  <Input
+                    value={joinCode}
+                    onChangeText={setJoinCode}
+                    label="Community Join Code"
+                    placeholder="Enter the code provided by your convener"
+                  />
+                </View>
+                <View style={{ alignItems: 'center' }}>
+                  <Pressable
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#F8F1FF',
+                      paddingVertical: 14,
+                      alignItems: 'center',
+                      borderRadius: 32,
+                      marginTop: 32,
+                      backgroundColor: '#391D65',
+                      width: '70%',
+                    }}
+                    disabled={joinPending}
+                    onPress={handleJoinCommunity}
+                  >
+                    <Text style={{ color: '#fff' }}>
+                      {!joinPending ? 'Join' : 'Joining...'}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <View>
+                <Text
+                  style={{
+                    color: '#1F1F1F',
+                    fontFamily: 'DMSansSemiBold',
+                    fontSize: 20,
+                    textAlign: 'center',
+                  }}
+                >
+                  Create Community
+                </Text>
+                <View style={{ gap: 16, marginTop: 26 }}>
+                  <Input
+                    value={cohortData.name}
+                    onChangeText={(text: string) => updateCohortData('name', text)}
+                    label="Community Name"
+                    placeholder="Digital Marketing Simplified"
+                  />
+                  <Input
+                    value={cohortData.description}
+                    onChangeText={(text: string) =>
+                      updateCohortData('description', text)
+                    }
+                    label="Description"
+                    placeholder="Self-paced learning program"
+                  />
+                  <Input
+                    value={cohortData.type}
+                    onChangeText={(text: string) => updateCohortData('type', text)}
+                    label="Community Type"
+                    placeholder="e.g., 'tech', 'marketing'"
+                  />
+                  <Input
+                    value={cohortData.codePrefix}
+                    onChangeText={(text: string) =>
+                      updateCohortData('codePrefix', text)
+                    }
+                    label="Community code (prefix)"
+                    placeholder="Sal-Cohort"
+                  />
+                </View>
+                <View style={{ alignItems: 'center' }}>
+                  <Pressable
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#F8F1FF',
+                      paddingVertical: 14,
+                      alignItems: 'center',
+                      borderRadius: 32,
+                      marginTop: 32,
+                      backgroundColor: '#391D65',
+                      width: '70%',
+                    }}
+                    disabled={communityPending}
+                    onPress={handleCreateCommunity}
+                  >
+                    <Text style={{ color: '#fff' }}>
+                      {!communityPending ? 'Create' : 'Creating community...'}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
           </View>
         </View>
       </Modal>

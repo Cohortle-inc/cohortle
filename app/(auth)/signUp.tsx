@@ -48,9 +48,7 @@ const SignUp = () => {
   const [showDefinition, setShowDefinition] = useState(false);
   // Resolve API URL with fallback (handles preview builds where env may not be injected)
   const apiURL =
-    process.env.EXPO_PUBLIC_API_URL ||
-    (Constants.expoConfig?.extra as any)?.EXPO_PUBLIC_API_URL ||
-    'https://cohortle-api.onrender.com';
+    process.env.EXPO_PUBLIC_API_URL
 
   const token = useLocalSearchParams<{ token: string }>();
 
@@ -198,8 +196,8 @@ const SignUp = () => {
               />
               <RadioButton
                 label="I support programmes (admin / ops)"
-                selected={selectedRole === 'instructor'}
-                onSelect={() => handleSubRoleSelection('instructor')}
+                selected={selectedRole === 'convener'}
+                onSelect={() => handleSubRoleSelection('convener')}
               />
             </View>
           )}
