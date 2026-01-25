@@ -18,6 +18,7 @@ import Constants from 'expo-constants';
 import { useLocalSearchParams, useSearchParams } from 'expo-router/build/hooks';
 import { setItem } from '@/utils/asyncStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Header } from '@/ui';
 
 const { width } = Dimensions.get('window');
 
@@ -84,15 +85,13 @@ const SignUp = () => {
       ))}
     </View>
   );
-
   const handleRole = async () => {
     setLoading(true);
     setError('');
-    // Diagnostics for preview vs dev builds
-    // eslint-disable-next-line no-console
+
     console.log('[SignUp] apiURL:', apiURL);
-    // eslint-disable-next-line no-console
     console.log('[SignUp] token param present:', !!token?.token);
+
     try {
       const response = await axios.patch(
         `${apiURL}/v1/api/profile/set-role`,
@@ -101,40 +100,35 @@ const SignUp = () => {
           headers: {
             Authorization: token?.token ? `Bearer ${token.token}` : undefined,
           },
-        },
+        }
       );
+
       console.log(response.data);
+
       if (!response.data.error) {
         if (response.data.token) {
           await AsyncStorage.setItem('authToken', response.data.token);
         }
+
         setError('role set!');
-        setLoading(false);
-        if (selectedRole === 'convener') {
+
+        if (selectedRole !== 'learner') {
           router.navigate({
             pathname: '/(auth)/(convener)/programme-intent',
             params: { token: response.data.token },
           });
-        } else if (selectedRole === 'instructor') {
-          router.navigate({
-            pathname: '/convener-screens/community',
-            params: { token: response.data.token },
-          });
-        } else if (selectedRole === 'learner') {
+        } else {
           router.navigate({
             pathname: '/(student)/about',
             params: { token: response.data.token },
           });
         }
-        console.log(response.data.token);
       }
+
     } catch (err: any) {
-      // eslint-disable-next-line no-console
       console.error('[SignUp] Error setting role:', err.message || err);
       if (err.response) {
-        // eslint-disable-next-line no-console
         console.error('status:', err.response.status);
-        // eslint-disable-next-line no-console
         console.error('data:', err.response.data);
       }
       setError('error setting role: ' + (err.message || String(err)));
@@ -142,9 +136,11 @@ const SignUp = () => {
       setLoading(false);
     }
   };
+
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
+        <Header number={1} total={4} />
         <Text variant={'headerTwo'} style={{ paddingBottom: 57 }}>
           Create an account as a{' '}
           {selectedRole || mainRole ? (
@@ -196,7 +192,7 @@ const SignUp = () => {
               />
               <RadioButton
                 label="I support programmes (admin / ops)"
-                selected={selectedRole === 'convener'}
+                selected={selectedRole === 'instructor'}
                 onSelect={() => handleSubRoleSelection('convener')}
               />
             </View>

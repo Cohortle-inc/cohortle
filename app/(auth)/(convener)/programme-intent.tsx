@@ -89,7 +89,7 @@ const ProgrammeIntent = () => {
         <SafeAreaWrapper>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.container}>
-                    <Header number={1} total={2} />
+                    <Header number={2} total={2} />
                     <Text style={styles.title}>Tell us about the programme you want to run</Text>
 
                     <View style={styles.section}>

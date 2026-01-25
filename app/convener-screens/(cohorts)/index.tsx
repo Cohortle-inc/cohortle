@@ -263,7 +263,7 @@ const Cohorts = () => {
               textAlign: 'center',
             }}
           >
-            {userRole !== 'instructor' ? (
+            {userRole === 'instructor' ? (
               <View>
                 <Text
                   style={{
