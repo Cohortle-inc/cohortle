@@ -21,7 +21,8 @@ const useGetCommunities = () => {
     queryKey: ['communities'],
     queryFn: getCommunities,
     refetchOnReconnect: true,
-    refetchInterval: 6000
+    refetchOnWindowFocus: true,
+    refetchInterval: 3000
   });
 };
 

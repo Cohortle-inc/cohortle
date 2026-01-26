@@ -226,7 +226,8 @@ const Cohorts = () => {
             }}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-              {userRole === 'instructor' ? 'Join a community' : 'Create a community'}
+              {/* {userRole === 'instructor' ? 'Join a community' : 'Create a community'} */}
+              Create a community
             </Text>
           </Pressable>
         </View>
