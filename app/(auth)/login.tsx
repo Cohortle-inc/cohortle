@@ -164,6 +164,7 @@ const LoginScreen = (props: Props) => {
             <Text style={styles.signupHighlight}>Sign up</Text>
           </Text>
         </TouchableOpacity>
+        <Text>0.1</Text>
       </View>
     </SafeAreaWrapper>
   );
