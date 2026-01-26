@@ -86,7 +86,7 @@ const Cohorts = () => {
     createCommunity(payload, {
       onSuccess: (data) => {
         // ✅ Reset form
-        setCohortData({ name: '', description: '', codePrefix: '', type: '' });
+        setCohortData({ name: '', description: '', codePrefix: '', type: 'course' });
 
         // ✅ Close modal
         setModalVisible(false);
@@ -226,7 +226,7 @@ const Cohorts = () => {
             }}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-              {userRole !== 'instructor' ? 'Join a community' : 'Create a community'}
+              {userRole === 'instructor' ? 'Join a community' : 'Create a community'}
             </Text>
           </Pressable>
         </View>
@@ -263,7 +263,7 @@ const Cohorts = () => {
               textAlign: 'center',
             }}
           >
-            {userRole === 'instructor' ? (
+            {/* {userRole === 'instructor' ? (
               <View>
                 <Text
                   style={{
@@ -304,70 +304,70 @@ const Cohorts = () => {
                   </Pressable>
                 </View>
               </View>
-            ) : (
-              <View>
-                <Text
-                  style={{
-                    color: '#1F1F1F',
-                    fontFamily: 'DMSansSemiBold',
-                    fontSize: 20,
-                    textAlign: 'center',
-                  }}
-                >
-                  Create Community
-                </Text>
-                <View style={{ gap: 16, marginTop: 26 }}>
-                  <Input
-                    value={cohortData.name}
-                    onChangeText={(text: string) => updateCohortData('name', text)}
-                    label="Community Name"
-                    placeholder="Digital Marketing Simplified"
-                  />
-                  <Input
-                    value={cohortData.description}
-                    onChangeText={(text: string) =>
-                      updateCohortData('description', text)
-                    }
-                    label="Description"
-                    placeholder="Self-paced learning program"
-                  />
-                  <Input
-                    value={cohortData.type}
-                    onChangeText={(text: string) => updateCohortData('type', text)}
-                    label="Community Type"
-                    placeholder="e.g., 'tech', 'marketing'"
-                  />
-                  <Input
-                    value={cohortData.codePrefix}
-                    onChangeText={(text: string) =>
-                      updateCohortData('codePrefix', text)
-                    }
-                    label="Community code (prefix)"
-                    placeholder="Sal-Cohort"
-                  />
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <Pressable
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#F8F1FF',
-                      paddingVertical: 14,
-                      alignItems: 'center',
-                      borderRadius: 32,
-                      marginTop: 32,
-                      backgroundColor: '#391D65',
-                      width: '70%',
-                    }}
-                    disabled={communityPending}
-                    onPress={handleCreateCommunity}
-                  >
-                    <Text style={{ color: '#fff' }}>
-                      {!communityPending ? 'Create' : 'Creating community...'}
-                    </Text>
-                  </Pressable>
-                </View>
+            ) : ( */}
+            <View>
+              <Text
+                style={{
+                  color: '#1F1F1F',
+                  fontFamily: 'DMSansSemiBold',
+                  fontSize: 20,
+                  textAlign: 'center',
+                }}
+              >
+                Create Community
+              </Text>
+              <View style={{ gap: 16, marginTop: 26 }}>
+                <Input
+                  value={cohortData.name}
+                  onChangeText={(text: string) => updateCohortData('name', text)}
+                  label="Community Name"
+                  placeholder="Digital Marketing Simplified"
+                />
+                <Input
+                  value={cohortData.description}
+                  onChangeText={(text: string) =>
+                    updateCohortData('description', text)
+                  }
+                  label="Description"
+                  placeholder="Self-paced learning program"
+                />
+                {/* <Input
+                  value={cohortData.type}
+                  onChangeText={(text: string) => updateCohortData('type', text)}
+                  label="Community Type"
+                  placeholder="e.g., 'tech', 'marketing'"
+                /> */}
+                <Input
+                  value={cohortData.codePrefix}
+                  onChangeText={(text: string) =>
+                    updateCohortData('codePrefix', text)
+                  }
+                  label="Community code (prefix)"
+                  placeholder="Sal-Cohort"
+                />
               </View>
-            )}
+              <View style={{ alignItems: 'center' }}>
+                <Pressable
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#F8F1FF',
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    borderRadius: 32,
+                    marginTop: 32,
+                    backgroundColor: '#391D65',
+                    width: '70%',
+                  }}
+                  disabled={communityPending}
+                  onPress={handleCreateCommunity}
+                >
+                  <Text style={{ color: '#fff' }}>
+                    {!communityPending ? 'Create' : 'Creating community...'}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+            {/* )} */}
           </View>
         </View>
       </Modal>

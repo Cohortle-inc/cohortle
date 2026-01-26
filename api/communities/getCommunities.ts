@@ -19,8 +19,9 @@ const getCommunities = async () => {
 const useGetCommunities = () => {
   return useQuery({
     queryKey: ['communities'],
-    queryFn: getCommunities, 
+    queryFn: getCommunities,
     refetchOnReconnect: true,
+    refetchInterval: 6000
   });
 };
 

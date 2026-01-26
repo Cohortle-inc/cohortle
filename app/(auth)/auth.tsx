@@ -75,7 +75,6 @@ const Welcome = (props: Props) => {
             <OnboardFive width={320} height={320} />
           </View>
           <View style={styles.buttonContainer}>
-
             <Text>V 0.1</Text>
             <Button onPress={openBottomSheet} text="Get Started" />
             <Text

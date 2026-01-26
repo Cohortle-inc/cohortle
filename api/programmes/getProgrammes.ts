@@ -20,5 +20,6 @@ export const useGetProgrammes = (community: string) => {
         queryKey: ['programmes', community],
         queryFn: () => getProgrammes(community),
         refetchOnReconnect: true,
+        refetchInterval: 6000
     });
 }

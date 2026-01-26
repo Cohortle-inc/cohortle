@@ -35,6 +35,7 @@ const Profile = () => {
 
   // Use React Query instead of useState + useEffect
   const { data: profile, isLoading, error, refetch } = useProfile();
+  console.log('Profile Data in Component:', JSON.stringify(profile, null, 2));
 
   // const { data: cohorts = [] } = useConvenersCohorts();
   const bottomSheetRef = useRef<BottomSheet>(null);
