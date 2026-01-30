@@ -27,7 +27,7 @@ interface CohortScheduleManagerProps {
   cohortId: number;
 }
 
-export const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ cohortId }) => {
+const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ cohortId }) => {
   const { data: scheduleData = [], isLoading } = useGetSchedule(cohortId.toString());
   const createScheduleMutation = useCreateSchedule(cohortId.toString());
 
@@ -276,6 +276,8 @@ export const CohortScheduleManager: React.FC<CohortScheduleManagerProps> = ({ co
     </ScrollView>
   );
 };
+
+export default CohortScheduleManager;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },

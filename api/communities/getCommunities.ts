@@ -20,9 +20,10 @@ const useGetCommunities = () => {
   return useQuery({
     queryKey: ['communities'],
     queryFn: getCommunities,
-    refetchOnReconnect: true,
-    refetchOnWindowFocus: true,
-    refetchInterval: 3000
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: Infinity,
   });
 };
 

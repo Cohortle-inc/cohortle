@@ -15,8 +15,7 @@ import { router } from 'expo-router';
 import { useTheme } from '@shopify/restyle';
 import axios from 'axios';
 import Constants from 'expo-constants';
-import { useLocalSearchParams, useSearchParams } from 'expo-router/build/hooks';
-import { setItem } from '@/utils/asyncStorage';
+import { useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '@/ui';
 
@@ -48,8 +47,7 @@ const SignUp = () => {
   const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
   const [showDefinition, setShowDefinition] = useState(false);
   // Resolve API URL with fallback (handles preview builds where env may not be injected)
-  const apiURL =
-    process.env.EXPO_PUBLIC_API_URL
+  const apiURL = process.env.EXPO_PUBLIC_API_URL;
 
   const token = useLocalSearchParams<{ token: string }>();
 
@@ -141,25 +139,21 @@ const SignUp = () => {
     <SafeAreaWrapper>
       <View style={styles.container}>
         <Header number={1} total={4} />
-        <Text variant={'headerTwo'} style={{ paddingBottom: 57 }}>
+        <Text variant={'headerTwo'} style={{ paddingBottom: 12 }}>
           Create an account as a{' '}
-          {selectedRole || mainRole ? (
-            <View>
-              <Text variant={'headerTwo'} style={styles.selectedRoleText}>
-                {selectedRole || mainRole}
-              </Text>
-              <View
-                style={{
-                  height: 2,
-                  backgroundColor: theme.colors.primary, // Change to your desired color
-                  marginTop: 0,
-                }}
-              />
-            </View>
-          ) : (
-            '...'
-          )}
+          <Text variant={'headerTwo'} style={styles.selectedRoleText}>
+            {selectedRole || mainRole || '...'}
+          </Text>
         </Text>
+        {selectedRole || mainRole ? (
+          <View
+            style={{
+              height: 2,
+              backgroundColor: theme.colors.primary,
+              marginBottom: 45,
+            }}
+          />
+        ) : null}
 
         <View>
           <Button
@@ -193,7 +187,7 @@ const SignUp = () => {
               <RadioButton
                 label="I support programmes (admin / ops)"
                 selected={selectedRole === 'instructor'}
-                onSelect={() => handleSubRoleSelection('convener')}
+                onSelect={() => handleSubRoleSelection('instructor')}
               />
             </View>
           )}

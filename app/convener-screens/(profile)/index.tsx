@@ -22,6 +22,7 @@ import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typesc
 import { router } from 'expo-router';
 import { Image, ActivityIndicator, Linking } from 'react-native';
 import { useProfile } from '@/api/profile';
+import useGetCommunities from '@/api/communities/getCommunities';
 import { useGetCohort } from '@/api/cohorts/getCohort';
 import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
 import { useQueryClient } from '@tanstack/react-query';
@@ -35,7 +36,8 @@ const Profile = () => {
 
   // Use React Query instead of useState + useEffect
   const { data: profile, isLoading, error, refetch } = useProfile();
-  console.log('Profile Data in Component:', JSON.stringify(profile, null, 2));
+  const profileData = profile?.message ?? profile;
+  const { data: communities = [] } = useGetCommunities();
 
   // const { data: cohorts = [] } = useConvenersCohorts();
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -103,9 +105,7 @@ const Profile = () => {
     [],
   );
 
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log(index);
-  }, []);
+  const handleSheetChanges = useCallback(() => {}, []);
 
   // Show loading state
   if (isLoading) {
@@ -125,7 +125,7 @@ const Profile = () => {
       <SafeAreaWrapper>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Failed to load profile</Text>
-          <Pressable style={styles.retryButton} onPress={() => refetch}>
+          <Pressable style={styles.retryButton} onPress={() => refetch()}>
             <Text style={styles.retryText}>Retry</Text>
           </Pressable>
         </View>
@@ -148,19 +148,20 @@ const Profile = () => {
         <View style={styles.profileImage} />
         <View style={styles.profileDetails}>
           <Text style={styles.profileName}>
-            {profile?.first_name} {profile?.last_name}
+            {profileData?.first_name} {profileData?.last_name}
           </Text>
 
           <View style={styles.infoRow}>
             <Location />
             <Text style={styles.infoText}>
-              {profile?.location || 'No location set'}
+              {profileData?.location || 'No location set'}
             </Text>
           </View>
 
           <Pressable
             onPress={() => {
-              const url = profile?.socials || 'https://copywritingprompts.com';
+              const url =
+                profileData?.socials || 'https://copywritingprompts.com';
               Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
             }}
           >
@@ -169,17 +170,25 @@ const Profile = () => {
               <Text
                 style={[styles.infoText, { textDecorationLine: 'underline' }]}
               >
-                {profile?.socials && 'Social link'}
+                {profileData?.socials && 'Social link'}
               </Text>
             </View>
           </Pressable>
-          {profile.bio &&
-            <Text style={{ fontFamily: 'normal', fontSize: 13, textAlign: 'center' }}>{profile.bio}</Text>
-          }
+          {profileData?.bio ? (
+            <Text
+              style={{
+                fontFamily: 'normal',
+                fontSize: 13,
+                textAlign: 'center',
+              }}
+            >
+              {profileData.bio}
+            </Text>
+          ) : null}
           <View style={styles.infoRow}>
             <Calender />
             <Text style={styles.infoText}>
-              Joined {formatJoinedDate(profile.created_at)}
+              Joined {formatJoinedDate(profileData?.created_at || '')}
             </Text>
           </View>
 
@@ -219,9 +228,32 @@ const Profile = () => {
       <View>
         {activeTab === 'Communities' ? (
           <View style={{ gap: 16 }}>
-            {/* {cohorts.map((data: any) => (
-              <Community key={data.id} name={data.name} />
-            ))} */}
+            {communities.map((community: any) => (
+              <View
+                key={community.id}
+                style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}
+              >
+                <View
+                  style={{
+                    backgroundColor: '#F2750D',
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                  }}
+                />
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: 'DMSansMedium',
+                      fontSize: 12,
+                      color: '#1F1F1F',
+                    }}
+                  >
+                    {community.name}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
         ) : (
           <View style={{ gap: 16 }}>

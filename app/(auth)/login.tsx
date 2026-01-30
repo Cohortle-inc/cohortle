@@ -164,7 +164,9 @@ const LoginScreen = (props: Props) => {
             <Text style={styles.signupHighlight}>Sign up</Text>
           </Text>
         </TouchableOpacity>
-        <Text>0.3</Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>v0.3</Text>
+        </View>
       </View>
     </SafeAreaWrapper>
   );
@@ -242,5 +244,15 @@ const styles = StyleSheet.create({
   signupHighlight: {
     color: '#007AFF',
     fontWeight: '600',
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#9A9A9A',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
 });

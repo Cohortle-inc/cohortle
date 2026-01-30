@@ -55,9 +55,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <GestureHandlerRootView>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-          </Stack>
+          <Stack screenOptions={{ headerShown: false }} />
           <FlashMessage
             position="top"
             floating={true}

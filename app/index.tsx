@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { supabase } from '@/utils/lib/supabase';
-import { getItem } from '../utils/asyncStorage';
 import { View, ActivityIndicator } from 'react-native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,21 +18,8 @@ export default function InitialScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    const initialize = async () => {
-      const onboarded = await getItem('onboarded');
-      console.log(onboarded);
-
-      if (!onboarded) {
-        router.replace('/(auth)/onboarding');
-        return;
-      }
-      else {
-        router.replace('/(auth)/auth');
-      }
-    };
-
-    initialize();
-  }, []);
+    router.replace('/(auth)/auth');
+  }, [router]);
 
   // Show a loading indicator while deciding where to route the user
   return (
