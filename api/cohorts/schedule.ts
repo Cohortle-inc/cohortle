@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+import { Alert } from "react-native";
+import { requireApiBaseUrl } from "@/api/apiConfig";
 
 export interface SchedulePayload {
   title: string;
@@ -18,9 +18,9 @@ export const createCohortSchedule = async (
 ) => {
   const token = await AsyncStorage.getItem('authToken');
   try {
-
+    const apiBaseUrl = requireApiBaseUrl();
     const res = await axios.post(
-      `${API_BASE_URL}/v1/api/cohorts/${cohortId}/schedule`,
+      `${apiBaseUrl}/v1/api/cohorts/${cohortId}/schedule`,
       payload,
       {
         headers: {
@@ -32,6 +32,7 @@ export const createCohortSchedule = async (
     );
     return res.data;
   } catch (error: any) {
+    Alert.alert('Error', error?.message || 'Failed to create schedule.');
     console.error(error?.message || error.message);
     throw error;
   }
@@ -42,8 +43,9 @@ export const getCohortSchedule = async (
   params?: { start_date?: string; end_date?: string },
 ) => {
   const token = await AsyncStorage.getItem('authToken');
+  const apiBaseUrl = requireApiBaseUrl();
   const res = await axios.get(
-    `${API_BASE_URL}/v1/api/cohorts/${cohortId}/schedule`,
+    `${apiBaseUrl}/v1/api/cohorts/${cohortId}/schedule`,
     {
       params,
       headers: {
@@ -59,8 +61,13 @@ export const getCohortSchedule = async (
 export const useCreateSchedule = (cohortId?: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: SchedulePayload) =>
-      createCohortSchedule(cohortId as string, payload),
+    mutationFn: (payload: SchedulePayload) => {
+      if (!cohortId) {
+        Alert.alert('Error', 'Missing cohort information.');
+        throw new Error('Missing cohortId for schedule creation.');
+      }
+      return createCohortSchedule(cohortId, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cohort-schedule", cohortId] });
     },
