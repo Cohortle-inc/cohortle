@@ -1,15 +1,30 @@
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || process.env.EXPO_PUBLIC_API_BASE_URL;
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Alert } from "react-native";
+import { requireApiBaseUrl } from "@/api/apiConfig";
 
 export const completeLesson = async (
   lessonId: number,
   body: { cohort_id: number },
 ) => {
+  const apiBaseUrl = requireApiBaseUrl();
+  const token = await AsyncStorage.getItem('authToken');
+
+  if (!token) {
+    Alert.alert('Session Expired', 'Please log in again.');
+    throw new Error('Authentication token missing');
+  }
+
   const res = await axios.post(
-    `${API_BASE_URL}/v1/api/lessons/${lessonId}/complete`,
+    `${apiBaseUrl}/v1/api/lessons/${lessonId}/complete`,
     body,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    },
   );
   return res.data;
 };

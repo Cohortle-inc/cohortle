@@ -27,7 +27,6 @@ api.interceptors.request.use(async (config: any) => {
   if (tokenToUse) {
     config.headers.Authorization = `Bearer ${tokenToUse}`;
   }
-  console.log(tokenToUse === initialToken);
 
   return config;
 });

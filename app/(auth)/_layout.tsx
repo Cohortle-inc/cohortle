@@ -13,7 +13,6 @@ const Layout = (props: Props) => {
       <Stack.Screen name="check-email" />
       <Stack.Screen name="get-started" />
       <Stack.Screen name="create-community" />
-      <Stack.Screen name="onboarding" />
       <Stack.Screen name="signUp" />
       <Stack.Screen name="(convener)/programme-intent" />
       <Stack.Screen name="(convener)/partner-context" />

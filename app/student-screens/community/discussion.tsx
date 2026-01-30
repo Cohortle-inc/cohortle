@@ -1,15 +1,20 @@
-export const DiscussionForum = () => {
-    return (
-        <SafeAreaWrapper>
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>Discussion Forum</Text>
-                <TouchableOpacity>
-                    <Text>Back</Text>
-                </TouchableOpacity>
-                <View>
+import React from 'react';
+import { TouchableOpacity, View } from 'react-native';
+import { SafeAreaWrapper } from '@/HOC';
+import { Text } from '@/theme/theme';
 
-                </View>
-            </View>
-        </SafeAreaWrapper>
-    )
-}
+const DiscussionForum = () => {
+  return (
+    <SafeAreaWrapper>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Discussion Forum</Text>
+        <TouchableOpacity>
+          <Text>Back</Text>
+        </TouchableOpacity>
+        <View />
+      </View>
+    </SafeAreaWrapper>
+  );
+};
+
+export default DiscussionForum;

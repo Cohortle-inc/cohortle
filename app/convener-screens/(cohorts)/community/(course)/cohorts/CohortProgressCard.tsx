@@ -8,7 +8,7 @@ interface CohortProgressCardProps {
   cohortId: number;
 }
 
-export const CohortProgressCard: React.FC<CohortProgressCardProps> = ({ cohortId }) => {
+const CohortProgressCard: React.FC<CohortProgressCardProps> = ({ cohortId }) => {
   const { data, isLoading, error } = useGetCohortProgress(cohortId);
 
   if (isLoading) {
@@ -66,6 +66,8 @@ export const CohortProgressCard: React.FC<CohortProgressCardProps> = ({ cohortId
     </View>
   );
 };
+
+export default CohortProgressCard;
 
 const styles = StyleSheet.create({
   card: {

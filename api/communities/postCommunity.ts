@@ -45,7 +45,7 @@ export const usePostCommunity = () => {
         type: 'success',
         icon: 'success',
       });
-      // queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: ['communities'] });
     },
     onError: (error: Error) => {
       showMessage({

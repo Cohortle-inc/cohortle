@@ -3,13 +3,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { requireApiBaseUrl } from '@/api/apiConfig';
 
 const joinCommunity = async (code: string) => {
   const token = await AsyncStorage.getItem('authToken');
-  const apiURL = process.env.EXPO_PUBLIC_API_URL;
+  const apiBaseUrl = requireApiBaseUrl();
+
+  if (!token) {
+    Alert.alert('Session Expired', 'Please log in again.');
+    throw new Error('Authentication token missing');
+  }
 
   try {
-    const response = await axios.post(`${apiURL}/v1/api/communities/join`, { code }, {
+    const response = await axios.post(`${apiBaseUrl}/v1/api/communities/join`, { code }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

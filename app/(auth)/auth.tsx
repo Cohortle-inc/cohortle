@@ -1,14 +1,5 @@
-import {
-  Dimensions,
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
-import React, { useCallback, useRef, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { removeItem } from '@/utils/asyncStorage';
-import Lottie from 'lottie-react-native';
+import { Dimensions, Platform, StyleSheet, View } from 'react-native';
+import React, { useCallback, useRef } from 'react';
 import { Text, Theme } from '@/theme/theme';
 import { PaddedView } from '@/HOC';
 import { Button } from '@/components/ui';
@@ -20,7 +11,7 @@ import BottomSheet, {
 import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import OnboardFive from '../../assets/icons/onboarding/2.svg';
 
 const { width, height } = Dimensions.get('window');
@@ -33,18 +24,12 @@ const Welcome = (props: Props) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const handleSheetChanges = useCallback((index: number) => {
-    // Update state based on the index value
-    console.log(index);
-    // If index is greater than -1, sheet is active
+    // no-op
   }, []);
 
-  const handleBottomSheet = () => { };
+  const handleBottomSheet = () => {};
   const openBottomSheet = () => {
     bottomSheetRef.current?.expand();
-  };
-
-  const handleClick = async () => {
-    await removeItem('onboarded');
   };
 
   const renderBackdrop = useCallback(
@@ -75,7 +60,6 @@ const Welcome = (props: Props) => {
             <OnboardFive width={320} height={320} />
           </View>
           <View style={styles.buttonContainer}>
-            <Text>V 0.3</Text>
             <Button onPress={openBottomSheet} text="Get Started" />
             <Text
               style={{ textAlign: 'center', marginTop: 16 }}
@@ -91,6 +75,9 @@ const Welcome = (props: Props) => {
               </Text>
             </Text>
           </View>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>v0.3</Text>
+          </View>
         </PaddedView>
         <BottomSheet
           ref={bottomSheetRef}
@@ -101,20 +88,16 @@ const Welcome = (props: Props) => {
           backdropComponent={renderBackdrop}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <Link href="/(auth)/login" asChild>
-              <Button
-                style={{ marginTop: 16, marginBottom: 16 }}
-                onPress={openBottomSheet}
-                text="Log in"
-              />
-            </Link>
-            <Link asChild href={'/(auth)/email-confirmation'}>
-              <Button
-                variant="secondary"
-                onPress={openBottomSheet}
-                text="sign up"
-              />
-            </Link>
+            <Button
+              style={{ marginTop: 16, marginBottom: 16 }}
+              onPress={() => router.push('/(auth)/login')}
+              text="Log in"
+            />
+            <Button
+              variant="secondary"
+              onPress={() => router.push('/(auth)/email-confirmation')}
+              text="sign up"
+            />
           </BottomSheetView>
         </BottomSheet>
       </View>
@@ -151,5 +134,15 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 80,
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#9A9A9A',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
 });

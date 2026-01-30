@@ -24,7 +24,10 @@ import { CohortType } from '@/types/cohortType';
 import { showMessage } from 'react-native-flash-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useGetCommunities from '@/api/communities/getCommunities';
-import { CommunityType, usePostCommunity } from '@/api/communities/postCommunity';
+import {
+  CommunityType,
+  usePostCommunity,
+} from '@/api/communities/postCommunity';
 import { useGetProfile } from '@/api/getProfile';
 import useJoinCommunity from '@/api/communities/joinCommunity';
 
@@ -42,7 +45,8 @@ const Cohorts = () => {
   const { data: communities = [], isLoading } = useGetCommunities();
   // const cohorts = cohortsResponse || [];
   // const { mutate: createCohort, isPending } = useCreateCohort();
-  const { mutate: createCommunity, isPending: communityPending } = usePostCommunity();
+  const { mutate: createCommunity, isPending: communityPending } =
+    usePostCommunity();
   const { data: profile } = useGetProfile();
   const { mutate: joinCommunity, isPending: joinPending } = useJoinCommunity();
 
@@ -55,7 +59,7 @@ const Cohorts = () => {
     console.log(index);
     // If index is greater than -1, sheet is active
   }, []);
-  console.log(profile)
+  console.log(profile);
 
   const handleCreateCommunity = () => {
     if (
@@ -86,7 +90,12 @@ const Cohorts = () => {
     createCommunity(payload, {
       onSuccess: (data) => {
         // ✅ Reset form
-        setCohortData({ name: '', description: '', codePrefix: '', type: 'course' });
+        setCohortData({
+          name: '',
+          description: '',
+          codePrefix: '',
+          type: 'course',
+        });
 
         // ✅ Close modal
         setModalVisible(false);
@@ -132,14 +141,16 @@ const Cohorts = () => {
             icon: 'danger',
           });
         },
-      }
+      },
     );
   };
   const updateCohortData = (field: string, value: string) => {
     setCohortData((prev) => ({ ...prev, [field]: value }));
   };
   const openBottomSheet = (id: number) => {
-    const community = communities.find((community: CommunityType) => community.id === id);
+    const community = communities.find(
+      (community: CommunityType) => community.id === id,
+    );
     setSelectedCohort(community);
     // You can set the selected cohort to state if needed
     console.log('Opening bottom sheet for cohort ID:', community);
@@ -156,6 +167,7 @@ const Cohorts = () => {
       params: { id, cohortName },
     });
   };
+
   const renderBackdrop = useCallback(
     (
       props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps,
@@ -256,14 +268,7 @@ const Cohorts = () => {
           <Pressable onPress={toggleModal} style={{ alignItems: 'flex-end' }}>
             <Close />
           </Pressable>
-          <View
-            style={{
-              color: '#1F1F1F',
-              fontFamily: 'DMSansSemiBold',
-              fontSize: 20,
-              textAlign: 'center',
-            }}
-          >
+          <View>
             {/* {userRole === 'instructor' ? (
               <View>
                 <Text
@@ -320,7 +325,9 @@ const Cohorts = () => {
               <View style={{ gap: 16, marginTop: 26 }}>
                 <Input
                   value={cohortData.name}
-                  onChangeText={(text: string) => updateCohortData('name', text)}
+                  onChangeText={(text: string) =>
+                    updateCohortData('name', text)
+                  }
                   label="Community Name"
                   placeholder="Digital Marketing Simplified"
                 />
@@ -430,7 +437,10 @@ const Cohorts = () => {
               onPress={() =>
                 router.navigate({
                   pathname: `/convener-screens/(cohorts)/edit-community/[id]`,
-                  params: { id: selectedCohort?.id, name: selectedCohort?.name },
+                  params: {
+                    id: selectedCohort?.id,
+                    name: selectedCohort?.name,
+                  },
                 })
               }
             >

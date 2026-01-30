@@ -10,7 +10,7 @@ interface LessonCompletionButtonProps {
   onCompleted?: () => void;
 }
 
-export const LessonCompletionButton: React.FC<LessonCompletionButtonProps> = ({
+const LessonCompletionButton: React.FC<LessonCompletionButtonProps> = ({
   lessonId,
   cohortId,
   onCompleted,
@@ -46,6 +46,8 @@ export const LessonCompletionButton: React.FC<LessonCompletionButtonProps> = ({
     </TouchableOpacity>
   );
 };
+
+export default LessonCompletionButton;
 
 const styles = StyleSheet.create({
   button: {

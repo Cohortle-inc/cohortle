@@ -1,18 +1,19 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { ThemeProvider } from '@shopify/restyle';
 import theme from '@/theme/theme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import FlashMessage from 'react-native-flash-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
+import queryClient from '@/utils/queryClient';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const segments = useSegments();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     DMSansRegular: require('../assets/fonts/DMSans-Regular.ttf'),
@@ -29,10 +30,16 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
+    if (!loaded) {
+      return;
+    }
+
     const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
-        if (!token) {
+        const inAuthGroup = segments[0] === '(auth)';
+
+        if (!token && !inAuthGroup) {
           router.replace('/(auth)/login');
         }
       } catch (error) {
@@ -42,26 +49,13 @@ export default function RootLayout() {
     };
 
     checkAuth();
-  }, []);
+  }, [loaded, segments]);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: 1,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-      },
-      mutations: {
-        retry: 1,
-      },
-    },
-  });
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <GestureHandlerRootView>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-          </Stack>
+          <Stack screenOptions={{ headerShown: false }} />
           <FlashMessage
             position="top"
             floating={true}

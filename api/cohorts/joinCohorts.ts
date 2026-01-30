@@ -7,14 +7,7 @@ import {
 } from '@tanstack/react-query';
 import axios from 'axios';
 import { Alert } from 'react-native';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error(
-    'EXPO_PUBLIC_API_URL is not defined in your environment variables',
-  );
-}
+import { requireApiBaseUrl } from '@/api/apiConfig';
 
 interface JoinCohortResponse {
   success: boolean;
@@ -23,6 +16,7 @@ interface JoinCohortResponse {
 }
 
 const joinCohort = async (joinCode: string): Promise<JoinCohortResponse> => {
+  const apiBaseUrl = requireApiBaseUrl();
   const token = await AsyncStorage.getItem('authToken');
 
   if (!token) {
@@ -31,7 +25,7 @@ const joinCohort = async (joinCode: string): Promise<JoinCohortResponse> => {
   }
 
   const response = await axios.post(
-    `${API_URL}/v1/api/cohorts/join/${joinCode}`,
+    `${apiBaseUrl}/v1/api/cohorts/join/${joinCode}`,
     {},
     {
       headers: {
