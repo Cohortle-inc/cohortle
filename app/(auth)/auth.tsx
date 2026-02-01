@@ -27,7 +27,7 @@ const Welcome = (props: Props) => {
     // no-op
   }, []);
 
-  const handleBottomSheet = () => {};
+  const handleBottomSheet = () => { };
   const openBottomSheet = () => {
     bottomSheetRef.current?.expand();
   };
@@ -76,7 +76,7 @@ const Welcome = (props: Props) => {
             </Text>
           </View>
           <View style={styles.footer}>
-            <Text style={styles.footerText}>v0.3</Text>
+            <Text style={styles.footerText}>v0.4</Text>
           </View>
         </PaddedView>
         <BottomSheet
