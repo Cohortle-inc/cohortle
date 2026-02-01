@@ -66,7 +66,7 @@ const Message: React.FC<PostMessageProps> = ({ withImg, postMessage }) => {
       </View>
       <View style={{ marginTop: 8 }}>
         <Text style={{ fontSize: 14, marginTop: 16 }}>
-          {postMessage.community_names?.join(', ') || 'None'}
+          {postMessage.community_names?.join(', ') || 'Everyone'}
         </Text>
         <Text style={{ fontSize: 12, marginTop: 16 }}>{postMessage.text}</Text>
         <View

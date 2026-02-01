@@ -11,7 +11,7 @@ const getCommunityMembers = async (communityId: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data;
+    return response.data.members;
   } catch (error) {
     console.error('Error getting community members:', error);
     throw error;

@@ -12,18 +12,21 @@ export interface CreatePostParams {
 
 export const createPost = async ({ text, can_reply, community_ids }: CreatePostParams) => {
   const token = await AsyncStorage.getItem('authToken');
-  const response = await axios.post(
-    `${API_URL}/v1/api/posts`,
-    { text, can_reply, community_ids },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+  try {
+    const response = await axios.post(
+      `${API_URL}/v1/api/posts`,
+      { text, can_reply, community_ids },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       },
-    },
-  );
-  console.log(response.data);
-  return response.data;
+    );
+    console.log(response.data);
+  }
+  catch {
+  }
 };
 
 export const useCreatePost = () => {

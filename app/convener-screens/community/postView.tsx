@@ -146,15 +146,15 @@ export default function PostScreen(): React.JSX.Element {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {post ? (
-              <Message
-                postMessage={{
-                  id: post.id,
-                  posted_by: post.posted_by,
-                  text: post.text,
-                  updated_at: post.updated_at,
-                  community_names: post.community_names,
-                }}
-              />
+          <Message
+            postMessage={{
+              id: post.id,
+              posted_by: post.posted_by,
+              text: post.text,
+              updated_at: post.updated_at,
+              community_names: post.community_names,
+            }}
+          />
         ) : (
           <Text>Post not found</Text>
         )}

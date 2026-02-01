@@ -24,6 +24,7 @@ import { useRemoveCommunity } from '@/api/communities/deleteCommunity';
 import { useGetCommunityMembers } from '@/api/communities/getMembers';
 import { useRemoveCommunityMember } from '@/api/communities/removeMember';
 import { useUpdateCommunity } from '@/api/communities/updateCommunity';
+import { useGetProfile } from '@/api/getProfile';
 
 const EditCohort = () => {
   const router = useRouter();
@@ -37,12 +38,14 @@ const EditCohort = () => {
   const [selectedLearner, setSelectedLearner] = useState<any>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: community } = useGetCommunity(id as any);
-  const { data: communityMembers } = useGetCommunityMembers(id);
+  const { data: communityMembers = [] } = useGetCommunityMembers(id);
   const [loading, setLoading] = useState(false);
   const removeCommunityMutation = useRemoveCommunity();
   const updateCommunityMutation = useUpdateCommunity();
   const removeMemberMutation = useRemoveCommunityMember();
-  // console.log(communityMembers)
+  console.log(communityMembers)
+  const { data: user } = useGetProfile();
+  console.log("user: ", user)
 
   const handleRemoveMember = () => {
     if (!selectedLearner) return;
@@ -219,58 +222,60 @@ const EditCohort = () => {
               placeholder={community?.name}
             />
           </View>
-          <View
-            style={{
-              marginTop: 'auto',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              gap: 36,
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => setDeleteCohortVisible(true)}
+          {community?.owner_id === user?.id && (
+            <View
               style={{
-                borderWidth: 1,
-                borderColor: 'red',
-                flex: 1,
-                width: '100%',
-                borderRadius: 16,
+                marginTop: 'auto',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                gap: 36,
               }}
             >
-              <Text
+              <TouchableOpacity
+                onPress={() => setDeleteCohortVisible(true)}
                 style={{
-                  textAlign: 'center',
-                  paddingVertical: 6,
-                  paddingHorizontal: 16,
-                  color: 'red',
+                  borderWidth: 1,
+                  borderColor: 'red',
+                  flex: 1,
+                  width: '100%',
+                  borderRadius: 16,
                 }}
               >
-                Delete
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#391D65',
-                flex: 1,
-                width: '100%',
-                borderRadius: 16,
-                opacity: (loading || !name.trim()) ? 0.7 : 1
-              }}
-              onPress={handleUpdateCommunity}
-              disabled={loading || !name.trim()}
-            >
-              <Text
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    paddingVertical: 6,
+                    paddingHorizontal: 16,
+                    color: 'red',
+                  }}
+                >
+                  Delete
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={{
-                  textAlign: 'center',
-                  paddingVertical: 6,
-                  paddingHorizontal: 16,
-                  color: '#fff',
+                  backgroundColor: '#391D65',
+                  flex: 1,
+                  width: '100%',
+                  borderRadius: 16,
+                  opacity: (loading || !name.trim()) ? 0.7 : 1
                 }}
+                onPress={handleUpdateCommunity}
+                disabled={loading || !name.trim()}
               >
-                {loading ? 'Saving...' : 'Save changes'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    paddingVertical: 6,
+                    paddingHorizontal: 16,
+                    color: '#fff',
+                  }}
+                >
+                  {loading ? 'Saving...' : 'Save changes'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       ) : (
         <ScrollView
@@ -280,10 +285,10 @@ const EditCohort = () => {
           ]}
         >
           {communityMembers && communityMembers.length > 0 ? (
-            communityMembers.map((learner: any) => (
+            communityMembers.map((member: any) => (
               <LearnerItem
-                key={learner.member_id || learner.id}
-                learner={learner}
+                key={member.membership_id}
+                learner={member}
                 onPressOptions={openBottomSheetWithLearner}
               />
             ))
@@ -641,6 +646,7 @@ const LearnerItem = ({
       </Text>
       <Text style={{ fontSize: 13, color: '#666' }}>{learner.email}</Text>
     </View>
+    {/* <Text>{learner}</Text> */}
 
     {/* Options */}
     <TouchableOpacity onPress={() => onPressOptions(learner)}>

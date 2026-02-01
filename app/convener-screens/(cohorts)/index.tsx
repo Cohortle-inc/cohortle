@@ -40,15 +40,16 @@ const Cohorts = () => {
   });
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isJoinCodeVisible, setJoinCodeVisible] = useState(false);
   /// Note: Instead of calling the communities withing a cohort, its the cohort that is being called in this case. a major oversight
   // const { data: cohortsResponse, isError } = useConvenersCohorts();
   const { data: communities = [], isLoading } = useGetCommunities();
   // const cohorts = cohortsResponse || [];
   // const { mutate: createCohort, isPending } = useCreateCohort();
-  const { mutate: createCommunity, isPending: communityPending } =
+  const { mutate: createCommunity, isPending: communityPending, error: communityError } =
     usePostCommunity();
   const { data: profile } = useGetProfile();
-  const { mutate: joinCommunity, isPending: joinPending } = useJoinCommunity();
+  const { mutate: joinCommunity, isPending: joinPending, error: joinError } = useJoinCommunity();
 
   const userRole = profile?.role || profile?.user?.role;
   const [joinCode, setJoinCode] = useState('');
@@ -160,6 +161,9 @@ const Cohorts = () => {
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
+  const toggleJoinCodeModal = () => {
+    setJoinCodeVisible(!isJoinCodeVisible);
+  };
 
   const handleCohortPress = (id: number, cohortName: string) => {
     router.navigate({
@@ -228,20 +232,23 @@ const Cohorts = () => {
             This is where you'll create, edit, and manage your communities and
             learners.
           </Text>
-          <Pressable
-            onPress={toggleModal}
-            style={{
-              backgroundColor: '#391D65',
-              paddingVertical: 16,
-              borderRadius: 32,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-              {/* {userRole === 'instructor' ? 'Join a community' : 'Create a community'} */}
-              Create a community
-            </Text>
-          </Pressable>
+          <View style={{ gap: 20 }}>
+            <Pressable
+              onPress={toggleModal}
+              style={{
+                backgroundColor: '#391D65',
+                paddingVertical: 16,
+                borderRadius: 32,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+                {/* {userRole === 'instructor' ? 'Join a community' : 'Create a community'} */}
+                Create a community
+              </Text>
+            </Pressable>
+
+          </View>
         </View>
       ) : (
         <View style={{ gap: 15, paddingBottom: 20 }}>
@@ -253,6 +260,19 @@ const Cohorts = () => {
               onOpenBottomSheet={() => openBottomSheet(cohort.id)}
             />
           ))}
+          <Pressable
+            onPress={toggleJoinCodeModal}
+            style={{
+              backgroundColor: '#391D65',
+              paddingVertical: 16,
+              borderRadius: 32,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+              Join a community
+            </Text>
+          </Pressable>
         </View>
       )}
       <Modal isVisible={isModalVisible}>
@@ -269,48 +289,6 @@ const Cohorts = () => {
             <Close />
           </Pressable>
           <View>
-            {/* {userRole === 'instructor' ? (
-              <View>
-                <Text
-                  style={{
-                    color: '#1F1F1F',
-                    fontFamily: 'DMSansSemiBold',
-                    fontSize: 20,
-                    textAlign: 'center',
-                  }}
-                >
-                  Join Community
-                </Text>
-                <View style={{ gap: 16, marginTop: 26 }}>
-                  <Input
-                    value={joinCode}
-                    onChangeText={setJoinCode}
-                    label="Community Join Code"
-                    placeholder="Enter the code provided by your convener"
-                  />
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <Pressable
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#F8F1FF',
-                      paddingVertical: 14,
-                      alignItems: 'center',
-                      borderRadius: 32,
-                      marginTop: 32,
-                      backgroundColor: '#391D65',
-                      width: '70%',
-                    }}
-                    disabled={joinPending}
-                    onPress={handleJoinCommunity}
-                  >
-                    <Text style={{ color: '#fff' }}>
-                      {!joinPending ? 'Join' : 'Joining...'}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            ) : ( */}
             <View>
               <Text
                 style={{
@@ -376,6 +354,66 @@ const Cohorts = () => {
               </View>
             </View>
             {/* )} */}
+          </View>
+        </View>
+      </Modal>
+
+      <Modal isVisible={isJoinCodeVisible}>
+        <View
+          style={{
+            backgroundColor: 'white',
+            // height: 500,
+            paddingBottom: 40,
+            padding: 16,
+            borderRadius: 8,
+          }}
+        >
+          <Pressable onPress={toggleJoinCodeModal} style={{ alignItems: 'flex-end' }}>
+            <Close />
+          </Pressable>
+          <View>
+            <View>
+              <Text
+                style={{
+                  color: '#1F1F1F',
+                  fontFamily: 'DMSansSemiBold',
+                  fontSize: 20,
+                  textAlign: 'center',
+                }}
+              >
+                Join Community
+              </Text>
+              <View style={{ gap: 16, marginTop: 26 }}>
+                <Input
+                  value={joinCode}
+                  onChangeText={setJoinCode}
+                  label="Community Join Code"
+                  placeholder="Enter the code provided by your convener"
+                />
+              </View>
+
+              <View style={{ alignItems: 'center' }}>
+                <Pressable
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#F8F1FF',
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    borderRadius: 32,
+                    marginTop: 32,
+                    backgroundColor: '#391D65',
+                    width: '70%',
+                  }}
+                  disabled={joinPending}
+                  onPress={handleJoinCommunity}
+                >
+                  <Text style={{ color: '#fff' }}>
+                    {!joinPending ? 'Join' : 'Joining...'}
+                  </Text>
+                </Pressable>
+                <Text style={{ color: 'red', marginTop: 8 }}>{joinError && "Invalid code"} </Text>
+              </View>
+            </View>
           </View>
         </View>
       </Modal>

@@ -10,13 +10,21 @@ const joinCommunity = async (data: JoinCommunityData) => {
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
   const token = await AsyncStorage.getItem('authToken');
 
-  const response = await axios.post(`${apiURL}/v1/api/communities/join`, data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  try {
 
-  return response.data;
+    const response = await axios.post(`${apiURL}/v1/api/communities/join`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  }
+  catch (error) {
+    console.log(error);
+    throw error;
+  }
+
 };
 
 const useJoinCommunity = () => {
