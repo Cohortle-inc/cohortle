@@ -22,11 +22,11 @@ import { BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/lib/typesc
 import { router } from 'expo-router';
 import { Image, ActivityIndicator, Linking } from 'react-native';
 import { useProfile } from '@/api/profile';
-import { useGetCohort } from '@/api/cohorts/getCohort';
-import { useConvenersCohorts } from '@/api/cohorts/getConvenersCohorts';
+import useGetJoinedCommunities from '@/api/communities/getJoinedCommunities';
 import { useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { formatJoinedDate } from '@/utils/date';
+import { ScrollView } from 'react-native';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = React.useState<'Communities' | 'Social'>(
@@ -34,9 +34,11 @@ const Profile = () => {
   );
 
   // Use React Query instead of useState + useEffect
-  const { data: profile, isLoading, error, refetch } = useProfile();
+  const { data: profile, isLoading: isProfileLoading, error: profileError, refetch } = useProfile();
+  const { data: communities, isLoading: isCommunitiesLoading } = useGetJoinedCommunities();
 
-  // const { data: cohorts = [] } = useConvenersCohorts();
+  const isLoading = isProfileLoading || isCommunitiesLoading;
+  const error = profileError;
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const queryClient = useQueryClient();
@@ -179,9 +181,20 @@ const Profile = () => {
               </Text>
             </View>
           </Pressable>
-          {profile.bio &&
-            <Text style={{ fontFamily: 'normal', fontSize: 13, textAlign: 'center' }}>{profile.bio}</Text>
-          }
+          {profile.bio && (
+            <Text
+              style={{
+                fontFamily: 'DMSansRegular',
+                fontSize: 13,
+                textAlign: 'center',
+                color: '#1F1F1F',
+                marginTop: 8,
+                paddingHorizontal: 20,
+              }}
+            >
+              {profile?.bio}
+            </Text>
+          )}
           <View style={styles.infoRow}>
             <Calender />
             <Text style={styles.infoText}>
@@ -224,70 +237,48 @@ const Profile = () => {
       {/* Tab Content */}
       <View>
         {activeTab === 'Communities' ? (
-          <View style={{ gap: 16 }}>
-            {/* {cohorts.map((data: any) => (
-              <Community key={data.id} name={data.name} />
-            ))} */}
-          </View>
+          <ScrollView
+            style={{ flex: 1, marginTop: 16 }}
+            contentContainerStyle={{ gap: 16, paddingBottom: 20 }}
+          >
+            {communities?.map((data: any) => (
+              <React.Fragment key={data.id}>
+                {Community(data.id, data.name)}
+              </React.Fragment>
+            ))}
+            {communities?.length === 0 && (
+              <Text style={{ textAlign: 'center', color: '#8D9091', marginTop: 20 }}>
+                No communities joined yet
+              </Text>
+            )}
+          </ScrollView>
         ) : (
-          <View style={{ gap: 16 }}>
-            {/* <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              
-              <X />
-              <Text
-                style={{
-                  color: '#1F1F1F',
-                  fontSize: 10,
-                  fontFamily: 'DMSansRegular',
+          <View style={{ gap: 16, marginTop: 24, paddingHorizontal: 20 }}>
+            {profile?.socials ? (
+              <Pressable
+                onPress={() => {
+                  const url = profile.socials;
+                  Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
                 }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
               >
-                {profile?.socials || 'copywritingprompts.com'}
+                <Share />
+                <Text
+                  style={{
+                    color: '#391D65',
+                    fontSize: 14,
+                    fontFamily: 'DMSansMedium',
+                    textDecorationLine: 'underline',
+                  }}
+                >
+                  {profile.socials}
+                </Text>
+              </Pressable>
+            ) : (
+              <Text style={{ textAlign: 'center', color: '#8D9091' }}>
+                No social links added
               </Text>
-            </View> */}
-            {/* <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <Facebook />
-              <Text
-                style={{
-                  color: '#1F1F1F',
-                  fontSize: 10,
-                  fontFamily: 'DMSansRegular',
-                }}
-              >
-                {profile?.socials || 'copywritingprompts.com'}
-              </Text>
-            </View>
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <Instagram />
-              <Text
-                style={{
-                  color: '#1F1F1F',
-                  fontSize: 10,
-                  fontFamily: 'DMSansRegular',
-                }}
-              >
-                {profile?.socials || 'copywritingprompts.com'}
-              </Text>
-            </View>
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <Linkedin />
-              <Text
-                style={{
-                  color: '#1F1F1F',
-                  fontSize: 10,
-                  fontFamily: 'DMSansRegular',
-                }}
-              >
-                {profile?.socials || 'copywritingprompts.com'}
-              </Text>
-            </View> */}
+            )}
           </View>
         )}
       </View>
@@ -395,7 +386,7 @@ const styles = StyleSheet.create({
     height: 152,
     width: 152,
     backgroundColor: '#F2750D',
-    borderRadius: 8,
+    borderRadius: 76,
   },
   profileDetails: {
     marginTop: 24,

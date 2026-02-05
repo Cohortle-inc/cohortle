@@ -4,10 +4,13 @@ import axios from 'axios';
 
 const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
 
-const getLessons = async (id: number) => {
+const getLessons = async (id: number, cohortId?: number) => {
   const token = await AsyncStorage.getItem('authToken');
   try {
-    const response = await axios.get(`${apiURL}/v1/api/modules/${id}/lessons`, {
+    const url = cohortId
+      ? `${apiURL}/v1/api/modules/${id}/lessons?cohort_id=${cohortId}`
+      : `${apiURL}/v1/api/modules/${id}/lessons`;
+    const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
         'cache-control': 'no-cache',
@@ -20,14 +23,12 @@ const getLessons = async (id: number) => {
   }
 };
 
-export const useGetLessons = (id: number | null) => {
+export const useGetLessons = (id: number | null, cohortId?: number | null) => {
   return useQuery({
-    queryKey: ['lessons', id],
-    queryFn: () => getLessons(id!),
+    queryKey: ['lessons', id, cohortId],
+    queryFn: () => getLessons(id!, cohortId || undefined),
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
-
-    // staleTime: 0,
     enabled: !!id,
   });
 };

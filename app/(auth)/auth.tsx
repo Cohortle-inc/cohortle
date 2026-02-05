@@ -76,7 +76,7 @@ const Welcome = (props: Props) => {
             </Text>
           </View>
           <View style={styles.footer}>
-            <Text style={styles.footerText}>v0.4</Text>
+            <Text style={styles.footerText}>v0.5</Text>
           </View>
         </PaddedView>
         <BottomSheet

@@ -16,7 +16,6 @@ import axios from 'axios';
 
 interface FormData {
   username: string;
-  password: string;
 }
 
 interface FormErrors {
@@ -28,8 +27,7 @@ interface FormErrors {
 
 const SetCredentials = () => {
   const [data, setData] = useState<FormData>({
-    username: '',
-    password: '',
+    username: ''
   });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,9 +37,9 @@ const SetCredentials = () => {
 
   // Track changes for enabling the button
   useEffect(() => {
-    const hasChanges = data.username.trim() !== '' || data.password !== '';
+    const hasChanges = data.username.trim() !== '';
     // You can adjust this logic if pre-filled values exist
-  }, [data.username, data.password]);
+  }, [data.username]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
@@ -50,7 +48,7 @@ const SetCredentials = () => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
-    if (errors.confirmPassword && field === 'password') {
+    if (errors.confirmPassword) {
       setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
     }
     if (errors.server) {
@@ -68,16 +66,6 @@ const SetCredentials = () => {
       newErrors.username = 'Username must be at least 3 characters';
     } else if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUsername)) {
       newErrors.username = 'Only letters, numbers, _, ., - allowed';
-    }
-
-    if (!data.password) {
-      newErrors.password = 'Password is required';
-    } else if (data.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    if (data.password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     setErrors(newErrors);
@@ -106,7 +94,6 @@ const SetCredentials = () => {
     try {
       const response = await axiosInstance.put('/v1/api/profile', {
         username: data.username.trim(),
-        password: data.password,
       });
 
       if (response.data.error) {
@@ -145,12 +132,12 @@ const SetCredentials = () => {
     }
   };
 
-  const isFormFilled = data.username.trim() && data.password && confirmPassword;
+  const isFormFilled = data.username.trim()
 
   return (
     <SafeAreaWrapper>
+      <Header number={2} total={2} />
       <View style={styles.container}>
-        <Header number={2} total={2} />
 
         <Text style={styles.title}>What username do you want to use?</Text>
 
@@ -162,31 +149,6 @@ const SetCredentials = () => {
           error={errors.username}
           autoCapitalize="none"
           autoCorrect={false}
-        />
-
-        <Text style={styles.sectionTitle}>Set Password</Text>
-
-        <Input
-          label="Password"
-          placeholder="Create a strong password"
-          value={data.password}
-          onChangeText={(value: string) => handleChange('password', value)}
-          secureTextEntry
-          error={errors.password}
-        />
-
-        <Input
-          label="Confirm Password"
-          placeholder="Re-type your password"
-          value={confirmPassword}
-          onChangeText={(value: string) => {
-            setConfirmPassword(value);
-            if (errors.confirmPassword) {
-              setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-            }
-          }}
-          secureTextEntry
-          error={errors.confirmPassword}
         />
 
         {/* Server error display */}

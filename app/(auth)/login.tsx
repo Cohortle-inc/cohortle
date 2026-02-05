@@ -165,7 +165,7 @@ const LoginScreen = (props: Props) => {
           </Text>
         </TouchableOpacity>
         <View style={styles.footer}>
-          <Text style={styles.footerText}>v0.3</Text>
+          <Text style={styles.footerText}>v0.5</Text>
         </View>
       </View>
     </SafeAreaWrapper>

@@ -133,21 +133,26 @@ const CreateLesson = () => {
   };
 
   const pickMediaFromLibrary = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Permission required', 'Please allow access to your photo library');
-      return;
-    }
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission required', 'Please allow access to your photo library');
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: true,
-      quality: 1,
-      videoQuality: ImagePicker.UIImagePickerControllerQualityType.High,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: false, // Disabled - can crash on large videos
+        quality: 0.8, // Reduced to prevent memory issues
+        videoMaxDuration: 3600, // 1 hour max
+      });
 
-    if (!result.canceled && result.assets?.[0]) {
-      handleMediaSelected(result.assets[0]);
+      if (!result.canceled && result.assets?.[0]) {
+        handleMediaSelected(result.assets[0]);
+      }
+    } catch (error) {
+      console.error('Video picker error:', error);
+      Alert.alert('Error', 'Failed to select video. Please try again or use a smaller file.');
     }
   };
 
@@ -169,7 +174,9 @@ const CreateLesson = () => {
       'Choose Media Type',
       'Select the type of file you want to upload',
       [
-        { text: 'Videos only', onPress: pickDocumentsOrAudio },
+        { text: 'Video from Gallery', onPress: pickMediaFromLibrary },
+        { text: 'Video from Files', onPress: pickDocumentsOrAudio },
+        { text: 'Cancel', style: 'cancel' },
       ],
     );
   };

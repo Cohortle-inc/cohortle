@@ -90,53 +90,55 @@ const Community = () => {
             </View>
           ) : (
             // Optional: Handle empty state when not loading and no data
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Text
+            <View style={{ display: 'flex', height: '100vh' }}>
+              <View
                 style={{
-                  color: '#666',
-                  fontSize: 16,
-                  fontFamily: 'DMSansMedium',
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}
               >
-                No cohorts found.
-              </Text>
-              <View style={{ width: '100%', gap: 5 }}>
-                <Text style={{ textAlign: 'center' }}>
-                  Enter a Cohort Code to get Started
-                </Text>
-                <TextInput
-                  placeholder="Enter Join Code"
-                  value={code}
-                  onChangeText={setCode}
+                <Text
                   style={{
-                    borderWidth: 2,
-                    borderRadius: 5,
-                    borderColor: colors.purpleShade,
+                    color: '#666',
                     fontSize: 16,
-                    padding: 5,
+                    fontFamily: 'DMSansMedium',
                   }}
-                />
-                <Pressable
-                  onPress={handleJoin}
-                  style={{
-                    width: '100%',
-                    paddingVertical: 10,
-                    backgroundColor: colors.primary,
-                    borderRadius: 5,
-                    alignItems: 'center',
-                  }}
-                  disabled={joinPending}
                 >
-                  <Text style={{ color: 'white' }}>
-                    {joinPending ? 'Joining...' : 'Join Cohort'}
+                  No communities found.
+                </Text>
+                <View style={{ width: '100%', gap: 5 }}>
+                  <Text style={{ textAlign: 'center' }}>
+                    Enter a Community Code to get Started
                   </Text>
-                </Pressable>
+                  <TextInput
+                    placeholder="Enter Join Code"
+                    value={code}
+                    onChangeText={setCode}
+                    style={{
+                      borderWidth: 2,
+                      borderRadius: 5,
+                      borderColor: colors.purpleShade,
+                      fontSize: 16,
+                      padding: 5,
+                    }}
+                  />
+                  <Pressable
+                    onPress={handleJoin}
+                    style={{
+                      width: '100%',
+                      paddingVertical: 10,
+                      backgroundColor: colors.primary,
+                      borderRadius: 5,
+                      alignItems: 'center',
+                    }}
+                    disabled={joinPending}
+                  >
+                    <Text style={{ color: 'white' }}>
+                      {joinPending ? 'Joining...' : 'Join Cohort'}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           )}

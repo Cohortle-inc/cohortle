@@ -41,6 +41,9 @@ export const useCompleteLesson = () => {
     }) => completeLesson(lessonId, { cohort_id }),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["cohort-progress", variables.cohort_id] });
+      queryClient.invalidateQueries({ queryKey: ["lessons"] });
+      queryClient.invalidateQueries({ queryKey: ["published-lessons"] });
+      queryClient.invalidateQueries({ queryKey: ["lesson-completion", variables.lessonId, variables.cohort_id] });
     },
   });
 };

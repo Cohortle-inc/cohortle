@@ -8,16 +8,20 @@ interface LessonCompletionButtonProps {
   lessonId: number;
   cohortId: number;
   onCompleted?: () => void;
+  isAlreadyCompleted?: boolean;
 }
 
 const LessonCompletionButton: React.FC<LessonCompletionButtonProps> = ({
   lessonId,
   cohortId,
   onCompleted,
+  isAlreadyCompleted,
 }) => {
   const { mutate, isPending } = useCompleteLesson();
 
   const handlePress = () => {
+    console.log('tag')
+    console.log(lessonId, cohortId)
     mutate(
       { lessonId, cohort_id: cohortId },
       {
@@ -34,12 +38,21 @@ const LessonCompletionButton: React.FC<LessonCompletionButtonProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.button, isPending && styles.disabledButton]}
+      style={[
+        styles.button,
+        (isPending || isAlreadyCompleted) && styles.disabledButton,
+        isAlreadyCompleted && styles.completedButton
+      ]}
       onPress={handlePress}
-      disabled={isPending}
+      disabled={isPending || isAlreadyCompleted}
     >
       {isPending ? (
         <ActivityIndicator size="small" color="#fff" />
+      ) : isAlreadyCompleted ? (
+        <>
+          <Ionicons name="checkmark-circle" size={20} color="#fff" />
+          <Text style={styles.text}>Completed</Text>
+        </>
       ) : (
         <Text style={styles.text}>Complete Lesson</Text>
       )}
@@ -62,6 +75,9 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: '#94d3a2',
+  },
+  completedButton: {
+    backgroundColor: '#10B981', // Emerald 500
   },
   text: {
     color: '#fff',

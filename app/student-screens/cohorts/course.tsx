@@ -47,11 +47,18 @@ const Course = () => {
     refetch: refetchMembership
   } = useProgrammeMembership(Number(programmeID));
 
+  useEffect(() => {
+    if (membershipData?.cohortId) {
+      AsyncStorage.setItem('currentCohortID', String(membershipData.cohortId));
+    }
+  }, [membershipData?.cohortId]);
+
   const isMember = membershipData?.isMember;
 
   const { data: moduleData = [] } = useGetModules(isMember ? Number(programmeID) : null);
   const [module, setModule] = useState<number | null>(null);
-  const { data: lessonData = [] } = useGetPublishedLessons(module);
+  const cohortIdNum = membershipData?.cohortId ? Number(membershipData.cohortId) : null;
+  const { data: lessonData = [] } = useGetPublishedLessons(module, cohortIdNum);
 
   console.log(lessonData);
 
@@ -272,6 +279,7 @@ interface LessonProp {
   order_number: string;
   status: string;
   text: string;
+  completed?: boolean;
 }
 const Lesson = (lesson: LessonProp) => {
   const router = useRouter();
@@ -286,7 +294,14 @@ const Lesson = (lesson: LessonProp) => {
     await AsyncStorage.setItem('name', lesson.name || 'Untitled Lesson');
     await AsyncStorage.setItem('text', lesson.text || '');
     await AsyncStorage.setItem('lessonId', String(lesson.id));
-    router.navigate('/student-screens/cohorts/module');
+    await AsyncStorage.setItem('lessonCompleted', String(lesson.completed || false));
+    router.push({
+      pathname: '/student-screens/cohorts/module',
+      params: {
+        lessonId: lesson.id,
+        cohortId: await AsyncStorage.getItem('currentCohortID')
+      }
+    });
   };
 
   return (
@@ -369,10 +384,11 @@ const Lesson = (lesson: LessonProp) => {
         </View>
       </View>
 
-      {/* <CheckBox
-        checked={checkedModule}
-        onPress={() => setCheckedModule(!checkedModule)}
-      /> */}
+      {lesson.completed && (
+        <View style={{ marginLeft: 8 }}>
+          <Check color={colors.primary} />
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

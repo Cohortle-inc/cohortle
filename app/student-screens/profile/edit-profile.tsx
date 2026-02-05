@@ -246,7 +246,7 @@ const EditProfile = (props: Props) => {
               updateFormField('firstName', value)
             }
             label="First Name"
-            placeholder="Enter your first name"
+            placeholder={profileData ? profileData.first_name : "Enter your first name"}
             editable={!isSaving}
           />
 

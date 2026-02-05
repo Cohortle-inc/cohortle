@@ -30,6 +30,7 @@ import {
 } from '@/api/communities/postCommunity';
 import { useGetProfile } from '@/api/getProfile';
 import useJoinCommunity from '@/api/communities/joinCommunity';
+import { Ionicons } from '@expo/vector-icons';
 
 const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
@@ -188,6 +189,7 @@ const Cohorts = () => {
           </Text>
           <Pressable onPress={toggleModal}>
             <Plus />
+            <Ionicons name="git-merge" size={24} color="black" />
           </Pressable>
         </View>
       </View>

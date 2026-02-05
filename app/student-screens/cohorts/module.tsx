@@ -13,8 +13,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { RichEditor } from 'react-native-pell-rich-editor';
-import { LessonCompletionButton } from '@/app/convener-screens/(cohorts)/community/(course)/cohorts/LessonCompletionButton';
-import { DiscussionSection } from '@/components/cohorts/DiscussionSection';
+import { WebView } from 'react-native-webview';
+import LessonCompletionButton from '@/components/cohorts/LessonCompletionButton';
+import { useLocalSearchParams } from 'expo-router';
+import { LessonComments } from '@/components/cohorts/LessonComments';
+import { useGetLessonCompletion } from '@/api/lessons/getLessonCompletion';
+import { useGetLesson } from '@/api/communities/lessons/getLesson';
+import { useCompleteLesson } from '@/api/lessons/completeLesson';
+import { useGetPublishedLessons } from '@/api/communities/lessons/publishedLessons';
+import { useGetProfile } from '@/api/getProfile';
 
 const { width } = Dimensions.get('window');
 
@@ -25,10 +32,13 @@ interface RichEditorRef {
 
 const Module = () => {
   const router = useRouter();
+  const params = useLocalSearchParams<{ lessonId?: string; cohortId?: string }>();
+  const [lessonId, setLessonId] = useState<number | null>(params.lessonId ? Number(params.lessonId) : null);
+  const [cohortId, setCohortId] = useState<number | null>(params.cohortId ? Number(params.cohortId) : null);
+  const [isAlreadyCompleted, setIsAlreadyCompleted] = useState(false);
   const [title, setTitle] = useState('Untitled Lesson');
   const [media, setMedia] = useState<string | null>(null);
   const [text, setText] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<Video>(null);
   const richEditorRef = useRef<any>(null); // use any for editor ref to avoid strict typing issues
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
@@ -40,6 +50,18 @@ const Module = () => {
     const timer = setTimeout(() => setShowControls(false), 4000);
     return () => clearTimeout(timer);
   }, [showControls]);
+
+  // Handle auto-completion when video ends
+  const { mutate: completeLesson } = useCompleteLesson();
+  useEffect(() => {
+    if (status?.isLoaded && status.didJustFinish && !status.isLooping && !isAlreadyCompleted && lessonId && cohortId) {
+      console.log('🎥 Video finished! Marking lesson as complete...');
+      completeLesson(
+        { lessonId, cohort_id: cohortId },
+        { onSuccess: () => setIsAlreadyCompleted(true) }
+      );
+    }
+  }, [status, isAlreadyCompleted, lessonId, cohortId]);
 
   const togglePlayPause = () => {
     if (status?.isLoaded && status.isPlaying) {
@@ -68,69 +90,65 @@ const Module = () => {
   const duration = (status?.isLoaded && status.durationMillis) ? status.durationMillis : 0;
   const position = (status?.isLoaded && status.positionMillis) ? status.positionMillis : 0;
 
-  const [lessonId, setLessonId] = useState<number | null>(null);
-  const [cohortId, setCohortId] = useState<number | null>(null);
+
+
+  // Fetch completion status from backend
+  const { data: completionData, isLoading: isLoadingCompletion } = useGetLessonCompletion(lessonId, cohortId);
 
   useEffect(() => {
-    const loadLessonData = async () => {
-      try {
-        setIsLoading(true);
+    if (completionData?.completed) {
+      setIsAlreadyCompleted(true);
+    }
+  }, [completionData]);
 
-        const [savedMedia, savedTitle, savedText, savedLessonId, savedCohortId] = await Promise.all([
-          AsyncStorage.getItem('media'),
-          AsyncStorage.getItem('name'),
-          AsyncStorage.getItem('text'),
-          AsyncStorage.getItem('lessonId'),
-          AsyncStorage.getItem('communityID'),
-        ]);
+  const { data: lessonData, isLoading: isLoadingLesson } = useGetLesson(String(lessonId || ''));
 
-        console.log('📥 Loaded from storage:', {
-          media: savedMedia?.substring(0, 50),
-          title: savedTitle,
-          textLength: savedText?.length
-        });
+  useEffect(() => {
+    if (lessonData) {
+      setTitle(lessonData.name || 'Untitled Lesson');
+      setMedia(lessonData.media || null);
+      setText(lessonData.text || '<p>No content available</p>');
 
-        // ✅ Handle media URL properly
-        const videoUrl = savedMedia || null;
-        setMedia(videoUrl);
-        setTitle(savedTitle || 'Untitled Lesson');
-        setText(savedText || '<p>No content available</p>');
-        // nothing extra required here; lessonId is set when navigating to this screen
-
-        if (savedLessonId) setLessonId(Number(savedLessonId));
-        if (savedCohortId) setCohortId(Number(savedCohortId));
-
-        // ✅ Update RichEditor content after a short delay
-        setTimeout(() => {
-          if (richEditorRef.current && savedText) {
-            richEditorRef.current.setContentHTML(savedText);
-          }
-        }, 100);
-
-      } catch (error) {
-        console.error('Failed to load lesson data:', error);
-        setMedia(null);
-        setTitle('Untitled Lesson');
-        setText('<p>Failed to load content</p>');
-      } finally {
-        setIsLoading(false);
+      // ✅ Update RichEditor content
+      if (richEditorRef.current && lessonData.text) {
+        richEditorRef.current.setContentHTML(lessonData.text);
       }
-    };
+    }
+  }, [lessonData]);
 
-    loadLessonData();
-  }, []);
+  const isLoading = isLoadingLesson || isLoadingCompletion;
+
+  // Fetch all lessons in this module to find the next one
+  const { data: siblingLessons = [] } = useGetPublishedLessons(
+    lessonData?.module_id ? Number(lessonData.module_id) : null,
+    cohortId
+  );
+
+  const nextLesson = siblingLessons.find((l: any) => l.order_number === (lessonData?.order_number + 1))
+    || siblingLessons.find((l: any) => l.order_number > lessonData?.order_number);
+
+  const goToNextLesson = () => {
+    if (nextLesson) {
+      router.push({
+        pathname: '/student-screens/cohorts/module',
+        params: {
+          lessonId: nextLesson.id,
+          cohortId: cohortId
+        }
+      });
+    }
+  };
+
+  const { data: profile } = useGetProfile();
+  const isLearner = profile?.user?.role === 'learner';
 
   // ✅ Safe RichEditor ref handler
   const handleEditorRef = (ref: any | null) => {
     if (ref) {
-      // assign to ref.current safely
-      // eslint-disable-next-line no-param-reassign
       richEditorRef.current = ref;
       // ✅ Set content if text is already loaded
       if (text && text !== '<p>No content available</p>') {
-        setTimeout(() => {
-          ref.setContentHTML(text);
-        }, 50);
+        ref.setContentHTML(text);
       }
     }
   };
@@ -151,23 +169,33 @@ const Module = () => {
       {/* Video Player */}
       {media ? (
         <View style={styles.videoWrapper}>
-          <Video
-            ref={videoRef}
-            style={styles.video}
-            source={{ uri: media }}
-            useNativeControls
-            resizeMode={ResizeMode.CONTAIN}
-            isLooping={false}
-            onPlaybackStatusUpdate={setStatus}
-            onLoad={() => {
-              console.log('✅ Video loaded successfully');
-              setShowControls(true);
-            }}
-            onError={(e) => {
-              console.log('❌ Video Error:', e);
-              setMedia(null); // Fallback to no video state
-            }}
-          />
+          {media.includes('iframe.mediadelivery.net') ? (
+            <WebView
+              source={{ uri: media }}
+              style={styles.video}
+              allowsFullscreenVideo
+              javaScriptEnabled
+              domStorageEnabled
+            />
+          ) : (
+            <Video
+              ref={videoRef}
+              style={styles.video}
+              source={{ uri: media }}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              isLooping={false}
+              onPlaybackStatusUpdate={setStatus}
+              onLoad={() => {
+                console.log('✅ Video loaded successfully');
+                setShowControls(true);
+              }}
+              onError={(e) => {
+                console.log('❌ Video Error:', e);
+                setMedia(null); // Fallback to no video state
+              }}
+            />
+          )}
         </View>
       ) : (
         <View>
@@ -193,9 +221,9 @@ const Module = () => {
         </View>
 
         {/* Discussions Section */}
-        {lessonId && cohortId && (
-          <DiscussionSection
-            cohortId={cohortId}
+        {lessonId && (
+          <LessonComments
+            cohortId={cohortId || undefined}
             lessonId={lessonId}
           />
         )}
@@ -203,12 +231,23 @@ const Module = () => {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        {lessonId && cohortId ? (
+        {lessonId && cohortId && isLearner ? (
           <View style={{ flex: 1 }}>
-            <LessonCompletionButton
-              lessonId={lessonId}
-              cohortId={cohortId}
-            />
+            {isAlreadyCompleted && nextLesson ? (
+              <TouchableOpacity
+                onPress={goToNextLesson}
+                style={[styles.button, styles.nextButton]}
+              >
+                <Text style={styles.nextButtonText}>Next Lesson</Text>
+              </TouchableOpacity>
+            ) : (
+              <LessonCompletionButton
+                lessonId={lessonId}
+                cohortId={cohortId}
+                isAlreadyCompleted={isAlreadyCompleted}
+                onCompleted={() => setIsAlreadyCompleted(true)}
+              />
+            )}
           </View>
         ) : null}
 
