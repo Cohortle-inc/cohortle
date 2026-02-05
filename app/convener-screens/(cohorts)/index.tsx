@@ -9,7 +9,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
-import { Close, Options, Pencil, Plus, PlusSmall } from '@/assets/icons';
+import { Close, Crown, Options, Pencil, Plus, PlusSmall } from '@/assets/icons';
 import Modal from 'react-native-modal';
 import { Input } from '@/components/Form';
 import BottomSheet, {
@@ -256,25 +256,26 @@ const Cohorts = () => {
             <Community
               key={cohort.id}
               name={cohort.name}
+              isOwner={cohort.owner_id === profile?.id}
               onPress={() => handleCohortPress(cohort.id, cohort.name)}
               onOpenBottomSheet={() => openBottomSheet(cohort.id)}
             />
           ))}
-          <Pressable
-            onPress={toggleJoinCodeModal}
-            style={{
-              backgroundColor: '#391D65',
-              paddingVertical: 16,
-              borderRadius: 32,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-              Join a community
-            </Text>
-          </Pressable>
         </View>
       )}
+      <Pressable
+        onPress={toggleJoinCodeModal}
+        style={{
+          backgroundColor: '#391D65',
+          paddingVertical: 16,
+          borderRadius: 32,
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+          Join a community
+        </Text>
+      </Pressable>
       <Modal isVisible={isModalVisible}>
         <View
           style={{
@@ -496,10 +497,11 @@ export default Cohorts;
 interface CommunityProps {
   id?: number;
   name: string;
+  isOwner?: boolean;
   onOpenBottomSheet: () => void;
   onPress: () => void;
 }
-const Community = ({ name, onOpenBottomSheet, onPress }: CommunityProps) => {
+const Community = ({ name, isOwner, onOpenBottomSheet, onPress }: CommunityProps) => {
   const router = useRouter();
   return (
     <TouchableOpacity
@@ -514,15 +516,18 @@ const Community = ({ name, onOpenBottomSheet, onPress }: CommunityProps) => {
       <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
         <View style={styles.profileImage} />
         <View style={{}}>
-          <Text
-            style={{
-              fontFamily: 'DMSansMedium',
-              fontSize: 11,
-              color: '#1F1F1F',
-            }}
-          >
-            {name}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Text
+              style={{
+                fontFamily: 'DMSansMedium',
+                fontSize: 11,
+                color: '#1F1F1F',
+              }}
+            >
+              {name}
+            </Text>
+            {isOwner && <Crown width={14} height={14} />}
+          </View>
           {/* <Text style={{ color: '#8D9091', marginTop: 4, fontSize: 10 }}>
             15.8K Members
           </Text> */}

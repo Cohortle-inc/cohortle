@@ -165,13 +165,13 @@ const CohortDetails = () => {
                 <View style={styles.membersSection}>
                     <View style={styles.header}>
                         <Text style={styles.sectionTitle}>Members ({members.length})</Text>
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             style={styles.addButton}
                             onPress={() => setDiscussionModalVisible(true)}
                         >
                             <PlusSmall color="#fff" />
                             <Text style={styles.addButtonText}>Add Member</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
                     {membersLoading ? (

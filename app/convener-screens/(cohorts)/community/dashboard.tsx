@@ -13,7 +13,7 @@ import { SafeAreaWrapper } from '@/HOC';
 import { Back, Close, Options, Plus, PlusSmall } from '@/assets/icons';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { CohortProgressCard } from './(course)/cohorts/CohortProgressCard';
+import CohortProgressCard from './(course)/cohorts/CohortProgressCard';
 import { useGetSchedule } from '@/api/cohorts/schedule';
 import { Eclipse, X } from 'lucide-react-native';
 import { NavHead } from '@/components/HeadRoute';
@@ -111,17 +111,17 @@ export default function Dashboard() {
     {
       key: 'self-paced',
       title: 'Self-paced',
-      description: 'Learners can start immediately and learn at their own pace',
+      description: 'Courses starts when a member enrolls. All Content is available immediately.',
     },
     {
       key: 'structured',
       title: 'Structured',
-      description: 'Learning follows a structured, guided path with milestones',
+      description: 'Courses starts when a member enrolls. Sections are dripped relative to their enrollment date.',
     },
     {
       key: 'scheduled',
       title: 'Scheduled',
-      description: 'Courses run on a set schedule with live sessions',
+      description: 'Courses starts on a specific date. Sections are dripped relative to that date.',
     },
   ];
   const getButtonStyle = (isActive: any) => ({
@@ -218,7 +218,7 @@ export default function Dashboard() {
         </View>
 
         {/* Announcements section */}
-        <View style={styles.card}>
+        {/* <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardLabel}>Recent Announcements</Text>
             <TouchableOpacity onPress={() => setAnnounceModalVisible(true)}>
@@ -242,7 +242,7 @@ export default function Dashboard() {
           ) : (
             <Text style={{ color: '#666', marginTop: 8 }}>No announcements yet</Text>
           )}
-        </View>
+        </View> */}
         {/* <View style={styles.draftNotice}>
           <Text style={styles.draftTitle}>This programme is in draft mode.</Text>
           <Text style={styles.draftDescription}>

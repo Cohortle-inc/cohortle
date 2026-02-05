@@ -102,10 +102,10 @@ const Index = () => {
           {modules.length < 15 && (
             <TouchableOpacity
               onPress={handleCreateModule}
-              style={styles.addButton}
+              style={[styles.addButton, { backgroundColor: modulePending ? colors.purpleShade : colors.primary }]}
               disabled={modulePending}
             >
-              <Text style={styles.addButtonText}>Add module</Text>
+              <Text style={styles.addButtonText}>{modulePending ? 'Adding...' : 'Add Module'}</Text>
             </TouchableOpacity>
           )}
         </View>

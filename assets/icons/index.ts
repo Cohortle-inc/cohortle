@@ -16,3 +16,4 @@ export { Gallery } from './Gallery';
 export { RedTrash } from './Trash';
 export { Check } from './Check';
 export { RedDoor } from './RedDoor';
+export { Crown } from './Crown';

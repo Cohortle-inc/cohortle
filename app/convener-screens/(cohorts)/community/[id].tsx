@@ -62,17 +62,17 @@ const courseOptions = [
   {
     key: 'structured',
     title: 'Structured',
-    description: 'Learners can start immediately and learn at their own pace',
+    description: 'Courses starts when a member enrolls. Sections are dripped relative to their enrollment date.',
   },
   {
     key: 'scheduled',
     title: 'Scheduled',
-    description: 'Learners can start immediately and learn at their own pace',
+    description: 'Courses starts on a specific date. Sections are dripped relative to that date.',
   },
   {
     key: 'self_paced',
     title: 'Self-paced',
-    description: 'Learners can start immediately and learn at their own pace',
+    description: 'Courses starts when a member enrolls. All Content is available immediately.',
   },
 ];
 const getButtonStyle = (isActive: any) => ({
