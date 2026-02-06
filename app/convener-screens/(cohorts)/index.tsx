@@ -31,6 +31,7 @@ import {
 import { useGetProfile } from '@/api/getProfile';
 import useJoinCommunity from '@/api/communities/joinCommunity';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '@/utils/color';
 
 const Cohorts = () => {
   const [cohortData, setCohortData] = useState({
@@ -187,10 +188,15 @@ const Cohorts = () => {
           <Text style={{ color: '#B085EF', fontFamily: 'DMSansSemiBold' }}>
             Cohortle
           </Text>
-          <Pressable onPress={toggleModal}>
-            <Plus />
-            <Ionicons name="git-merge" size={24} color="black" />
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+
+            <Pressable onPress={toggleModal}>
+              <Plus />
+            </Pressable>
+            <Pressable onPress={toggleJoinCodeModal}>
+              <Ionicons name="git-merge" size={24} color={colors.primary} />
+            </Pressable>
+          </View>
         </View>
       </View>
       {isLoading ? (
@@ -265,19 +271,6 @@ const Cohorts = () => {
           ))}
         </View>
       )}
-      <Pressable
-        onPress={toggleJoinCodeModal}
-        style={{
-          backgroundColor: '#391D65',
-          paddingVertical: 16,
-          borderRadius: 32,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-          Join a community
-        </Text>
-      </Pressable>
       <Modal isVisible={isModalVisible}>
         <View
           style={{

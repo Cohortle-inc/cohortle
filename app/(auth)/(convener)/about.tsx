@@ -153,7 +153,7 @@ const About = () => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Header number={2} total={4} />
+        <Header number={2} total={3} />
         <Text style={styles.title}>Tell us about yourself</Text>
         <View style={{ gap: 24 }}>
           <Input

@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { SafeAreaWrapper } from '@/HOC';
 import { Text } from '@/theme/theme';
@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { Eye, EyeOff } from 'lucide-react-native';
+import { colors } from '@/utils/color';
 
 type Props = {};
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
@@ -81,14 +82,17 @@ const EmailConfirmation = (props: Props) => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Text variant={'l'} style={styles.header}>
-          Sign up for Cohortle
-        </Text>
+        <View style={{ alignItems: 'center', gap: 12, marginTop: 20 }}>
 
-        <Text>Fill in the field to create an account</Text>
-        {/* <Text>We'll send you a quick email to confirm your address.</Text> */}
+          <Text variant={'l'} style={styles.header}>
+            Sign up for Cohortle
+          </Text>
 
-        <View style={{ gap: 5, marginTop: 15 }}>
+          <Text>Fill in the field to create an account</Text>
+          {/* <Text>We'll send you a quick email to confirm your address.</Text> */}
+
+        </View>
+        <ScrollView style={{ gap: 5, marginTop: 40 }}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>First Name</Text>
             <TextInput
@@ -178,7 +182,7 @@ const EmailConfirmation = (props: Props) => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </ScrollView>
         <View style={{ marginTop: 36 }}>
           <Button
             disabled={loading}
@@ -201,6 +205,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontWeight: 'bold',
+    color: colors.primary,
   },
 
   inputContainer: {

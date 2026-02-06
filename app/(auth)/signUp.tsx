@@ -18,6 +18,7 @@ import Constants from 'expo-constants';
 import { useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '@/ui';
+import { isLoading } from 'expo-font';
 
 const { width } = Dimensions.get('window');
 
@@ -138,7 +139,7 @@ const SignUp = () => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Header number={1} total={4} />
+        {/* <Header number={1} total={4} /> */}
         <Text variant={'headerTwo'} style={{ paddingBottom: 12 }}>
           Create an account as a{' '}
           <Text variant={'headerTwo'} style={styles.selectedRoleText}>
@@ -208,7 +209,7 @@ const SignUp = () => {
         <View style={{ marginTop: 120 }}>
           <Button
             disabled={isNextButtonDisabled}
-            text="Next"
+            text={loading ? 'Loading...' : 'next'}
             onPress={handleRole}
           />
         </View>

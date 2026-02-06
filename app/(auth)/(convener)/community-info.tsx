@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { Back } from '@/assets/icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePostCommunity, CommunityType } from '@/api/communities/postCommunity';
+import { colors } from '@/utils/color';
 
 // Rename local state interface to avoid confusion with API types or global FormData
 interface CommunityFormState {
@@ -141,7 +142,7 @@ const CommunityInfo = () => {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <Header number={3} total={4} />
+        <Header number={2} total={3} />
 
         <View style={styles.headerText}>
           <Text style={styles.title}>
@@ -239,14 +240,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontFamily: 'DMSansBold',
-    color: '#1F1F1F',
+    color: colors.primary,
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     textAlign: 'center',
     fontSize: 14,
     fontFamily: 'DMSansRegular',
-    color: '#B085EF',
+    // colo'#B085EF',
   },
   form: {
     gap: 24,

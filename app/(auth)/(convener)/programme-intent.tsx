@@ -13,6 +13,7 @@ import { Text } from '@/theme/theme';
 import { router, useLocalSearchParams } from 'expo-router';
 import { usePostProgrammeIntent } from '@/api/programmes/postProgrammeIntent';
 import { Back } from '@/assets/icons';
+import { colors } from '@/utils/color';
 
 const PROGRAMME_CATEGORIES = [
     'Fellowship',
@@ -55,7 +56,7 @@ const ProgrammeIntent = () => {
         postIntent(formData, {
             onSuccess: () => {
                 router.push({
-                    pathname: '/(auth)/(convener)/partner-context',
+                    pathname: '/(auth)/(convener)/community-info',
                     params: { token },
                 });
             },
@@ -89,7 +90,7 @@ const ProgrammeIntent = () => {
         <SafeAreaWrapper>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.container}>
-                    <Header number={2} total={2} />
+                    <Header number={1} total={3} />
                     <Text style={styles.title}>Tell us about the programme you want to run</Text>
 
                     <View style={styles.section}>
@@ -156,7 +157,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontFamily: 'DMSansBold',
-        color: '#1F1F1F',
+        color: colors.primary,
+        textAlign: 'center',
         marginVertical: 32,
     },
     section: {

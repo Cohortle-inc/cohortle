@@ -13,6 +13,7 @@ import { Text } from '@/theme/theme';
 import { router, useLocalSearchParams } from 'expo-router';
 import { usePostPartnerContext } from '@/api/onboarding/postPartnerContext';
 import { Back } from '@/assets/icons';
+import { colors } from '@/utils/color';
 
 const LEARNER_TYPES = [
     'Students',
@@ -88,7 +89,7 @@ const PartnerContext = () => {
         <SafeAreaWrapper>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.container}>
-                    <Header number={2} total={2} />
+                    <Header number={3} total={3} />
 
                     <View style={styles.headerTitleContainer}>
                         <Text style={styles.title}>Help us support you better</Text>
@@ -158,7 +159,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontFamily: 'DMSansBold',
-        color: '#1F1F1F',
+        color: colors.primary,
+        textAlign: 'center',
     },
     optionalBadge: {
         backgroundColor: '#F3F4F6',

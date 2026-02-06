@@ -16,7 +16,7 @@ export const getCohortProgressSummary = async (cohortId: number) => {
       }
     }
     );
-    console.log(res.data.data)
+    console.log("ii", res.data.data)
     return res.data.data;
   } catch (error: any) {
     console.error(error?.message || error.message);
@@ -31,6 +31,7 @@ export const useGetCohortProgress = (cohortId?: number) =>
     queryFn: () => getCohortProgressSummary(cohortId as number),
     enabled: !!cohortId,
     staleTime: 3,
+    refetchInterval: 3000
   });
 
 export default {

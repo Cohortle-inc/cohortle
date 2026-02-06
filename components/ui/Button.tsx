@@ -39,8 +39,9 @@ const Button = ({
                   ? theme.colors.primaryDark
                   : theme.colors.primary,
           padding: theme.spacing.m,
-          borderRadius: 8,
-          borderWidth: variant === 'outline' ? 2 : 0,
+          borderRadius: 40,
+          alignItems: 'center',
+          borderWidth: variant === 'outline' ? 1 : 0,
           borderColor: disabled
             ? theme.colors.primaryLight
             : variant === 'outline'

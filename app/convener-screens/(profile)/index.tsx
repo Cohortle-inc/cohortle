@@ -34,7 +34,7 @@ const Profile = () => {
     'Communities',
   );
 
-  // Use React Query instead of useState + useEffect
+  // Use React Query instead of useState + useEffect 
   const { data: profile, isLoading, error, refetch } = useProfile();
   const profileData = profile?.message ?? profile;
   const { data: communities = [] } = useGetCommunities();
@@ -105,7 +105,7 @@ const Profile = () => {
     [],
   );
 
-  const handleSheetChanges = useCallback(() => {}, []);
+  const handleSheetChanges = useCallback(() => { }, []);
 
   // Show loading state
   if (isLoading) {

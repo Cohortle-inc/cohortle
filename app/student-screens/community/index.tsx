@@ -93,9 +93,8 @@ const Community = () => {
 
       {/* Content */}
       <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-        {activeTab === 'convener' ? (
+        {activeTab === 'foryou' ? (
           <View style={{ paddingBottom: 20 }}>
-            <Text style={styles.sectionTitle}>Announcements</Text>
             {cohortsLoading ? (
               <ActivityIndicator color={colors.primary} />
             ) : joinedCohorts && joinedCohorts.length > 0 ? (
