@@ -22,5 +22,6 @@ export const useGetCommunityMembers = (communityId: string) => {
   return useQuery({
     queryKey: ['communityMembers', communityId],
     queryFn: () => getCommunityMembers(communityId),
+    refetchInterval: 6000, // Refetch every 60 seconds
   });
 };

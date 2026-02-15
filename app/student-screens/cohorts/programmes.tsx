@@ -117,7 +117,7 @@ const ProgrammeItem = (programme: ProgrammeType) => {
   const handlePress = () => {
     router.push({
       pathname: '/student-screens/cohorts/course',
-      params: { programmeID: programme.id, title: programme.name, description: programme.description, type: programme.type },
+      params: { programmeID: programme.id, title: programme.name, description: programme.description, type: programme.type, communityID },
     });
   };
   const progress = 30; // example progress

@@ -280,18 +280,19 @@ export const Module = ({
           .slice() // safe copy — no mutation
           .sort((a: LessonProp, b: LessonProp) => a.id - b.id) // oldest first
           .map((lesson: LessonProp) => (
-            <View key={lesson.id} style={[styles.lessonRow, { backgroundColor: lesson.status === 'published' ? '#7ded1a2d' : '#EFEFEF' }]}>
-              <Ionicons name="play-circle-outline" size={18} color="#8E8E8E" />
-              <Text style={styles.lessonText}>{lesson.name}</Text>
-              <TouchableOpacity
+            <TouchableOpacity
                 onPress={() => {
                   setSelectedLesson(lesson);
                   setLessonModalOpen(true);
                 }}
-              >
+              ><View key={lesson.id} style={[styles.lessonRow, { backgroundColor: lesson.status === 'published' ? '#7ded1a2d' : '#EFEFEF' }]}>
+              <Ionicons name="play-circle-outline" size={18} color="#8E8E8E" />
+              <Text style={styles.lessonText}>{lesson.name}</Text>
+              
                 <Ionicons name="ellipsis-vertical" size={20} color="#8E8E8E" />
-              </TouchableOpacity>
+              
             </View>
+            </TouchableOpacity>
           ))}
         {lessons.length === 0 && (
           <Text style={styles.noLessons}>No lessons yet</Text>

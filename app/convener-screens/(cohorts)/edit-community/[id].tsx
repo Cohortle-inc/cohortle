@@ -153,6 +153,7 @@ const EditCohort = () => {
     }
 
     setLoading(true);
+    console.log("id", id);
     try {
       await updateCommunityMutation.mutateAsync({
         id: Number(id),
@@ -222,7 +223,6 @@ const EditCohort = () => {
               placeholder={community?.name}
             />
           </View>
-          {community?.owner_id === user?.id && (
             <View
               style={{
                 marginTop: 'auto',
@@ -275,7 +275,7 @@ const EditCohort = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+          
         </View>
       ) : (
         <ScrollView

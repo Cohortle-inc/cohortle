@@ -2,7 +2,6 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { requireApiBaseUrl } from '@/api/apiConfig';
 
 const joinCommunity = async (code: string) => {
@@ -28,14 +27,12 @@ const joinCommunity = async (code: string) => {
 
 export const useJoinCommunity = () => {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   return useMutation({
     mutationFn: joinCommunity,
     onSuccess: (data) => {
       Alert.alert('Success', 'You have joined the community successfully.');
       queryClient.invalidateQueries({ queryKey: ['learnerCohorts'] });
-      router.push('/student-screens/cohorts/course');
     },
     onError: (error: any) => {
       Alert.alert('Error', error.message);

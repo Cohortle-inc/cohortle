@@ -24,6 +24,7 @@ import { showMessage } from 'react-native-flash-message';
 
 export default function Dashboard() {
   const name = useLocalSearchParams<{ name: string }>();
+  const displayName = name?.name ?? '';
   const router = useRouter();
   const [isModalVisible, setModalVisible] = useState(false);
   const [courseType, setCourseType] = useState('self-paced');
@@ -159,7 +160,7 @@ export default function Dashboard() {
   // });
   return (
     <SafeAreaWrapper>
-      <NavHead text={name.name} icon={<Eclipse />} />
+      <NavHead text={displayName} icon={<Eclipse />} />
       {/* Header */}
       <ScrollView style={styles.container}>
         <View style={styles.headerRow}>
@@ -184,8 +185,15 @@ export default function Dashboard() {
           </Link>
         </View> */}
 
-        {/* New Progress Card */}
-        <CohortProgressCard cohortId={cohortId} />
+        {/* New Progress Card (render only when cohortId is valid) */}
+        {cohortId > 0 ? (
+          <CohortProgressCard cohortId={cohortId} />
+        ) : (
+          <View style={[styles.card, { alignItems: 'center' }]}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={{ color: '#666', marginTop: 8 }}>Loading cohort...</Text>
+          </View>
+        )}
 
         {/* Schedule / Completion Rate */}
         <View style={styles.card}>
