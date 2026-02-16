@@ -1,4 +1,4 @@
-# Cohortz
+# Cohortle (formerly Cohortz)
 
 Cohortz is a dynamic platform for managing communities and online classes, combining features similar to Circle and Skol. The app allows users to create and manage communities (referred to as "cohortz"), upload and share resources, and follow different cohortz to stay updated with their activities. Whether you're an educator, community leader, or student, Cohortz provides a centralized space to facilitate engagement and learning.
 
