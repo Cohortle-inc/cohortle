@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { LessonUnitType } from '@/types/lessonTypes';
+
 export interface LessonProp {
   id?: number;
   module_id: number;
@@ -8,6 +10,7 @@ export interface LessonProp {
   description?: string;
   url: string;
   order_number: number;
+  type?: LessonUnitType;
 }
 const apiURL = process.env.EXPO_PUBLIC_API_URL;
 const postLesson = async (LessonData: LessonProp, id: number) => {

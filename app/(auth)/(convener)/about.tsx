@@ -18,8 +18,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ✅ Define types for form state
 interface FormData {
-  firstName: string;
-  lastName: string;
   username: string;
   password: string;
   location: string;
@@ -30,8 +28,6 @@ interface FormData {
 
 // ✅ Define errors interface
 interface FormErrors {
-  firstName?: string;
-  lastName?: string;
   terms?: string;
 }
 
@@ -48,8 +44,6 @@ interface UpdateProfileResponse {
 
 const About = () => {
   const [data, setData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
     username: '',
     password: '',
     location: '',
@@ -62,39 +56,27 @@ const About = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [hasChanges, setHasChanges] = useState(false);
 
-  const token = useLocalSearchParams().token as string;
+  const { token, firstName, lastName } = useLocalSearchParams<{
+    token: string;
+    firstName?: string;
+    lastName?: string;
+  }>();
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
   const router = useRouter();
 
   // Track if any relevant field has changed
   useEffect(() => {
-    const changes = data.firstName.trim() !== '' || data.lastName.trim() !== '';
+    const changes = isChecked;
     setHasChanges(changes);
-  }, [data.firstName, data.lastName]);
+  }, [isChecked]);
 
   const handleUpdate = (field: keyof FormData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for the field being edited (only clear when field is a known error key)
-    if ((field === 'firstName' || field === 'lastName') && errors[field as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [field as 'firstName' | 'lastName']: undefined }));
-    }
   };
 
   // Client-side validation
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    if (!data.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    } else if (data.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters';
-    }
-
-    if (!data.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    } else if (data.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters';
-    }
 
     if (!isChecked) {
       newErrors.terms = 'You must agree to the terms and privacy policy';
@@ -109,11 +91,16 @@ const About = () => {
       return;
     }
 
+    if (!firstName || !lastName) {
+      Alert.alert('Error', 'Name information is missing. Please start the signup process again.');
+      return;
+    }
+
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('first_name', data.firstName.trim());
-      formData.append('last_name', data.lastName.trim());
+      formData.append('first_name', firstName.trim());
+      formData.append('last_name', lastName.trim());
       formData.append('password', data.password); // still sent if filled, but optional
 
       const response = await axios.put(`${apiURL}/v1/api/profile`, formData, {
@@ -156,20 +143,11 @@ const About = () => {
         <Header number={2} total={3} />
         <Text style={styles.title}>Tell us about yourself</Text>
         <View style={{ gap: 24 }}>
-          <Input
-            label="First Name"
-            placeholder="First name"
-            value={data.firstName}
-            onChangeText={(value: string) => handleUpdate('firstName', value)}
-            error={errors.firstName}
-          />
-          <Input
-            label="Last Name"
-            placeholder="Last name"
-            value={data.lastName}
-            onChangeText={(value: string) => handleUpdate('lastName', value)}
-            error={errors.lastName}
-          />
+          {/* Name fields removed - now passed from previous screen */}
+          <View style={styles.nameDisplay}>
+            <Text style={styles.nameLabel}>Name:</Text>
+            <Text style={styles.nameValue}>{firstName} {lastName}</Text>
+          </View>
           {/* Uncomment if password is required later
           <Input
             label="Password"
@@ -209,7 +187,7 @@ const About = () => {
 
         <Pressable
           onPress={handleSave}
-          disabled={loading || !isChecked || !data.firstName.trim() || !data.lastName.trim()}
+          disabled={loading || !isChecked}
           style={[styles.submitBtn, (loading || !hasChanges) && styles.disabledBtn]}
         >
           {loading ? (
@@ -240,6 +218,24 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSansBold',
     color: '#1F1F1F',
     marginBottom: 80,
+  },
+  nameDisplay: {
+    padding: 16,
+    backgroundColor: '#F8F1FF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5D9F2',
+  },
+  nameLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+    fontFamily: 'DMSansMedium',
+  },
+  nameValue: {
+    fontSize: 16,
+    color: '#391D65',
+    fontFamily: 'DMSansBold',
   },
   checkboxContainer: {
     flexDirection: 'row',

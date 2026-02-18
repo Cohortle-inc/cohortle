@@ -26,6 +26,9 @@ import { useGetLessons } from '@/api/communities/lessons/getLessons';
 import { usePostLesson } from '@/api/communities/lessons/postLessons';
 import { useEditLesson } from '@/api/communities/lessons/updateLesson';
 import { useDeleteLesson } from '@/api/communities/lessons/deleteLesson';
+import AssignmentIndicator from '@/components/assignments/AssignmentIndicator';
+import { UnitTypeSelectionModal } from '@/components/lessons/UnitTypeSelectionModal';
+import { LessonUnitType, getEditorRoute, getUnitTypeIcon } from '@/types/lessonTypes';
 
 interface ModuleType {
   id: number;
@@ -39,6 +42,7 @@ interface LessonProp {
   id: number;
   name: string;
   status: 'published' | 'draft';
+  type?: LessonUnitType;
 }
 
 const Index = () => {
@@ -175,6 +179,9 @@ export const Module = ({
   const [optionModal, setOptionModal] = useState(0); // 4 = rename, 5 = delete
   const [newLessonName, setNewLessonName] = useState('');
   const [discussionModalVisible, setDiscussionModalVisible] = useState(false);
+  const [showTypeModal, setShowTypeModal] = useState(false);
+  
+  const router = useRouter();
 
   const { data: lessons = [], refetch } = useGetLessons(id);
   const { mutate: editModule } = useEditModule();
@@ -194,14 +201,37 @@ export const Module = ({
   };
 
   const handleCreateLesson = () => {
+    setShowTypeModal(true);
+  };
+
+  const handleTypeSelected = (type: LessonUnitType) => {
     const newLesson = {
       module_id: id,
       name: 'New Lesson',
       description: '',
       url: '',
       order_number: lessons.length + 1,
+      type,
     };
-    CreateLesson(newLesson, { onSuccess: () => refetch() });
+    CreateLesson(newLesson, {
+      onSuccess: (createdLesson: any) => {
+        refetch();
+        setShowTypeModal(false);
+        routeToEditor(type, createdLesson.id);
+      },
+    });
+  };
+
+  const routeToEditor = (type: LessonUnitType, lessonId: number) => {
+    const editorRoute = getEditorRoute(type);
+    router.push({
+      pathname: editorRoute as any,
+      params: {
+        lessonId,
+        moduleId: id,
+        moduleTitle: title,
+      },
+    });
   };
 
   const handleStatusChange = (
@@ -279,21 +309,30 @@ export const Module = ({
         {lessons
           .slice() // safe copy — no mutation
           .sort((a: LessonProp, b: LessonProp) => a.id - b.id) // oldest first
-          .map((lesson: LessonProp) => (
-            <TouchableOpacity
+          .map((lesson: LessonProp) => {
+            // Get icon based on lesson type, fallback to videocam-outline for legacy lessons
+            const iconName = lesson.type ? getUnitTypeIcon(lesson.type) : 'videocam-outline';
+            
+            return (
+              <TouchableOpacity
+                key={lesson.id}
                 onPress={() => {
                   setSelectedLesson(lesson);
                   setLessonModalOpen(true);
                 }}
-              ><View key={lesson.id} style={[styles.lessonRow, { backgroundColor: lesson.status === 'published' ? '#7ded1a2d' : '#EFEFEF' }]}>
-              <Ionicons name="play-circle-outline" size={18} color="#8E8E8E" />
-              <Text style={styles.lessonText}>{lesson.name}</Text>
-              
-                <Ionicons name="ellipsis-vertical" size={20} color="#8E8E8E" />
-              
-            </View>
-            </TouchableOpacity>
-          ))}
+              >
+                <View style={[styles.lessonRow, { backgroundColor: lesson.status === 'published' ? '#7ded1a2d' : '#EFEFEF' }]}>
+                  <Ionicons name={iconName as any} size={18} color="#8E8E8E" />
+                  <Text style={styles.lessonText}>{lesson.name}</Text>
+                  
+                  {/* Assignment Indicator */}
+                  <AssignmentIndicator lessonId={String(lesson.id)} isStudent={false} />
+                  
+                  <Ionicons name="ellipsis-vertical" size={20} color="#8E8E8E" />
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         {lessons.length === 0 && (
           <Text style={styles.noLessons}>No lessons yet</Text>
         )}
@@ -453,6 +492,13 @@ export const Module = ({
           </TouchableOpacity>
         </View>
       </SlideModal>
+
+      {/* Unit Type Selection Modal */}
+      <UnitTypeSelectionModal
+        isVisible={showTypeModal}
+        onSelectType={handleTypeSelected}
+        onCancel={() => setShowTypeModal(false)}
+      />
     </View>
   );
 };

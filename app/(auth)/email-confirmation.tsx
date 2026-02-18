@@ -64,7 +64,11 @@ const EmailConfirmation = (props: Props) => {
       if (!response.data.error) {
         router.navigate({
           pathname: '/(auth)/signUp',
-          params: { token: response.data.token },
+          params: { 
+            token: response.data.token,
+            firstName: firstName,
+            lastName: lastName
+          },
         });
         console.log('sent!');
       } else {

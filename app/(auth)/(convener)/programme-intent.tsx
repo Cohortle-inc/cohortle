@@ -30,7 +30,11 @@ const DURATION_UNITS = ['Weeks', 'Months'];
 const DELIVERY_MODES = ['Online', 'Hybrid', 'Physical'];
 
 const ProgrammeIntent = () => {
-    const { token } = useLocalSearchParams<{ token: string }>();
+    const { token, firstName, lastName } = useLocalSearchParams<{ 
+        token: string;
+        firstName?: string;
+        lastName?: string;
+    }>();
     const [formData, setFormData] = useState({
         programme_type: '',
         expected_cohort_size: '',
@@ -56,8 +60,8 @@ const ProgrammeIntent = () => {
         postIntent(formData, {
             onSuccess: () => {
                 router.push({
-                    pathname: '/(auth)/(convener)/community-info',
-                    params: { token },
+                    pathname: '/(auth)/(convener)/about',
+                    params: { token, firstName, lastName },
                 });
             },
             onError: (error: any) => {
@@ -65,7 +69,7 @@ const ProgrammeIntent = () => {
                 // Fallback navigation if API fails but we want to continue onboarding
                 router.push({
                     pathname: '/(auth)/(convener)/about',
-                    params: { token },
+                    params: { token, firstName, lastName },
                 });
             }
         });

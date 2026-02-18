@@ -50,7 +50,11 @@ const SignUp = () => {
   // Resolve API URL with fallback (handles preview builds where env may not be injected)
   const apiURL = process.env.EXPO_PUBLIC_API_URL;
 
-  const token = useLocalSearchParams<{ token: string }>();
+  const { token, firstName, lastName } = useLocalSearchParams<{ 
+    token: string;
+    firstName?: string;
+    lastName?: string;
+  }>();
 
   const handleRoleSelection = (role: 'convener' | 'learner') => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -89,7 +93,7 @@ const SignUp = () => {
     setError('');
 
     console.log('[SignUp] apiURL:', apiURL);
-    console.log('[SignUp] token param present:', !!token?.token);
+    console.log('[SignUp] token param present:', !!token);
 
     try {
       const response = await axios.patch(
@@ -97,7 +101,7 @@ const SignUp = () => {
         { role: selectedRole },
         {
           headers: {
-            Authorization: token?.token ? `Bearer ${token.token}` : undefined,
+            Authorization: token ? `Bearer ${token}` : undefined,
           },
         }
       );
@@ -114,12 +118,20 @@ const SignUp = () => {
         if (selectedRole !== 'learner') {
           router.navigate({
             pathname: '/(auth)/(convener)/programme-intent',
-            params: { token: response.data.token },
+            params: { 
+              token: response.data.token,
+              firstName: firstName,
+              lastName: lastName
+            },
           });
         } else {
           router.navigate({
             pathname: '/(student)/about',
-            params: { token: response.data.token },
+            params: { 
+              token: response.data.token,
+              firstName: firstName,
+              lastName: lastName
+            },
           });
         }
       }

@@ -8,22 +8,18 @@ const getCommunity = async (id: string) => {
   const token = await AsyncStorage.getItem('authToken');
 
   try {
-    console.log('Fetching community', { id, apiURL, hasToken: !!token });
-
     const response = await axios.get(`${apiURL}/v1/api/communities/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log('Fetched community:', response.data.community);
     return response.data.community;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
       console.error('Error fetching community: status=', error.response?.status);
-      console.error('Error fetching community: data=', error.response?.data);
     }
-    console.error('Error fetching community (raw):', error);
+    console.error('Error fetching community:', error?.message || 'Unknown error');
     throw error;
   }
 };

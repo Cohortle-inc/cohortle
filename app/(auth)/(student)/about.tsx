@@ -15,36 +15,31 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
 
 interface FormData {
-  firstName: string;
-  lastName: string;
+  // firstName and lastName removed - now passed as params
 }
 
 interface FormErrors {
-  firstName?: string;
-  lastName?: string;
   terms?: string;
   server?: string;
 }
 
 const About = () => {
-  const [data, setData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-  });
+  const [data, setData] = useState<FormData>({});
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const { token } = useLocalSearchParams<{ token: string }>();
+  const { token, firstName, lastName } = useLocalSearchParams<{ 
+    token: string;
+    firstName?: string;
+    lastName?: string;
+  }>();
   const apiURL = process.env.EXPO_PUBLIC_API_URL as string;
   const router = useRouter();
 
   // Clear field errors on input
   const handleUpdate = (field: keyof FormData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
     if (errors.server) {
       setErrors((prev) => ({ ...prev, server: undefined }));
     }
@@ -53,21 +48,6 @@ const About = () => {
   // Client-side validation
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    const trimmedFirstName = data.firstName.trim();
-    const trimmedLastName = data.lastName.trim();
-
-    if (!trimmedFirstName) {
-      newErrors.firstName = 'First name is required';
-    } else if (trimmedFirstName.length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters';
-    }
-
-    if (!trimmedLastName) {
-      newErrors.lastName = 'Last name is required';
-    } else if (trimmedLastName.length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters';
-    }
 
     if (!isChecked) {
       newErrors.terms = 'You must agree to the terms and privacy policy';
@@ -85,13 +65,18 @@ const About = () => {
       return;
     }
 
+    if (!firstName || !lastName) {
+      Alert.alert('Error', 'Name information is missing. Please start the signup process again.');
+      return;
+    }
+
     setLoading(true);
     setErrors({}); // Clear previous errors
 
     try {
       const formData = new FormData();
-      formData.append('first_name', data.firstName.trim());
-      formData.append('last_name', data.lastName.trim());
+      formData.append('first_name', firstName.trim());
+      formData.append('last_name', lastName.trim());
 
       const response = await axios.put(
         `${apiURL}/v1/api/profile`,
@@ -139,10 +124,7 @@ const About = () => {
     }
   };
 
-  const isFormValid =
-    data.firstName.trim().length >= 2 &&
-    data.lastName.trim().length >= 2 &&
-    isChecked;
+  const isFormValid = isChecked;
 
   return (
     <SafeAreaWrapper>
@@ -152,20 +134,11 @@ const About = () => {
         <Text style={styles.title}>Tell us about yourself 😄</Text>
 
         <View style={styles.form}>
-          <Input
-            label="First Name"
-            placeholder="First name"
-            value={data.firstName}
-            onChangeText={(value: string) => handleUpdate('firstName', value)}
-            error={errors.firstName}
-          />
-          <Input
-            label="Last Name"
-            placeholder="Last name"
-            value={data.lastName}
-            onChangeText={(value: string) => handleUpdate('lastName', value)}
-            error={errors.lastName}
-          />
+          {/* Name fields removed - now passed from previous screen */}
+          <View style={styles.nameDisplay}>
+            <Text style={styles.nameLabel}>Name:</Text>
+            <Text style={styles.nameValue}>{firstName} {lastName}</Text>
+          </View>
         </View>
 
         {/* Terms Checkbox with Error */}
@@ -235,6 +208,24 @@ const styles = StyleSheet.create({
   form: {
     gap: 24,
     marginTop: 20,
+  },
+  nameDisplay: {
+    padding: 16,
+    backgroundColor: '#F8F1FF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5D9F2',
+  },
+  nameLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+    fontFamily: 'DMSansMedium',
+  },
+  nameValue: {
+    fontSize: 16,
+    color: '#391D65',
+    fontFamily: 'DMSansBold',
   },
   checkboxContainer: {
     flexDirection: 'row',

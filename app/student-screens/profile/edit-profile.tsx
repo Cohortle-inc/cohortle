@@ -246,7 +246,7 @@ const EditProfile = (props: Props) => {
               updateFormField('firstName', value)
             }
             label="First Name"
-            placeholder={profileData ? profileData.message.first_name : "Enter your first name"}
+            placeholder={profileData?.first_name || "Enter your first name"}
             editable={!isSaving}
           />
 
@@ -254,7 +254,7 @@ const EditProfile = (props: Props) => {
             value={formData.lastName}
             onChangeText={(value: string) => updateFormField('lastName', value)}
             label="Last Name"
-            placeholder={profileData ? profileData.message.last_name : "Enter your last name"}
+            placeholder={profileData?.last_name || "Enter your last name"}
             editable={!isSaving}
           />
 
@@ -262,7 +262,7 @@ const EditProfile = (props: Props) => {
             label="Bio"
             value={formData.bio}
             onChangeText={(value: string) => updateFormField('bio', value)}
-            placeholder={profileData ? profileData.message.bio : "Tell us about yourself"}
+            placeholder={profileData?.bio || "Tell us about yourself"}
             editable={!isSaving}
             maxLength={500}
           />
@@ -271,7 +271,7 @@ const EditProfile = (props: Props) => {
             value={formData.location}
             onChangeText={(value: string) => updateFormField('location', value)}
             label="Location"
-            placeholder={profileData ? profileData.message.location : "Enter your location"}
+            placeholder={profileData?.location || "Enter your location"}
             editable={!isSaving}
           />
 
@@ -279,7 +279,7 @@ const EditProfile = (props: Props) => {
             value={formData.socials}
             onChangeText={(value: string) => updateFormField('socials', value)}
             label="LinkedIn URL"
-            placeholder={profileData ? profileData.message.socials : "Enter your LinkedIn URL"}
+            placeholder={profileData?.socials || "Enter your LinkedIn URL"}
             editable={!isSaving}
           />
         </View>

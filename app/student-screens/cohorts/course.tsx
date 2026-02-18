@@ -19,6 +19,7 @@ import { useGetPublishedLessons } from '@/api/communities/lessons/publishedLesso
 import { colors } from '@/utils/color';
 import { useProgrammeMembership } from '@/hooks/useProgrammeMembership';
 import CohortSelection from '@/components/cohorts/CohortSelection';
+import AssignmentIndicator from '@/components/assignments/AssignmentIndicator';
 
 type ModuleType = {
   id: number;
@@ -370,6 +371,9 @@ const Lesson = (lesson: LessonProp) => {
               Text
             </Text>
           )}
+          
+          {/* Assignment Indicator */}
+          <AssignmentIndicator lessonId={String(lesson.id)} isStudent={true} />
           {/* <Text
             style={{
               borderWidth: 1,

@@ -8,17 +8,27 @@ export const getProfile = async () => {
   try {
     const apiBaseUrl = requireApiBaseUrl();
     const token = await AsyncStorage.getItem('authToken');
+    
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
     const response = await axios.get(`${apiBaseUrl}/v1/api/profile`, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data);
-    return response.data; // Returning full data including user object
+    
+    // Normalize the response structure
+    // If API returns { message: { first_name, ... } }, flatten it
+    const profileData = response.data?.message || response.data?.user || response.data;
+    
+    return profileData;
   } catch (error: any) {
-    Alert.alert('Error', error?.message || 'Failed to load profile.');
-    throw error;
+    const errorMessage = error?.response?.data?.message || error?.message || 'Failed to load profile.';
+    console.error('Profile fetch error:', errorMessage);
+    throw new Error(errorMessage);
   }
 };
 

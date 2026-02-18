@@ -22,6 +22,7 @@ import { useGetLesson } from '@/api/communities/lessons/getLesson';
 import { useCompleteLesson } from '@/api/lessons/completeLesson';
 import { useGetPublishedLessons } from '@/api/communities/lessons/publishedLessons';
 import { useGetProfile } from '@/api/getProfile';
+import { isYouTubeUrl, getYouTubeEmbedUrl } from '@/utils/youtubeHelpers';
 
 const { width } = Dimensions.get('window');
 
@@ -52,16 +53,38 @@ const Module = () => {
   }, [showControls]);
 
   // Handle auto-completion when video ends
-  const { mutate: completeLesson } = useCompleteLesson();
+  const { mutate: completeLesson, isPending: isCompletingLesson } = useCompleteLesson();
+  const [hasMarkedComplete, setHasMarkedComplete] = useState(false);
+  
   useEffect(() => {
-    if (status?.isLoaded && status.didJustFinish && !status.isLooping && !isAlreadyCompleted && lessonId && cohortId) {
+    if (
+      status?.isLoaded && 
+      status.didJustFinish && 
+      !status.isLooping && 
+      !isAlreadyCompleted && 
+      !hasMarkedComplete &&
+      !isCompletingLesson &&
+      lessonId && 
+      cohortId
+    ) {
       console.log('🎥 Video finished! Marking lesson as complete...');
+      setHasMarkedComplete(true); // Prevent duplicate calls
+      
       completeLesson(
         { lessonId, cohort_id: cohortId },
-        { onSuccess: () => setIsAlreadyCompleted(true) }
+        { 
+          onSuccess: () => {
+            setIsAlreadyCompleted(true);
+            console.log('✅ Lesson marked complete');
+          },
+          onError: (error) => {
+            console.error('❌ Failed to mark lesson complete:', error);
+            setHasMarkedComplete(false); // Allow retry on error
+          }
+        }
       );
     }
-  }, [status, isAlreadyCompleted, lessonId, cohortId]);
+  }, [status, isAlreadyCompleted, hasMarkedComplete, isCompletingLesson, lessonId, cohortId]);
 
   const togglePlayPause = () => {
     if (status?.isLoaded && status.isPlaying) {
@@ -169,7 +192,16 @@ const Module = () => {
       {/* Video Player */}
       {media ? (
         <View style={styles.videoWrapper}>
-          {media.includes('iframe.mediadelivery.net') ? (
+          {isYouTubeUrl(media) ? (
+            <WebView
+              source={{ uri: getYouTubeEmbedUrl(media) }}
+              style={styles.video}
+              allowsFullscreenVideo
+              javaScriptEnabled
+              domStorageEnabled
+              mediaPlaybackRequiresUserAction={false}
+            />
+          ) : media.includes('iframe.mediadelivery.net') ? (
             <WebView
               source={{ uri: media }}
               style={styles.video}

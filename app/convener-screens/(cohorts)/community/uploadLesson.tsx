@@ -2,14 +2,13 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
   ScrollView,
   Alert,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
 import { colors } from '@/utils/color';
 import { NavHead } from '@/components/HeadRoute';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -17,13 +16,7 @@ import { useGetLesson } from '@/api/communities/lessons/getLesson';
 import { uploadLessonMedia } from '@/api/communities/lessons/uploadMedia';
 import { Ionicons } from '@expo/vector-icons';
 import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
-
-interface MediaFile {
-  uri: string;
-  type: 'video';
-  name: string;
-  size?: number;
-}
+import { validateYouTubeUrl, isYouTubeUrl } from '@/utils/youtubeHelpers';
 
 interface RichEditorRef {
   setContentHTML: (html: string) => void;
@@ -34,7 +27,8 @@ interface RichEditorRef {
 
 const CreateLesson = () => {
   const [title, setTitle] = useState<string>('Introduction');
-  const [media, setMedia] = useState<MediaFile | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string>('');
+  const [urlError, setUrlError] = useState<string>('');
   const [description, setDescription] = useState('');
   const [text, setText] = useState<string>(''); // Only for initial load and display
   const [editorKey, setEditorKey] = useState(0);
@@ -44,7 +38,7 @@ const CreateLesson = () => {
 
   const lessonID = useLocalSearchParams().lessonId as string;
   const moduleID = useLocalSearchParams().moduleId as string;
-  const moduleTitle = useLocalSearchParams().moduleTitle;
+  const moduleTitle = (useLocalSearchParams().moduleTitle as string) || 'Module';
   const { data: lessonData, isLoading } = useGetLesson(lessonID);
   console.log(lessonData)
 
@@ -65,6 +59,7 @@ const CreateLesson = () => {
       console.log('📥 Loading lesson data into editor');
 
       setDescription(lessonData.description || '');
+      setVideoUrl(lessonData.media || lessonData.url || '');
 
       const lessonText = lessonData.text || '<p>Start writing your lesson content...</p>';
 
@@ -78,9 +73,9 @@ const CreateLesson = () => {
   }, [lessonData, isLoading]);
 
   // ✅ Minimal ref assignment
-  const handleEditorRef = useCallback((ref: RichEditorRef | null) => {
-    richEditor.current = ref;
-    if (ref) {
+  const handleEditorRef = useCallback((ref: any) => {
+    if (ref && richEditor.current !== ref) {
+      (richEditor as any).current = ref;
       console.log('✅ Editor ref assigned');
     }
   }, []);
@@ -106,116 +101,72 @@ const CreateLesson = () => {
     return currentContentRef.current || text;
   }, [text]);
 
-  // Media handling functions...
-  const handleMediaSelected = (
-    asset: ImagePicker.ImagePickerAsset | DocumentPicker.DocumentPickerAsset,
-  ) => {
-    const getFileName = (): string => {
-      if ('fileName' in asset && asset.fileName) return asset.fileName;
-      if ('name' in asset && asset.name) return asset.name;
-      return asset.uri.split('/').pop() || 'file';
-    };
-
-    const getMediaType = (): MediaFile['type'] => {
-      const mime = (asset as any).mimeType?.toLowerCase() || '';
-      if (mime.startsWith('video/')) return 'video';
-      return 'video';
-    };
-
-    const unified: MediaFile = {
-      uri: asset.uri,
-      name: getFileName(),
-      type: getMediaType(),
-      size: 'fileSize' in asset ? (asset.fileSize ?? undefined) : 'size' in asset ? asset.size : undefined,
-    };
-
-    setMedia(unified);
-  };
-
-  const pickMediaFromLibrary = async () => {
-    try {
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert('Permission required', 'Please allow access to your photo library');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-        allowsEditing: false, // Disabled - can crash on large videos
-        quality: 0.8, // Reduced to prevent memory issues
-        videoMaxDuration: 3600, // 1 hour max
-      });
-
-      if (!result.canceled && result.assets?.[0]) {
-        handleMediaSelected(result.assets[0]);
-      }
-    } catch (error) {
-      console.error('Video picker error:', error);
-      Alert.alert('Error', 'Failed to select video. Please try again or use a smaller file.');
+  // Validate YouTube URL
+  const handleUrlChange = (url: string) => {
+    setVideoUrl(url);
+    if (url.trim() === '') {
+      setUrlError('');
+      return;
     }
-  };
-
-  const pickDocumentsOrAudio = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: '*/*',
-      copyToCacheDirectory: true,
-      multiple: false,
-    });
-
-    if (result.canceled) return;
-
-    const asset = result.assets?.[0];
-    if (asset) handleMediaSelected(asset);
-  };
-
-  const handleUploadPress = () => {
-    Alert.alert(
-      'Choose Media Type',
-      'Select the type of file you want to upload',
-      [
-        { text: 'Video from Gallery', onPress: pickMediaFromLibrary },
-        { text: 'Video from Files', onPress: pickDocumentsOrAudio },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-    );
+    const error = validateYouTubeUrl(url);
+    setUrlError(error || '');
   };
 
   const handleUpdateForm = async () => {
+    // Validate YouTube URL if provided
+    if (videoUrl.trim() !== '') {
+      const error = validateYouTubeUrl(videoUrl);
+      if (error) {
+        Alert.alert('Invalid URL', error);
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       // ✅ Always get content from ref (most up-to-date)
       const currentContent = getCurrentContent();
       console.log('💾 Saving content from ref:', currentContent.substring(0, 100) + '...');
 
-      await uploadLessonMedia(lessonID, media, currentContent);
+      // Pass YouTube URL instead of file
+      await uploadLessonMedia(lessonID, videoUrl, currentContent);
 
       // ✅ Update state only after successful save to reflect changes
       setText(currentContent);
       hasUnsavedChangesRef.current = false;
 
       setLoading(false);
-      Alert.alert('Success', 'Lesson updated!');
-      router.back()
+      Alert.alert('Success', 'Lesson updated successfully!', [
+        {
+          text: 'OK',
+          onPress: () => router.back(),
+        },
+      ]);
     } catch (error: any) {
-      console.log('Update Error:', error?.response?.data);
-      Alert.alert('Error', 'Could not update lesson');
+      console.error('Update Error:', error);
       setLoading(false);
+      
+      // Show user-friendly error message
+      const errorMessage = error?.message || 'Could not update lesson. Please try again.';
+      Alert.alert('Upload Failed', errorMessage, [
+        { text: 'OK', style: 'default' },
+      ]);
     }
   };
 
   const renderPreview = () => {
-    const currentVideoUrl = media?.uri || lessonData?.media || lessonData?.url;
-
-    if (!currentVideoUrl) return null;
+    if (!videoUrl || videoUrl.trim() === '') return null;
 
     return (
       <View style={styles.previewBox}>
         <View style={styles.videoPlaceholder}>
-          <Ionicons name="play-circle" size={48} color="#fff" />
+          <Ionicons name="logo-youtube" size={48} color="#FF0000" />
         </View>
         <Text style={styles.videoName} numberOfLines={2}>
-          {media?.name || currentVideoUrl.split('/').pop()?.split('?')[0] || 'Video'}
+          {isYouTubeUrl(videoUrl) ? 'YouTube Video' : 'Video URL'}
+        </Text>
+        <Text style={styles.videoUrl} numberOfLines={1}>
+          {videoUrl}
         </Text>
       </View>
     );
@@ -231,32 +182,34 @@ const CreateLesson = () => {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.uploadSection}
-          onPress={handleUploadPress}
-        >
-          <Ionicons name="videocam" color={colors.primary} size={25} />
-          <View style={styles.uploadContent}>
-            {renderPreview() ? (
-              <>
-                {renderPreview()}
-                <Text style={styles.changeText}>
-                  {media ? 'Tap to change video' : 'Tap to replace video'}
-                </Text>
-              </>
-            ) : (
-              <View style={{ alignItems: 'center', gap: 5 }}>
-                <Text style={styles.uploadSubtext}>
-                  Tap to add a video lesson
-                </Text>
-              </View>
-            )}
-
-            <Text style={styles.uploadButton}>
-              {media || lessonData?.media ? 'Change Video' : 'Select Video'}
-            </Text>
-          </View>
-        </TouchableOpacity>
+        <View style={styles.uploadSection}>
+          <Ionicons name="logo-youtube" color={colors.primary} size={32} />
+          <Text style={styles.sectionTitle}>YouTube Video URL</Text>
+          <Text style={styles.sectionSubtitle}>
+            Upload your video to YouTube (as Unlisted), then paste the URL here
+          </Text>
+          
+          <TextInput
+            style={[styles.urlInput, urlError ? styles.urlInputError : null]}
+            value={videoUrl}
+            onChangeText={handleUrlChange}
+            placeholder="https://www.youtube.com/watch?v=..."
+            placeholderTextColor="#999"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+          />
+          
+          {urlError ? (
+            <Text style={styles.errorText}>{urlError}</Text>
+          ) : null}
+          
+          {renderPreview()}
+          
+          <Text style={styles.helpText}>
+            💡 Tip: Set your YouTube video to "Unlisted" so only people with the link can view it
+          </Text>
+        </View>
 
         {/* ✅ Fixed Rich Text Editor - No re-renders during typing */}
         <View style={styles.richEditorContainer}>
@@ -324,13 +277,46 @@ const styles = StyleSheet.create({
   uploadSection: {
     borderWidth: 2,
     borderColor: colors.purpleShade,
-    borderStyle: 'dashed',
+    borderStyle: 'solid',
     borderRadius: 12,
     padding: 20,
-    gap: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: 12,
     backgroundColor: '#fff',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    textAlign: 'center',
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  urlInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  urlInputError: {
+    borderColor: '#ff4444',
+  },
+  errorText: {
+    color: '#ff4444',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  helpText: {
+    fontSize: 13,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
   uploadContent: { alignItems: 'center', width: '100%' },
   uploadSubtext: { fontSize: 14, color: '#666', textAlign: 'center' },
@@ -352,11 +338,12 @@ const styles = StyleSheet.create({
   videoPlaceholder: {
     width: 120,
     height: 120,
-    backgroundColor: '#000',
+    backgroundColor: '#f0f0f0',
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
+    marginTop: 10,
   },
   videoName: {
     fontSize: 14,
@@ -364,6 +351,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     maxWidth: 200,
+  },
+  videoUrl: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    maxWidth: 250,
+    marginTop: 4,
   },
   changeText: {
     fontSize: 13,

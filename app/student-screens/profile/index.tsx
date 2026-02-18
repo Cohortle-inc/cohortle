@@ -148,7 +148,7 @@ const Profile = () => {
       <View style={styles.profileContainer}>
         {profile?.profile_image ? (
           <Image
-            source={{ uri: profile.message.profile_image }}
+            source={{ uri: profile.profile_image }}
             style={[styles.profileImage, { backgroundColor: 'transparent' }]}
           />
         ) : (
@@ -156,19 +156,19 @@ const Profile = () => {
         )}
         <View style={styles.profileDetails}>
           <Text style={styles.profileName}>
-            {profile?.message.first_name} {profile?.message.last_name}
+            {profile?.first_name} {profile?.last_name}
           </Text>
 
           <View style={styles.infoRow}>
             <Location />
             <Text style={styles.infoText}>
-              {profile?.message.location || 'No location set'}
+              {profile?.location || 'No location set'}
             </Text>
           </View>
 
           <Pressable
             onPress={() => {
-              const url = profile?.message.socials || 'https://copywritingprompts.com';
+              const url = profile?.socials || 'https://copywritingprompts.com';
               Linking.openURL(url.startsWith('http') ? url : `https://${url}`);
             }}
           >
@@ -177,11 +177,11 @@ const Profile = () => {
               <Text
                 style={[styles.infoText, { textDecorationLine: 'underline' }]}
               >
-                {profile?.message.socials && 'Social Link'}
+                {profile?.socials && 'Social Link'}
               </Text>
             </View>
           </Pressable>
-          {profile?.message.bio && (
+          {profile?.bio && (
             <Text
               style={{
                 fontFamily: 'DMSansRegular',
@@ -192,13 +192,13 @@ const Profile = () => {
                 paddingHorizontal: 20,
               }}
             >
-              {profile?.message.bio}
+              {profile?.bio}
             </Text>
           )}
           <View style={styles.infoRow}>
             <Calender />
             <Text style={styles.infoText}>
-              Joined {formatJoinedDate(profile?.message.created_at)}
+              Joined {formatJoinedDate(profile?.created_at)}
             </Text>
           </View>
 
