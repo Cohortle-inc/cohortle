@@ -1,21 +1,39 @@
 {
+  "cli": {
+    "version": ">= 5.2.0"
+  },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "android": {
+        "buildType": "apk"
+      }
     },
     "preview": {
+      "distribution": "internal",
+      "channel": "preview",
       "android": {
-        "distribution": "internal",
         "buildType": "apk",
-        "env": {
-          "EXPO_PUBLIC_SUPABASE_URL": "https://oewgmuhohrqzpjuvkuhk.supabase.com",
-          "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ld2dtdWhvaHJxenBqdXZrdWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMzM3MjIsImV4cCI6MjA1NzYwOTcyMn0.1DlqVzBjDWnG2qjS20AvieF99xLr4kP6qWQFh1PdfBA",
-          "EXPO_PUBLIC_API_URL": "https://api.cohortle.com"
-        }
+        "gradleCommand": ":app:assembleRelease"
       },
-      "channel": "preview"
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.cohortle.com",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.cohortle.com"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.cohortle.com",
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.cohortle.com"
+      }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
