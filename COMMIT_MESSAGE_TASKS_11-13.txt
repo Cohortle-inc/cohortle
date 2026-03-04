@@ -1,0 +1,48 @@
+feat: Complete tasks 11-13 - publishing, edit/delete, comprehensive logging
+
+Tasks Completed:
+- Task 11: Programme publishing functionality
+- Task 12: Edit and delete functionality for all resources
+- Task 13: Comprehensive logging throughout workflow
+
+Backend Changes:
+- Added POST /v1/api/programmes/:id/publish endpoint
+- Added PUT /v1/api/programmes/:id endpoint
+- Added DELETE /v1/api/programmes/:id endpoint
+- Added DELETE /v1/api/lessons/:id endpoint (WLIMP context)
+- Created errorLogger.js utility with comprehensive logging functions
+- Added error logging to cohort and programme routes
+- All endpoints verify ownership before modifications
+
+Frontend Changes:
+- Publish button UI already implemented in programme detail page
+- useProgrammeDetail hook already has publish mutation
+- All CRUD API functions already exist in convener.ts
+- Created errorHandling.ts utility for error parsing
+- Updated ProgrammeForm and CohortForm with error handling
+- Edit modals and delete confirmations already in place
+
+Testing:
+- Backend: 9 tests passing (errorLogger.test.js)
+- Frontend: 20 tests implemented (errorHandling.test.ts)
+- All diagnostics clean
+
+Features:
+- Complete CRUD operations for programmes, cohorts, weeks, lessons
+- Programme publishing workflow with ownership verification
+- Comprehensive error handling with user-friendly messages
+- Automatic sensitive data sanitization in logs
+- Environment-aware logging (verbose in dev, minimal in production)
+- Cascade deletes for related data
+
+Files Modified:
+- cohortle-api/routes/programme.js
+- cohortle-api/routes/cohort.js
+- cohortle-api/utils/errorLogger.js (new)
+- cohortle-api/__tests__/utils/errorLogger.test.js (new)
+- cohortle-web/src/lib/utils/errorHandling.ts (new)
+- cohortle-web/__tests__/utils/errorHandling.test.ts (new)
+- cohortle-web/src/components/convener/ProgrammeForm.tsx
+- cohortle-web/src/components/convener/CohortForm.tsx
+- TASKS_8-13_PROGRESS.md (updated)
+- TASKS_11-13_COMPLETION_SUMMARY.md (new)

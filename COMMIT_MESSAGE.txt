@@ -1,0 +1,128 @@
+feat(mvp-completion-gaps): Add LiveSessionContent and progress calculation system
+
+## Summary
+Implemented LiveSessionContent component and comprehensive progress calculation 
+system for the MVP completion gaps spec. Added extensive property-based testing 
+with optimized iteration counts for faster test execution.
+
+## Features Added
+
+### 1. LiveSessionContent Component
+- Session status indicators (upcoming/live/completed)
+- Automatic status calculation based on date and duration
+- Google Calendar integration with one-click add
+- .ics file download for other calendar apps
+- Timezone-aware date/time display
+- Conditional UI based on session status
+- Join button with animated "Live Now" state
+- Responsive design with mobile support
+
+### 2. Progress Calculation System
+- Core utilities for calculating progress percentages
+- Week-level progress calculation
+- Programme-level progress aggregation
+- Module-level progress tracking
+- Real-time progress updates after lesson completion
+- React Query hooks for progress management
+- Optimistic updates with cache invalidation
+- Edge case handling (zero lessons, negative values, etc.)
+
+### 3. React Query Integration
+- `useProgrammeProgress()` - Fetch and calculate programme progress
+- `useModuleProgress()` - Fetch and calculate module progress
+- `useUpdateProgress()` - Update progress cache after completion
+- `useInvalidateProgress()` - Bulk refresh of progress queries
+- 30-second stale time for frequently changing data
+
+## Testing
+
+### Unit Tests (49 tests)
+- LiveSessionContent: 30 tests
+- Progress Calculation: 19 tests
+- All tests passing ✅
+
+### Property-Based Tests (27 properties, 1,350 iterations)
+- LiveSessionContent: 12 properties (50 iterations each)
+- Progress Calculation: 6 properties (50 iterations each)
+- Completion API Integration: 5 properties (50 iterations each)
+- Progress Indicator Updates: 4 properties (50 iterations each)
+- Optimized from 100 → 50 iterations for 50% faster execution
+
+### Requirements Validated
+- Requirements 1.22-1.25 (Live Session Display)
+- Requirements 2.2, 2.5, 2.6, 2.8, 2.9, 2.10 (Progress Tracking)
+
+## Files Added
+
+### Components
+- `cohortle-web/src/components/lessons/LiveSessionContent.tsx`
+
+### Utilities
+- `cohortle-web/src/lib/utils/progressCalculation.ts`
+
+### Hooks
+- `cohortle-web/src/lib/hooks/useProgress.ts`
+
+### Tests
+- `cohortle-web/__tests__/components/LiveSessionContent.test.tsx`
+- `cohortle-web/__tests__/components/LiveSessionContent.pbt.tsx`
+- `cohortle-web/__tests__/utils/progressCalculation.test.ts`
+- `cohortle-web/__tests__/utils/progressCalculation.pbt.ts`
+- `cohortle-web/__tests__/api/completionApiIntegration.pbt.ts`
+- `cohortle-web/__tests__/components/progressIndicatorUpdates.pbt.tsx`
+
+### Documentation
+- `cohortle-web/PROGRESS_CALCULATION_IMPLEMENTATION.md`
+- `MVP_COMPLETION_GAPS_SESSION_SUMMARY.md`
+- `TEST_OPTIMIZATION_SUMMARY.md`
+- `PRE_COMMIT_CHECKLIST.md`
+
+## Files Modified
+- `.kiro/specs/mvp-completion-gaps/tasks.md` (task status updates)
+- `cohortle-web/src/components/lessons/LessonViewer.tsx` (LiveSessionContent integration)
+- `cohortle-web/src/lib/hooks/useLessonCompletion.ts` (progress invalidation)
+
+## Technical Details
+
+### Performance Optimizations
+- Memoized calculations in LiveSessionContent
+- React Query caching with 30s stale time
+- Optimistic updates for progress
+- Efficient progress calculation algorithms
+- Reduced PBT iterations for faster CI/CD
+
+### Type Safety
+- All TypeScript interfaces defined
+- No `any` types used
+- Proper type exports
+- Full type coverage
+
+### Integration
+- LiveSessionContent integrated into LessonViewer
+- Progress hooks ready for dashboard use
+- Completion tracking invalidates progress queries
+- Seamless API integration
+
+## Breaking Changes
+None - all changes are additive and backward compatible
+
+## Deployment Safety
+✅ Safe to deploy
+- No database migrations required
+- No environment variable changes
+- No breaking API changes
+- All existing features unaffected
+
+## Next Steps
+- Implement progress dashboard UI (Task 10)
+- Add lesson overview sidebar (Task 7.3)
+- Implement breadcrumb navigation (Task 7.6)
+- Add convener preview mode (Task 11)
+- Implement lesson reordering (Task 12)
+
+## Stats
+- Tasks Completed: 11/45 (24%)
+- Tests Added: 76 (49 unit + 27 property)
+- Test Coverage: Comprehensive
+- Build Status: ✅ Passing
+- Diagnostics: ✅ No errors
