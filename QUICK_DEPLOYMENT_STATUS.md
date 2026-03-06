@@ -45,6 +45,15 @@ Look for in Coolify logs:
 
 ## 🚨 IF ISSUES OCCUR
 
+### Server Action Errors (ACTIVE ISSUE)
+**Status**: Occurring in production logs
+**Error**: `Failed to find Server Action "x"`
+**Fix**: See `SERVER_ACTION_CACHE_FIX_IMMEDIATE.md`
+**Action Required**:
+1. Run `.\purge-cloudflare-cache.ps1`
+2. Force rebuild cohortle-web in Coolify
+3. Verify in incognito window
+
 ### SQL Errors Still Appear
 1. Check if deployment actually happened
 2. Verify commit `8a51f7d` is deployed
