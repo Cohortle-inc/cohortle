@@ -118,8 +118,37 @@ If needed, this system can be upgraded to:
 ✅ Backend logic implemented
 ✅ Frontend UI implemented
 ✅ Local environment configured
-⏳ Pending: Production environment variable setup
-⏳ Pending: Deployment and testing
+✅ Whitespace trimming added (prevents copy/paste errors)
+✅ Debug logging added to production
+⏳ Pending: Verify environment variable in Coolify (no quotes, no whitespace)
+⏳ Pending: Test after deployment completes
+
+## Troubleshooting
+
+If you're getting 400 errors after setting the environment variable:
+
+1. **Check the environment variable format in Coolify:**
+   - Should be: `CONVENER_INVITATION_CODE=COHORTLE_CONVENER_2024`
+   - NOT: `CONVENER_INVITATION_CODE="COHORTLE_CONVENER_2024"` (no quotes)
+   - NOT: `CONVENER_INVITATION_CODE=COHORTLE_CONVENER_2024 ` (no trailing space)
+
+2. **Check production logs for debug output:**
+   ```
+   Invitation code validation: { input: '...', expected: '...', match: false }
+   ```
+   This will show you exactly what's being compared.
+
+3. **Run the test script:**
+   ```powershell
+   .\test-convener-signup.ps1
+   ```
+   This will show you the exact error message.
+
+4. **Verify the deployment completed:**
+   - Both API and web need to redeploy after the code changes
+   - Check Coolify deployment status
+
+See `CONVENER_SIGNUP_TROUBLESHOOTING.md` for detailed troubleshooting steps.
 
 ## Next Steps
 
