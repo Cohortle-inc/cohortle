@@ -231,7 +231,7 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - **Property 3: Verification Notification Visibility**
     - **Validates: Requirements 2.1, 2.2, 2.6, 8.4**
 
-  - [~]* 8.4 Write unit tests for EmailVerificationBanner
+  - [ ]* 8.4 Write unit tests for EmailVerificationBanner
     - Test rendering with email address
     - Test resend button click
     - Test loading and success states
@@ -257,11 +257,11 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - Provide appropriate actions for each error
     - _Requirements: 4.5, 4.6, 5.5_
 
-  - [~]* 9.3 Write property test for error message specificity
+  - [ ]* 9.3 Write property test for error message specificity
     - **Property 14: Error Message Specificity**
     - **Validates: Requirements 5.5**
 
-  - [~]* 9.4 Write unit tests for verify-email page
+  - [ ]* 9.4 Write unit tests for verify-email page
     - Test all state transitions: loading → success/error
     - Test redirect after success
     - Test "Request new link" button
@@ -282,15 +282,15 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - Show disabled state with tooltip for unverified users
     - _Requirements: 3.1, 3.2, 3.5_
 
-  - [~]* 10.3 Write property test for programme UI state
+  - [ ]* 10.3 Write property test for programme UI state
     - **Property 6: Programme UI State Based on Verification**
     - **Validates: Requirements 3.5**
 
-  - [~]* 10.4 Write property test for real-time permission updates
+  - [ ]* 10.4 Write property test for real-time permission updates
     - **Property 13: Real-time Permission Updates**
     - **Validates: Requirements 8.3, 8.5**
 
-  - [~]* 10.5 Write unit tests for ProgrammeActionGuard
+  - [ ]* 10.5 Write unit tests for ProgrammeActionGuard
     - Test rendering for verified users
     - Test rendering for unverified users
     - Test fallback message content
@@ -311,16 +311,16 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - Verify user state includes emailVerified: false
     - _Requirements: 1.1, 1.2_
 
-  - [~]* 11.3 Write property test for authenticated session creation
+  - [ ]* 11.3 Write property test for authenticated session creation
     - **Property 1: Authenticated Session Creation on Signup**
     - **Validates: Requirements 1.1**
 
-  - [~]* 11.4 Write property test for unverified user access permissions
+  - [ ]* 11.4 Write property test for unverified user access permissions
     - **Property 2: Unverified User Access Permissions**
     - **Validates: Requirements 1.3, 1.4, 1.5**
 
 - [ ] 12. Integration and end-to-end testing
-  - [~]* 12.1 Test complete verification flow
+  - [ ]* 12.1 Test complete verification flow
     - Sign up new user
     - Verify notification bar appears
     - Click verification link from email
@@ -329,7 +329,7 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - Verify programme actions are now enabled
     - _Requirements: 1.1, 2.1, 4.2, 4.3, 4.7, 8.4_
 
-  - [~]* 12.2 Test resend verification flow
+  - [ ]* 12.2 Test resend verification flow
     - Sign up new user
     - Click "Resend verification email"
     - Verify new email is sent
@@ -337,7 +337,7 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - Verify new token works
     - _Requirements: 2.4, 2.5, 7.3_
 
-  - [~]* 12.3 Test access control enforcement
+  - [ ]* 12.3 Test access control enforcement
     - Sign up unverified user
     - Attempt to create programme → blocked
     - Attempt to join programme → blocked
@@ -346,7 +346,7 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - Attempt to join programme → succeeds
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 8.3, 8.5_
 
-  - [~]* 12.4 Test error scenarios
+  - [ ]* 12.4 Test error scenarios
     - Test expired token handling
     - Test invalid token handling
     - Test already verified handling
@@ -354,7 +354,7 @@ This implementation plan addresses critical UX issues in the Cohortle email veri
     - Verify all error messages are clear and actionable
     - _Requirements: 4.5, 4.6, 5.5_
 
-- [~] 13. Final checkpoint - All tests pass and feature complete
+- [ ] 13. Final checkpoint - All tests pass and feature complete
   - Ensure all unit tests pass
   - Ensure all property tests pass
   - Ensure all integration tests pass
