@@ -3,7 +3,6 @@ name: Purge Cloudflare Cache on Deploy
 on:
   push:
     branches:
-      - main
       - master
     paths:
       - 'cohortle-web/**'
