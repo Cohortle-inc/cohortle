@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cohortle Authentication Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.pass {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.fail {
+            background: #f44336;
+            color: white;
+        }
+        .status.pending {
+            background: #ff9800;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Cohortle Authentication Diagnostic Tool</h1>
+        <p>This tool helps diagnose authentication issues by testing the API endpoints directly from your browser.</p>
+
+        <div class="test-section">
+            <h2>Configuration</h2>
+            <div class="form-group">
+                <label for="apiUrl">API URL:</label>
+                <input type="text" id="apiUrl" value="https://api.cohortle.com" placeholder="https://api.cohortle.com">
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 1: Register New Learner</h2>
+            <div class="form-group">
+                <label for="learnerEmail">Email:</label>
+                <input type="email" id="learnerEmail" placeholder="test-learner@example.com">
+            </div>
+            <div class="form-group">
+                <label for="learnerPassword">Password:</label>
+                <input type="password" id="learnerPassword" placeholder="TestPassword123!">
+            </div>
+            <div class="form-group">
+                <label for="learnerFirstName">First Name:</label>
+                <input type="text" id="learnerFirstName" placeholder="Test">
+            </div>
+            <div class="form-group">
+                <label for="learnerLastName">Last Name:</label>
+                <input type="text" id="learnerLastName" placeholder="Learner">
+            </div>
+            <button onclick="registerLearner()">Register Learner</button>
+            <div id="registerLearnerResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 2: Login as Learner</h2>
+            <div class="form-group">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" placeholder="test-learner@example.com">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" placeholder="TestPassword123!">
+            </div>
+            <button onclick="loginUser()">Login</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 3: Get Profile</h2>
+            <p>Uses token from login test above</p>
+            <button onclick="getProfile()" id="profileBtn" disabled>Get Profile</button>
+            <div id="profileResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 4: Get Dashboard</h2>
+            <p>Uses token from login test above</p>
+            <button onclick="getDashboard()" id="dashboardBtn" disabled>Get Dashboard</button>
+            <div id="dashboardResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Summary</h2>
+            <div id="testSummary">
+                <p>Run the tests above to see results</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let testResults = {
+            register: null,
+            login: null,
+            profile: null,
+            dashboard: null
+        };
+
+        function getApiUrl() {
+            return document.getElementById('apiUrl').value;
+        }
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            element.textContent = message;
+        }
+
+        function updateTestSummary() {
+            const summary = document.getElementById('testSummary');
+            let html = '<h3>Test Results:</h3>';
+            
+            const tests = [
+                { name: 'Register Learner', key: 'register' },
+                { name: 'Login', key: 'login' },
+                { name: 'Get Profile', key: 'profile' },
+                { name: 'Get Dashboard', key: 'dashboard' }
+            ];
+
+            tests.forEach(test => {
+                const result = testResults[test.key];
+                let statusClass = 'pending';
+                let statusText = 'Not Run';
+                
+                if (result === true) {
+                    statusClass = 'pass';
+                    statusText = 'PASS';
+                } else if (result === false) {
+                    statusClass = 'fail';
+                    statusText = 'FAIL';
+                }
+                
+                html += `<p>${test.name}: <span class="status ${statusClass}">${statusText}</span></p>`;
+            });
+
+            summary.innerHTML = html;
+        }
+
+        async function registerLearner() {
+            const email = document.getElementById('learnerEmail').value;
+            const password = document.getElementById('learnerPassword').value;
+            const firstName = document.getElementById('learnerFirstName').value;
+            const lastName = document.getElementById('learnerLastName').value;
+
+            if (!email || !password || !firstName || !lastName) {
+                showResult('registerLearnerResult', 'Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                showResult('registerLearnerResult', 'Registering...', 'info');
+                
+                const response = await fetch(`${getApiUrl()}/v1/api/auth/register-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        first_name: firstName,
+                        last_name: lastName,
+                        role: 'student'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && !data.error) {
+                    testResults.register = true;
+                    authToken = data.token;
+                    document.getElementById('profileBtn').disabled = false;
+                    document.getElementById('dashboardBtn').disabled = false;
+                    
+                    showResult('registerLearnerResult', 
+                        `✓ Registration successful!\n\n` +
+                        `User ID: ${data.user.id}\n` +
+                        `Email: ${data.user.email}\n` +
+                        `Role: ${data.user.role}\n` +
+                        `Token: ${authToken ? 'Received' : 'Not received'}\n\n` +
+                        `You can now test profile and dashboard access.`,
+                        'success'
+                    );
+                } else {
+                    testResults.register = false;
+                    showResult('registerLearnerResult', 
+                        `✗ Registration failed\n\n` +
+                        `Error: ${data.message}\n\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                testResults.register = false;
+                showResult('registerLearnerResult', 
+                    `✗ Registration failed\n\n` +
+                    `Error: ${error.message}`,
+                    'error'
+                );
+            }
+            
+            updateTestSummary();
+        }
+
+        async function loginUser() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showResult('loginResult', 'Please fill in email and password', 'error');
+                return;
+            }
+
+            try {
+                showResult('loginResult', 'Logging in...', 'info');
+                
+                const response = await fetch(`${getApiUrl()}/v1/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && !data.error) {
+                    testResults.login = true;
+                    authToken = data.token;
+                    document.getElementById('profileBtn').disabled = false;
+                    document.getElementById('dashboardBtn').disabled = false;
+                    
+                    showResult('loginResult', 
+                        `✓ Login successful!\n\n` +
+                        `User ID: ${data.user.id}\n` +
+                        `Email: ${data.user.email}\n` +
+                        `Role: ${data.user.role}\n` +
+                        `Email Verified: ${data.user.email_verified}\n` +
+                        `Token: ${authToken ? 'Received' : 'Not received'}\n\n` +
+                        `You can now test profile and dashboard access.`,
+                        'success'
+                    );
+                } else {
+                    testResults.login = false;
+                    showResult('loginResult', 
+                        `✗ Login failed\n\n` +
+                        `Error: ${data.message}\n\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                testResults.login = false;
+                showResult('loginResult', 
+                    `✗ Login failed\n\n` +
+                    `Error: ${error.message}`,
+                    'error'
+                );
+            }
+            
+            updateTestSummary();
+        }
+
+        async function getProfile() {
+            if (!authToken) {
+                showResult('profileResult', 'Please login first to get a token', 'error');
+                return;
+            }
+
+            try {
+                showResult('profileResult', 'Getting profile...', 'info');
+                
+                const response = await fetch(`${getApiUrl()}/v1/api/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && !data.error) {
+                    testResults.profile = true;
+                    showResult('profileResult', 
+                        `✓ Profile retrieved successfully!\n\n` +
+                        `User ID: ${data.user.id}\n` +
+                        `Name: ${data.user.name}\n` +
+                        `Email: ${data.user.email}\n` +
+                        `Role: ${data.user.role}\n` +
+                        `Email Verified: ${data.user.email_verified}\n` +
+                        `Joined: ${data.user.joinedAt}\n\n` +
+                        `Stats:\n` +
+                        `- Total Programmes: ${data.stats.totalProgrammes}\n` +
+                        `- Completed Programmes: ${data.stats.completedProgrammes}\n` +
+                        `- Total Lessons Completed: ${data.stats.totalLessonsCompleted}`,
+                        'success'
+                    );
+                } else {
+                    testResults.profile = false;
+                    showResult('profileResult', 
+                        `✗ Profile retrieval failed\n\n` +
+                        `Error: ${data.message}\n\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                testResults.profile = false;
+                showResult('profileResult', 
+                    `✗ Profile retrieval failed\n\n` +
+                    `Error: ${error.message}`,
+                    'error'
+                );
+            }
+            
+            updateTestSummary();
+        }
+
+        async function getDashboard() {
+            if (!authToken) {
+                showResult('dashboardResult', 'Please login first to get a token', 'error');
+                return;
+            }
+
+            try {
+                showResult('dashboardResult', 'Getting dashboard...', 'info');
+                
+                const response = await fetch(`${getApiUrl()}/v1/api/dashboard`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && !data.error) {
+                    testResults.dashboard = true;
+                    showResult('dashboardResult', 
+                        `✓ Dashboard retrieved successfully!\n\n` +
+                        `Enrolled Programmes: ${data.enrolledProgrammes?.length || 0}\n` +
+                        `Upcoming Sessions: ${data.upcomingSessions?.length || 0}\n` +
+                        `Recent Activity: ${data.recentActivity?.length || 0}\n\n` +
+                        `Full Response:\n${JSON.stringify(data, null, 2)}`,
+                        'success'
+                    );
+                } else {
+                    testResults.dashboard = false;
+                    showResult('dashboardResult', 
+                        `✗ Dashboard retrieval failed\n\n` +
+                        `Error: ${data.message}\n\n` +
+                        `Response: ${JSON.stringify(data, null, 2)}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                testResults.dashboard = false;
+                showResult('dashboardResult', 
+                    `✗ Dashboard retrieval failed\n\n` +
+                    `Error: ${error.message}`,
+                    'error'
+                );
+            }
+            
+            updateTestSummary();
+        }
+
+        // Initialize
+        updateTestSummary();
+    </script>
+</body>
+</html>
