@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Password Reset Frontend</title>
+</head>
+<body>
+    <h1>Debug Password Reset Frontend</h1>
+    
+    <div>
+        <h2>Test Reset Password API Call</h2>
+        <input type="text" id="token" placeholder="Reset token" style="width: 500px;">
+        <br><br>
+        <input type="password" id="password" placeholder="New password">
+        <br><br>
+        <button onclick="testResetPassword()">Test Reset Password</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testResetPassword() {
+            const token = document.getElementById('token').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!token || !password) {
+                resultDiv.innerHTML = '<p style="color: red;">Please enter both token and password</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                // Test 1: Direct API call (bypassing proxy)
+                console.log('Testing direct API call...');
+                const directResponse = await fetch('https://api.cohortle.com/v1/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const directData = await directResponse.text();
+                console.log('Direct API response:', directResponse.status, directData);
+                
+                // Test 2: Proxy API call (through Next.js)
+                console.log('Testing proxy API call...');
+                const proxyResponse = await fetch('/api/proxy/v1/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const proxyData = await proxyResponse.text();
+                console.log('Proxy API response:', proxyResponse.status, proxyData);
+                
+                resultDiv.innerHTML = `
+                    <h3>Results:</h3>
+                    <p><strong>Direct API:</strong> ${directResponse.status} - ${directData}</p>
+                    <p><strong>Proxy API:</strong> ${proxyResponse.status} - ${proxyData}</p>
+                `;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Pre-fill with a test token if available
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenParam = urlParams.get('token');
+        if (tokenParam) {
+            document.getElementById('token').value = tokenParam;
+        }
+    </script>
+</body>
+</html>
