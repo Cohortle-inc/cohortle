@@ -80,7 +80,7 @@ Comprehensive bug hunting tasks covering authentication verification, programme 
   - Verify convener can access both convener and learner features
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.6_
 
-- [~] 2.6 Audit programme creation endpoints
+- [ ] 2.6 Audit programme creation endpoints
   - Review POST /v1/api/programmes
   - Verify authentication required
   - Verify convener role required
