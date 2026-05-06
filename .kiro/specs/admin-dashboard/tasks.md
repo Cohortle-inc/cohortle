@@ -44,13 +44,13 @@ Thin layout layer over the existing `/internal` routes. Involves a middleware up
     - Test: "Leads" link does not have active styles on other paths
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 2.2, 3.1, 3.2_
 
-  - [ ]* 2.2 Fix type error in AdminLayout property-based test
+  - [x]* 2.2 Fix type error in AdminLayout property-based test
     - File: `cohortle-web/__tests__/components/AdminLayout.pbt.tsx`
     - Add missing `AuthContextType` fields to the `mockUseAuth.mockReturnValue(...)` call: `loginWithGoogle`, `resendVerificationEmail`, `refreshVerificationStatus`
     - **Property 4: AdminLayout redirects non-admin users**
     - Minimum 100 iterations; use fast-check
     - **Validates: Requirements 1.4**
 
-- [ ] 3. Checkpoint — ensure all tests pass
+- [x] 3. Checkpoint — ensure all tests pass
   - Run `npx jest --testPathPattern="adminMiddleware|AdminLayout" --run` and confirm all tests pass
   - Ask the user if any questions arise before proceeding
