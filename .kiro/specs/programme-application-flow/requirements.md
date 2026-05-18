@@ -224,3 +224,61 @@ This spec covers the full lifecycle: how applicants discover and apply to progra
 8. WHEN an Applicant has already submitted an Application to a Programme listed on the Organisation_Page, THE System SHALL display that Programme card with a "Applied" badge instead of the "Apply" button (only when the Applicant is authenticated)
 9. WHEN a Convener views their Convener Dashboard, THE System SHALL display a cross-programme applications summary showing all Applications across all their Programmes, with the ability to filter by programme
 10. WHEN a Convener views a cross-programme applicant (an Applicant who has applied to more than one of the Convener's Programmes), THE System SHALL surface this relationship in the review interface so the Convener is aware of the overlap
+
+---
+
+## Addendum: Hardening and Surfacing (May 2026)
+
+The following requirements were added after the initial implementation audit to close identified gaps.
+
+### Requirement 14: New User Acceptance Token Handoff
+
+**User Story:** As an accepted applicant without a Cohortle account, I want the signup flow to automatically complete my enrolment after I create an account, so that I don't have to take any extra steps.
+
+#### Acceptance Criteria
+
+1. WHEN an unauthenticated Applicant clicks an Acceptance_Email link, THE System SHALL redirect them to `/signup` with `acceptToken`, `name`, and `email` pre-filled as query parameters
+2. WHEN the Signup page detects an `acceptToken` query parameter, THE System SHALL display the heading "Complete your enrolment" and suppress the default post-signup redirect
+3. WHEN the Applicant completes signup with an `acceptToken` present, THE System SHALL call `redeemAcceptanceToken` AFTER the account is created and the auth cookie is set, before any navigation occurs
+4. WHEN token redemption succeeds after signup, THE System SHALL redirect the new Learner directly to `/programmes/:id` rather than the generic dashboard
+5. WHEN token redemption fails after signup (e.g. token expired between signup page load and submission), THE System SHALL redirect to `/dashboard` with a graceful fallback — the user is still signed up
+6. WHEN an Applicant who already has an account clicks an Acceptance_Email link, THE System SHALL redirect them to `/login?acceptToken=...&email=...` and upon successful login, SHALL redeem the token and redirect to the programme
+7. WHEN the Login page detects an `acceptToken` query parameter, THE System SHALL display the heading "Log in to complete your enrolment"
+
+---
+
+### Requirement 15: Draft Application Editing
+
+**User Story:** As a learner with a draft application, I want to edit it before submitting, so that I can refine my answers.
+
+#### Acceptance Criteria
+
+1. WHEN a Learner's Application is in `draft` status, THE System SHALL display an "Edit" link in `MyApplicationsSection` that navigates to `/apply/edit/:id`
+2. WHEN a Learner navigates to `/apply/edit/:id`, THE System SHALL load the application's existing responses and pre-populate the form fields
+3. WHEN a Learner saves changes on the edit page, THE System SHALL call `PUT /v1/api/applications/:id` and redirect to the dashboard on success
+4. WHEN a Learner navigates to `/apply/edit/:id` for an application that is not in `draft` status, THE System SHALL display an error message and a link back to the dashboard
+
+---
+
+### Requirement 16: Rejection UX
+
+**User Story:** As a convener, I want to reject applications through a proper modal interface, so that I can provide a clear rejection reason without browser prompts.
+
+#### Acceptance Criteria
+
+1. WHEN a Convener clicks "Reject" on an application in the list view, THE System SHALL open a modal with a textarea for the rejection reason
+2. THE System SHALL disable the "Confirm Reject" button until the rejection reason textarea contains at least one non-whitespace character
+3. WHEN the Convener confirms the rejection, THE System SHALL close the modal and update the application status inline without a full page reload
+4. THE System SHALL NOT use `window.prompt()` for any user-facing interaction
+
+---
+
+### Requirement 17: Cohort Loading on Application Detail
+
+**User Story:** As a convener reviewing an application, I want the cohort selector to be populated when I accept from the detail page, so that I can complete the acceptance without navigating away.
+
+#### Acceptance Criteria
+
+1. WHEN a Convener opens the Application Detail page, THE System SHALL load the available cohorts for the programme in parallel with the application data
+2. WHEN cohorts are loaded, THE System SHALL populate the cohort selector in the Decision section
+3. IF no cohorts exist for the programme, THE System SHALL display a warning in the Decision section prompting the Convener to create a cohort first

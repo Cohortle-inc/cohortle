@@ -767,3 +767,61 @@ Key property test files:
 - Hybrid mode: simultaneous code enrollment and application submission
 - Bulk accept/reject with history verification
 - CSV export format validation
+
+
+---
+
+## Addendum: New User Acceptance Token Handoff (May 2026)
+
+### Problem
+
+The original design described the new user path as: token validates → return pre-fill data → user completes signup → enrollment created. However, `AuthContext.signup()` called `window.location.href` immediately after account creation, navigating away before `SignupForm` could call `redeemAcceptanceToken`. This meant the token was never redeemed for new users.
+
+### Fix
+
+`AuthContext.signup()` now accepts an optional `options.skipRedirect` flag. When `true`, the method sets user state and returns without navigating. `SignupForm` passes `skipRedirect: true` when `acceptToken` is present, then calls `redeemAcceptanceToken` itself before navigating.
+
+### Updated New User Flow
+
+```
+Applicant clicks acceptance link
+  → /accept/[token] page loads
+  → redeemAcceptanceToken(token) called (no userId)
+  → API returns { requiresSignup: true, prefill: { name, email }, cohortId, programmeId }
+  → Redirect to /signup?acceptToken=TOKEN&name=NAME&email=EMAIL
+
+/signup page
+  → SignupForm renders with prefillName, prefillEmail, acceptToken
+  → Heading: "Complete your enrolment"
+  → User fills in password, submits
+
+SignupForm.handleSubmit
+  → signup(..., { skipRedirect: true })  ← auth cookie set, user state set, NO navigation
+  → redeemAcceptanceToken(acceptToken)   ← now authenticated, userId available
+  → API creates enrollment, consumes token
+  → window.location.href = /programmes/:id
+```
+
+### Updated Existing User Flow (via login)
+
+```
+Applicant clicks acceptance link
+  → /accept/[token] page loads
+  → redeemAcceptanceToken(token) called (no userId — not logged in)
+  → API returns { requiresSignup: true, ... }
+  → Redirect to /login?acceptToken=TOKEN&email=EMAIL
+
+/login page (LoginPageInner reads searchParams)
+  → Heading: "Log in to complete your enrolment"
+  → LoginForm pre-fills email from query param
+
+LoginForm.handleSubmit
+  → login(email, password)  ← AuthContext handles redirect internally
+  → After login, LoginForm checks for acceptToken in searchParams
+  → redeemAcceptanceToken(acceptToken)
+  → window.location.href = /programmes/:id
+```
+
+### Cohort Loading on Detail Page
+
+The application detail page previously relied on `app.cohorts` being populated in the API response, which it was not. The fix loads cohorts via `getCohorts(programmeId)` in parallel with the application fetch using `Promise.all`, then populates the cohort selector from the separate `cohorts` state.
