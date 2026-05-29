@@ -30,7 +30,7 @@ The Cohortle Marketing Funnel is a full-funnel web experience designed to attrac
 1. WHEN a visitor loads the homepage (`/`), THE Homepage SHALL display a hero section containing a headline focused on outcomes, a subheadline identifying the target audience, a primary CTA button labelled "Apply to Partner with Cohortle", and a secondary CTA button labelled "Book a Demo".
 2. THE Homepage SHALL display a problem section that names at least four specific pain points: managing programmes via WhatsApp or spreadsheets, lack of programme structure, poor participant progress tracking, and difficulty scaling programmes.
 3. THE Homepage SHALL display a solution section that presents Cohortle as a structured system covering programme design, cohort management, progress tracking, and outcome delivery.
-4. THE Homepage SHALL display a use-cases section listing at least four organisation types: fellowship programmes, NGO training programmes, bootcamps, and community-led programmes.
+4.** THE Homepage SHALL display a use-cases section listing at least four organisation types: fellowship programmes, NGO training programmes, bootcamps, and community-led programmes.
 5. THE Homepage SHALL display a "How It Works" section with exactly three numbered steps: Create Programme, Invite Participants, and Track Progress & Outcomes.
 6. THE Homepage SHALL display a social proof section referencing at least one early partner (WLIMP) and a placeholder for testimonials.
 7. THE Homepage SHALL display a final CTA section that repeats the primary "Apply to Partner with Cohortle" call to action.
