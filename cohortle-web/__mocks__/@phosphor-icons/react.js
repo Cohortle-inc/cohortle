@@ -1,0 +1,81 @@
+/**
+ * Manual mock for @phosphor-icons/react
+ * Returns simple React component stubs for all icon imports in Jest tests.
+ */
+const React = require('react');
+
+// Generic icon stub that renders a simple SVG
+function IconStub(props) {
+  return React.createElement('svg', {
+    'data-testid': 'phosphor-icon',
+    'data-weight': props.weight,
+    width: props.size,
+    height: props.size,
+    className: props.className,
+    'aria-hidden': props['aria-hidden'],
+    'aria-label': props['aria-label'],
+  });
+}
+
+// Export all commonly used icons as the same stub
+module.exports = {
+  CheckCircle: IconStub,
+  Circle: IconStub,
+  LockSimple: IconStub,
+  Fire: IconStub,
+  Trophy: IconStub,
+  Star: IconStub,
+  BookOpen: IconStub,
+  Users: IconStub,
+  Lightning: IconStub,
+  CalendarCheck: IconStub,
+  Medal: IconStub,
+  Target: IconStub,
+  TrendUp: IconStub,
+  Lightbulb: IconStub,
+  MapTrifold: IconStub,
+  Student: IconStub,
+  Flag: IconStub,
+  Hand: IconStub,
+  ArrowLeft: IconStub,
+  ArrowRight: IconStub,
+  X: IconStub,
+  Check: IconStub,
+  Warning: IconStub,
+  Info: IconStub,
+  Question: IconStub,
+  Lock: IconStub,
+  Unlock: IconStub,
+  Play: IconStub,
+  Pause: IconStub,
+  FileText: IconStub,
+  Link: IconStub,
+  Video: IconStub,
+  Image: IconStub,
+  Download: IconStub,
+  Upload: IconStub,
+  Gear: IconStub,
+  User: IconStub,
+  SignOut: IconStub,
+  House: IconStub,
+  MagnifyingGlass: IconStub,
+  Bell: IconStub,
+  Chat: IconStub,
+  Heart: IconStub,
+  ThumbsUp: IconStub,
+  ThumbsDown: IconStub,
+  Share: IconStub,
+  Copy: IconStub,
+  Trash: IconStub,
+  PencilSimple: IconStub,
+  Plus: IconStub,
+  Minus: IconStub,
+  CaretDown: IconStub,
+  CaretUp: IconStub,
+  CaretLeft: IconStub,
+  CaretRight: IconStub,
+  DotsThree: IconStub,
+  DotsThreeVertical: IconStub,
+  Spinner: IconStub,
+  CircleNotch: IconStub,
+};

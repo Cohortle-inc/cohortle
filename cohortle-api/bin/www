@@ -1,0 +1,172 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require("../app");
+var debug = require("debug")("mkd-baas:server");
+var http = require("http");
+var { validateAndFailFast } = require("../utils/validateEnvironment");
+var { initializeRoleSystem } = require("../scripts/initialize-role-system");
+var { execSync } = require("child_process");
+
+/**
+ * Validate environment configuration before starting server
+ */
+try {
+  validateAndFailFast();
+} catch (error) {
+  console.error("Failed to start server:", error.message);
+  process.exit(1);
+}
+
+/**
+ * Run database migrations before starting server
+ * This ensures all schema changes are applied before the app starts
+ */
+async function runMigrations() {
+  try {
+    console.log("Running database migrations...");
+    execSync("npx sequelize-cli db:migrate", {
+      stdio: "inherit",
+      cwd: __dirname + "/.."
+    });
+    console.log("✅ Migrations completed successfully");
+    return true;
+  } catch (error) {
+    console.error("⚠️  Migration failed, but continuing startup...");
+    console.error("   Check logs and run migrations manually if needed");
+    return false;
+  }
+}
+
+/**
+ * Run idempotent seeders after migrations.
+ * Only runs seeders that are safe to run multiple times.
+ */
+async function runSeeders() {
+  const seeders = [
+    "20260304000000-seed-roles-and-permissions.js",
+    "20260410000000-seed-default-achievements.js",
+  ];
+
+  for (const seeder of seeders) {
+    try {
+      console.log(`Running seeder: ${seeder}...`);
+      execSync(`npx sequelize-cli db:seed --seed ${seeder}`, {
+        stdio: "inherit",
+        cwd: __dirname + "/.."
+      });
+      console.log(`✅ Seeder ${seeder} completed`);
+    } catch (error) {
+      // Seeders failing should not block startup — they use INSERT IGNORE / findOrCreate
+      console.error(`⚠️  Seeder ${seeder} failed, continuing...`);
+    }
+  }
+}
+
+/**
+ * Initialize role system on startup (production only)
+ * This is idempotent and safe to run on every deployment
+ */
+async function startServer() {
+  // Run migrations first
+  await runMigrations();
+
+  // Run idempotent seeders (roles + achievements)
+  await runSeeders();
+  
+  // Then initialize role system (runs on every startup, idempotent)
+  initializeRoleSystem().catch(error => {
+    console.error("⚠️  Role system initialization failed:", error.message);
+    console.error("   Server will continue, but role system may not be fully configured.");
+  });
+  
+  // Continue with server startup
+  startHttpServer();
+}
+
+function startHttpServer() {
+
+  /**
+   * Get port from environment and store in Express.
+   */
+
+  var port = normalizePort(process.env.PORT || "3000");
+  console.log("Listening on port:", port);
+  app.set("port", port);
+
+  /**
+   * Create HTTP server.
+   */
+
+  var server = http.createServer(app);
+
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+
+  server.listen(port, "0.0.0.0");
+  server.on("error", onError);
+  server.on("listening", () => onListening(server));
+}
+
+// Start the server
+startServer();
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== "listen") {
+    throw error;
+  }
+
+  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening(server) {
+  var addr = server.address();
+  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  debug("Listening on " + bind);
+}

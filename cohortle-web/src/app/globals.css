@@ -1,0 +1,96 @@
+/* EMERGENCY: Force disable any Server Action processing */
+form {
+  /* Ensure all forms are processed client-side only */
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Apply DM Sans as the base font (loaded via <link> in layout.tsx) */
+body {
+  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* Custom styles */
+.prose {
+  max-width: none;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose p {
+  margin-bottom: 1em;
+}
+
+.prose ul,
+.prose ol {
+  margin-bottom: 1em;
+}
+
+.prose li {
+  margin-bottom: 0.25em;
+}
+
+/* Loading spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus styles for accessibility */
+.focus-visible:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .text-gray-600 {
+    color: #000000;
+  }
+  
+  .text-gray-500 {
+    color: #000000;
+  }
+  
+  .border-gray-300 {
+    border-color: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin {
+    animation: none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
